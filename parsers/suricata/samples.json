@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "note": "Suricata 模板正样本与关键字段断言。JSON 样本按 eve.json 公开字段结构重建（alert.severity 1-4、flow/dns/http 子对象），fast.log 样本按公开行格式重建，ts 为 Unix 秒；未联网抓取。",
+  "samples": {
+    "suricata-eve-alert-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:23:45.123456+0000\",\"flow_id\":123456789,\"event_type\":\"alert\",\"src_ip\":\"203.0.113.120\",\"src_port\":44321,\"dest_ip\":\"10.20.30.120\",\"dest_port\":80,\"proto\":\"TCP\",\"alert\":{\"action\":\"blocked\",\"gid\":1,\"signature_id\":2024897,\"rev\":3,\"signature\":\"ET SCAN Potential SSH Scan\",\"category\":\"Attempted Information Leak\",\"severity\":2},\"host\":\"ids-01\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:23:45.123Z",
+        "event.type": "alert",
+        "source.ip": "203.0.113.120",
+        "source.port": "44321",
+        "destination.ip": "10.20.30.120",
+        "destination.port": "80",
+        "network.transport": "TCP",
+        "network.community_id": "123456789",
+        "rule.id": "2024897",
+        "rule.name": "ET SCAN Potential SSH Scan",
+        "rule.category": "Attempted Information Leak",
+        "host.name": "ids-01",
+        "event.severity": "medium",
+        "event.action": "denied",
+        "event.category": "intrusion"
+      }
+    },
+    "suricata-eve-dns-json": {
+      "protocol": "file",
+      "fixture": "parsers/suricata-eve-dns-1.log",
+      "line": "{\"timestamp\":\"2026-02-21T10:24:00.000000+0000\",\"event_type\":\"dns\",\"src_ip\":\"10.20.30.50\",\"src_port\":53122,\"dest_ip\":\"8.8.8.8\",\"dest_port\":53,\"proto\":\"UDP\",\"dns\":{\"type\":\"query\",\"id\":12345,\"rrname\":\"malware-c2.example.net\",\"rrtype\":\"A\",\"rcode\":\"NOERROR\"},\"host\":\"ids-01\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:24:00.000Z",
+        "event.type": "dns",
+        "source.ip": "10.20.30.50",
+        "destination.ip": "8.8.8.8",
+        "destination.port": "53",
+        "network.transport": "UDP",
+        "dns.header_flags": "query",
+        "dns.question.name": "malware-c2.example.net",
+        "dns.question.type": "A",
+        "dns.response_code": "NOERROR",
+        "host.name": "ids-01",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    },
+    "suricata-eve-http-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:25:00.000000+0000\",\"event_type\":\"http\",\"src_ip\":\"203.0.113.121\",\"src_port\":50123,\"dest_ip\":\"10.20.30.121\",\"dest_port\":80,\"proto\":\"TCP\",\"http\":{\"hostname\":\"www.example.com\",\"url\":\"/login.php?id=1\",\"http_user_agent\":\"sqlmap/1.7.2#stable\",\"http_method\":\"GET\",\"protocol\":\"HTTP/1.1\",\"status\":200,\"length\":512},\"host\":\"ids-01\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:25:00.000Z",
+        "event.type": "http",
+        "source.ip": "203.0.113.121",
+        "destination.ip": "10.20.30.121",
+        "destination.port": "80",
+        "url.domain": "www.example.com",
+        "url.path": "/login.php?id=1",
+        "http.request.method": "GET",
+        "user_agent.original": "sqlmap/1.7.2#stable",
+        "http.version": "HTTP/1.1",
+        "http.response.status_code": "200",
+        "http.response.body.bytes": "512",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "suricata-eve-flow-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:26:00.000000+0000\",\"event_type\":\"flow\",\"src_ip\":\"10.20.30.130\",\"src_port\":51000,\"dest_ip\":\"203.0.113.130\",\"dest_port\":443,\"proto\":\"TCP\",\"flow\":{\"pkts_toserver\":10,\"pkts_toclient\":12,\"bytes_toserver\":1024,\"bytes_toclient\":2048,\"start\":\"2026-02-21T10:20:00.000000+0000\",\"end\":\"2026-02-21T10:26:00.000000+0000\",\"age\":360,\"state\":\"established\",\"reason\":\"timeout\"},\"host\":\"ids-01\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:26:00.000Z",
+        "event.type": "flow",
+        "source.ip": "10.20.30.130",
+        "destination.ip": "203.0.113.130",
+        "destination.port": "443",
+        "source.packets": "10",
+        "destination.packets": "12",
+        "source.bytes": "1024",
+        "destination.bytes": "2048",
+        "event.duration": "360",
+        "network.connection_state": "established",
+        "event.reason": "timeout",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    },
+    "suricata-fast-alert-regex": {
+      "protocol": "file",
+      "line": "02/21/2026-10:27:00.123456  [**] [1:2024897:3] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 203.0.113.122:44321 -> 10.20.30.122:22",
+      "expect": {
+        "event.time": "2026-02-21T10:27:00.123Z",
+        "rule.gid": "1",
+        "rule.id": "2024897",
+        "rule.version": "3",
+        "rule.name": "ET SCAN Potential SSH Scan",
+        "rule.category": "Attempted Information Leak",
+        "source.ip": "203.0.113.122",
+        "source.port": "44321",
+        "destination.ip": "10.20.30.122",
+        "destination.port": "22",
+        "network.transport": "TCP",
+        "event.severity": "medium",
+        "event.action": "alert",
+        "event.category": "intrusion"
+      }
+    }
+  }
+}

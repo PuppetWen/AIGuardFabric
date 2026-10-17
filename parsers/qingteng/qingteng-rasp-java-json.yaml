@@ -1,0 +1,48 @@
+# 青藤云 RASP（应用运行时防护）—— Java 应用攻击拦截日志（JSON）
+# 正样本：parsers/qingteng/samples.json 中 key = qingteng-rasp-java-json
+key: qingteng-rasp-java-json
+name: 青藤云 RASP 应用攻击拦截
+vendor: 青藤云
+product: RASP
+protocols: [webhook, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.time
+  app=$.app
+  instance=$.instance
+  attack=$.attack_type
+  level=$.level
+  action=$.action
+  url=$.url
+  client_ip=$.client_ip
+  ua=$.user_agent
+  rule_id=$.rule_id
+  stack=$.stack_trace
+mapping:
+  map:
+    ts: event.time
+    app: service.name
+    instance: host.name
+    attack: event.category_raw
+    url: url.path
+    client_ip: source.ip
+    ua: user_agent.original
+    rule_id: rule.id
+    stack: error.stack_trace
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    java_expression_injection: web
+    sql_injection: web
+    command_injection: web
+    deserialization: web
+  action_field: action
+  defaults:
+    event.category: web
+required_fields: [rule_id]
+sample_fixture: parsers/qingteng/samples.json#qingteng-rasp-java-json
+description: 青藤云 RASP Java Agent 攻击拦截日志：表达式注入/反序列化等运行时攻击（含调用栈，落 error.stack_trace）。

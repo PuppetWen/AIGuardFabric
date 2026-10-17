@@ -1,0 +1,32 @@
+# AWS ALB —— 访问日志（公开空格分隔格式的头部列）
+# 正样本：parsers/aws/samples.json 中 key = aws-alb-access-log
+key: aws-alb-access-log
+name: AWS ALB 访问日志
+vendor: AWS
+product: Application Load Balancer
+protocols: [file, object-storage, beats]
+engine: grok
+pattern: '%{WORD:kind} %{TIMESTAMP_ISO8601:ts} %{NOTSPACE:elb} %{IPORHOST:client_ip}:%{PORT:client_port} %{IPORHOST:target_ip}:%{PORT:target_port} %{NUMBER:req_time} %{NUMBER:target_time} %{NUMBER:resp_time} %{INT:elb_status} %{INT:target_status} %{INT:received_bytes} %{INT:sent_bytes} "%{WORD:method} %{NOTSPACE:url} HTTP/%{NUMBER:http_version}" "%{DATA:user_agent}"'
+mapping:
+  map:
+    kind: event.type
+    elb: observer.name
+    client_ip: source.ip
+    client_port: source.port
+    target_ip: destination.ip
+    target_port: destination.port
+    req_time: event.duration
+    elb_status: http.response.status_code
+    target_status: http.response.status_code_upstream
+    received_bytes: source.bytes
+    sent_bytes: http.response.body.bytes
+    method: http.request.method
+    url: url.full
+    user_agent: user_agent.original
+  time_field: ts
+  defaults:
+    event.category: web
+    event.severity: info
+required_fields: [elb, client_ip]
+sample_fixture: parsers/aws/samples.json#aws-alb-access-log
+description: AWS ALB 访问日志头部列（type/time/elb/client:port/target:port/处理时间/状态码/请求行/UA），后端 5xx 与慢请求溯源。

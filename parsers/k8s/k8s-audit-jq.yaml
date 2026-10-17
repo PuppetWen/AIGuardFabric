@@ -1,0 +1,42 @@
+# Kubernetes —— API Server 审计日志（JQ 变换版）
+# 正样本：parsers/k8s/samples.json 中 key = k8s-audit-jq
+# 说明：用 JQ 引擎做字段挑选/重命名（输出对象的键即扁平字段名），适合"只关心少量字段"的高吞吐场景。
+key: k8s-audit-jq
+name: Kubernetes 审计日志（JQ）
+vendor: Kubernetes
+product: API Server Audit
+protocols: [file, beats, kafka]
+engine: jq
+pattern: |
+  {
+    "ts": .stageTimestamp,
+    "verb": .verb,
+    "user": .user.username,
+    "ns": .objectRef.namespace,
+    "resource": .objectRef.resource,
+    "object": .objectRef.name,
+    "code": .responseStatus.code,
+    "src_ip": .sourceIPs[0],
+    "level": .level,
+    "uri": .requestURI,
+    "decision": .annotations["authorization.k8s.io/decision"]
+  }
+mapping:
+  map:
+    ts: event.time
+    verb: event.action_raw
+    user: user.name
+    ns: host.k8s_namespace
+    resource: kubernetes.resource
+    object: kubernetes.object.name
+    code: http.response.status_code
+    src_ip: source.ip
+    level: log.level
+    uri: url.path
+    decision: event.outcome
+  defaults:
+    event.category: cloud-control
+    event.severity: info
+required_fields: [verb, user]
+sample_fixture: parsers/k8s/samples.json#k8s-audit-jq
+description: K8s 审计日志的 JQ 变换模板（纯 Rust jaq 执行，无需外部 jq），字段挑选与重命名在模板内完成。

@@ -1,0 +1,46 @@
+# AIGuardFabric 检测规则 —— 对象存储公开导出
+# 安全域: model-data（模型与数据安全）｜ 检测目标: tool-arguments ｜ 算子: all ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/llm-top-10/
+key: MD-CLD-008
+name: 对象存储公开导出
+description: 把数据导出到对象存储并显式设置为公共读，属高危数据暴露动作。
+domain: model-data
+severity: critical
+kind: composite
+target: tool-arguments
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM02
+- cloud-misconfiguration
+- data-exposure
+references:
+- https://genai.owasp.org/llm-top-10/
+detection:
+  type: all
+  of:
+  - type: regex
+    pattern: '(?i)(ossutil|aws\s+s3|s3cmd|mc\s+cp)[^\n]{0,80}(oss://|s3://|https://)'
+    case_insensitive: true
+    min_matches: 1
+  - type: keyword
+    any:
+    - public-read
+    - public-read-write
+    - --acl public
+    - 匿名读
+    - 公共读
+    - allusers
+samples:
+  positive:
+  - aws s3 cp /data/customers.csv s3://prod-export/customers.csv --acl public-read
+  - ossutil cp -r /data/dump oss://prod-export/dump --acl public-read
+  negative:
+  - aws s3 cp ./build/artifact.tar.gz s3://internal-artifacts/ --sse AES256
+  - 对象存储桶策略要求：默认私有，公共读必须走例外审批流程。
+remediation: 对象存储默认私有并开启公共访问阻断；导出动作需审批并记录数据分级。
+author: agf-rules
+version: 1

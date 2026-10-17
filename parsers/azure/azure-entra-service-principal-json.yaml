@@ -1,0 +1,35 @@
+key: azure-entra-service-principal-json
+name: Entra ID 服务主体登录日志
+vendor: Microsoft Azure
+product: Microsoft Entra ID
+protocols: [object-storage, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.time
+  op=$.operationName
+  cat=$.category
+  result=$.resultType
+  ip=$.callerIpAddress
+  principal=$.properties.servicePrincipalId
+  name=$.properties.servicePrincipalName
+  app=$.properties.appId
+  err=$.properties.status.errorCode
+  corr=$.correlationId
+mapping:
+  map:
+    ts: event.time
+    op: event.action_raw
+    cat: event.category_raw
+    result: event.outcome
+    ip: source.ip
+    principal: user.id
+    name: user.name
+    app: service.id
+    err: error.code
+    corr: trace.id
+  defaults:
+    event.category: authentication
+    event.severity: medium
+required_fields: [principal, ip]
+sample_fixture: tests/fixtures/logs/public/azure-entra-service-principal-json.log
+description: Entra 服务主体登录使用 servicePrincipalId/name；不要求仅用户登录才有的 userPrincipalName。

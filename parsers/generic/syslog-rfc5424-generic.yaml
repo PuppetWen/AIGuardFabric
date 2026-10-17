@@ -1,0 +1,15 @@
+# 通用 Syslog —— RFC5424（结构化数据 + 版本号）
+# 正样本：parsers/generic/samples.json 中 key = syslog-rfc5424-generic
+key: syslog-rfc5424-generic
+name: 通用 Syslog（RFC5424）
+vendor: generic
+product: syslog
+protocols: [syslog, file, beats, mqtt]
+engine: syslog
+# Syslog 引擎不需要 pattern（引擎自带 RFC3164/5424 语法），空 pattern 为合法输入
+pattern: ''
+mapping:
+  map: {}
+required_fields: [host.name]
+sample_fixture: parsers/generic/samples.json#syslog-rfc5424-generic
+description: 通用 RFC5424 模板（PRI/VERSION/时间戳/主机/APP/PROCID/MSGID/结构化数据/消息体），SD 参数落 syslog.sd.*。

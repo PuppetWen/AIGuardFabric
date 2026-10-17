@@ -1,0 +1,49 @@
+[package]
+name = "agf-scheduler"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 调度服务：资产盘点/日志拉取/红队巡航/规则热更新/报表/归档（本地 cron 与 SchedulerX3 双模）"
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "agf-scheduler"
+path = "src/main.rs"
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+agf-asset.workspace = true
+agf-scan.workspace = true
+agf-ingest.workspace = true
+agf-correlate.workspace = true
+agf-alicloud.workspace = true
+
+tokio.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+dotenvy.workspace = true
+axum.workspace = true
+futures.workspace = true
+reqwest.workspace = true
+tower-http.workspace = true
+subtle.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+agf-api.workspace = true
+sqlx.workspace = true
+
+[lints]
+workspace = true

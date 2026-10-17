@@ -1,0 +1,46 @@
+# 腾讯云 WAF —— Web 攻击日志（JSON / CLS 投递）
+# 正样本：parsers/tencent/samples.json 中 key = tencent-waf-attack-json
+key: tencent-waf-attack-json
+name: 腾讯云 WAF 攻击日志
+vendor: 腾讯云
+product: Web应用防火墙
+protocols: [webhook, kafka, object-storage, http-pull]
+engine: json-path
+pattern: |
+  ts=$.time
+  domain=$.domain
+  src_ip=$.src_ip
+  method=$.method
+  uri=$.url
+  attack=$.attack_type
+  action=$.action
+  rule_id=$.rule_id
+  rule_name=$.rule_name
+  ua=$.user_agent
+  http_version=$.http_version
+  status=$.status
+mapping:
+  map:
+    ts: event.time
+    domain: url.domain
+    src_ip: source.ip
+    method: http.request.method
+    uri: url.path
+    attack: event.category_raw
+    rule_id: rule.id
+    rule_name: rule.name
+    ua: user_agent.original
+    http_version: http.version
+    status: http.response.status_code
+  category_map:
+    webshell: web
+    sqli: web
+    xss: web
+    cc: web
+  action_field: action
+  defaults:
+    event.severity: medium
+    event.category: web
+required_fields: [rule_id, src_ip]
+sample_fixture: tests/fixtures/logs/parsers/tencent-waf-attack-1.log
+description: 腾讯云 WAF Web 攻击日志（time/domain/src_ip/method/url/attack_type/action/rule_id/rule_name/user_agent/http_version）。

@@ -1,0 +1,51 @@
+[package]
+name = "agf-aigw"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 大模型统一网关：多厂商适配、协议转换、流式转发、路由降级、语义缓存、计量"
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = []
+test-loopback-transport = []
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+
+tokio.workspace = true
+tokio-stream.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+async-stream.workspace = true
+
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+reqwest.workspace = true
+bytes.workspace = true
+sha2.workspace = true
+base64.workspace = true
+dashmap.workspace = true
+indexmap.workspace = true
+parking_lot.workspace = true
+# Bedrock 真实适配器需要自签 AWS SigV4（workspace 已声明，见根 Cargo.toml [workspace.dependencies]）
+hmac.workspace = true
+hex.workspace = true
+regex.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+
+[lints]
+workspace = true

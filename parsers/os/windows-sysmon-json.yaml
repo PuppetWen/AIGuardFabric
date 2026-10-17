@@ -1,0 +1,37 @@
+# Microsoft Windows —— Sysmon 事件（JSON 转发，EventID=1 进程创建）
+# 正样本：parsers/os/samples.json 中 key = windows-sysmon-json
+key: windows-sysmon-json
+name: Windows Sysmon 进程创建
+vendor: Microsoft Windows
+product: Sysmon
+protocols: [file, beats, webhook, http-pull]
+engine: json-path
+pattern: |
+  ts=$['@timestamp']
+  channel=$.winlog.channel
+  event_id=$.winlog.event_id
+  computer=$.winlog.computer_name
+  utc_time=$.winlog.event_data.UtcTime
+  image=$.winlog.event_data.Image
+  cmdline=$.winlog.event_data.CommandLine
+  parent=$.winlog.event_data.ParentImage
+  user=$.winlog.event_data.User
+  hashes=$.winlog.event_data.Hashes
+mapping:
+  map:
+    ts: event.time
+    channel: log.channel
+    event_id: event.code
+    computer: host.name
+    utc_time: process.start
+    image: process.executable
+    cmdline: process.command_line
+    parent: process.parent.executable
+    user: user.name
+    hashes: process.hashes
+  defaults:
+    event.category: process
+    event.severity: info
+required_fields: [image, computer]
+sample_fixture: parsers/os/samples.json#windows-sysmon-json
+description: Sysmon EventID=1 进程创建（Image/CommandLine/ParentImage/User/Hashes），父子进程链还原来源。

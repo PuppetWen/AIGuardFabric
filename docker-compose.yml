@@ -1,0 +1,458 @@
+# =============================================================================
+# AIGuardFabric 全栈编排（§9 Docker 与部署）
+#
+# 铁律：
+#   * 数据卷**全部** bind mount 到 <项目>/data/，不使用匿名卷；`down -v` 不会删除 bind mount 中的数据
+#   * 不硬编码绝对路径：路径一律来自 .env（见 .env.example 的 AGF_DATA_DIR 等）
+#   * 未配置的外部依赖（阿里云/大模型厂商/WAF）不影响启动：AGF_MOCK_MODE=1 自动降级
+#
+# 用法：
+#   docker compose config                 # 校验
+#   docker compose up -d                  # 全栈（默认不启用 clickhouse / grafana）
+#   docker compose --profile clickhouse --profile grafana up -d
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d   # 只起依赖（开发热重载）
+# =============================================================================
+
+name: aiguardfabric
+
+x-common-env: &common-env
+  AGF_ENV: ${AGF_ENV:-dev}
+  AGF_MOCK_MODE: ${AGF_MOCK_MODE:-1}
+  AGF_DEGRADE_ON_MISSING: ${AGF_DEGRADE_ON_MISSING:-1}
+  AGF_CLOUD_WORKLOAD_TENANTS: ${AGF_CLOUD_WORKLOAD_TENANTS:-}
+  ALIBABA_CLOUD_OIDC_TOKEN_FILE: ${ALIBABA_CLOUD_OIDC_TOKEN_FILE:-}
+  ALIBABA_CLOUD_OIDC_PROVIDER_ARN: ${ALIBABA_CLOUD_OIDC_PROVIDER_ARN:-}
+  AGF_LOG_LEVEL: ${AGF_LOG_LEVEL:-info}
+  AGF_LOG_FORMAT: ${AGF_LOG_FORMAT:-json}
+  AGF_PROJECT_ROOT: /app
+  AGF_DATA_DIR: /data
+  AGF_SERVER_HOST: 0.0.0.0
+  AGF_SERVER_PORT: "8080"
+  AGF_TRUSTED_PROXIES: ${AGF_TRUSTED_PROXIES:-}
+  AGF_API_PREFIX: ${AGF_API_PREFIX:-/api/v1}
+  AGF_PG_HOST: postgres
+  AGF_PG_PORT: "5432"
+  AGF_PG_DB: ${AGF_PG_DB:-aiguardfabric}
+  AGF_PG_USER: ${AGF_PG_USER:-agf}
+  AGF_PG_PASSWORD: ${AGF_PG_PASSWORD:?AGF_PG_PASSWORD 必须设置（禁止弱口令）}
+  AGF_REDIS_URL: redis://redis:6379/0
+  AGF_NATS_ENABLED: ${AGF_NATS_ENABLED:-1}
+  AGF_NATS_URL: nats://nats:4222
+  AGF_NATS_STREAM: ${AGF_NATS_STREAM:-AGF_EVENTS}
+  AGF_CLICKHOUSE_ENABLED: ${AGF_CLICKHOUSE_ENABLED:-0}
+  AGF_CLICKHOUSE_URL: http://clickhouse:8123
+  AGF_CLICKHOUSE_DB: ${AGF_CLICKHOUSE_DB:-agf}
+  AGF_S3_ENDPOINT: http://minio:9000
+  AGF_S3_REGION: ${AGF_S3_REGION:-us-east-1}
+  AGF_S3_BUCKET: ${AGF_S3_BUCKET:-agf-evidence}
+  AGF_S3_ACCESS_KEY: ${AGF_S3_ACCESS_KEY:-agfminio}
+  AGF_S3_SECRET_KEY: ${AGF_S3_SECRET_KEY:?AGF_S3_SECRET_KEY 必须设置}
+  AGF_S3_FORCE_PATH_STYLE: "1"
+  AGF_JWT_SECRET: ${AGF_JWT_SECRET:?AGF_JWT_SECRET 必须设置（>=32 字节）}
+  AGF_JWT_ISSUER: ${AGF_JWT_ISSUER:-aiguardfabric}
+  AGF_MASTER_KEY_BASE64: ${AGF_MASTER_KEY_BASE64:?AGF_MASTER_KEY_BASE64 必须设置（32 字节 base64）}
+  AGF_KMS_BACKEND: ${AGF_KMS_BACKEND:-local-file}
+  AGF_BOOTSTRAP_ADMIN_USER: ${AGF_BOOTSTRAP_ADMIN_USER:-admin}
+  AGF_BOOTSTRAP_ADMIN_EMAIL: ${AGF_BOOTSTRAP_ADMIN_EMAIL:-admin@aiguardfabric.local}
+  AGF_BOOTSTRAP_ADMIN_PASSWORD: ${AGF_BOOTSTRAP_ADMIN_PASSWORD:-}
+  AGF_FORCE_PASSWORD_CHANGE: ${AGF_FORCE_PASSWORD_CHANGE:-1}
+  AGF_LLM_DEFAULT_PROVIDER: ${AGF_LLM_DEFAULT_PROVIDER:-mock}
+  AGF_OTEL_ENABLED: ${AGF_OTEL_ENABLED:-0}
+  AGF_PROMETHEUS_ENABLED: ${AGF_PROMETHEUS_ENABLED:-1}
+  RUST_LOG: ${AGF_LOG_LEVEL:-info}
+  # 项目内缓存重定向（铁律 2）
+  CARGO_HOME: /app/.cargo
+  RUSTUP_HOME: /app/.rustup
+
+x-app-defaults: &app-defaults
+  restart: unless-stopped
+  networks: [agf-net]
+  logging: &default-logging
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "5"
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  # ---------------------------------------------------------------------------
+  # 数据面
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: ${POSTGRES_IMAGE:-timescale/timescaledb:latest-pg16}
+    container_name: agf-postgres
+    restart: unless-stopped
+    networks: [agf-net]
+    environment:
+      POSTGRES_DB: ${AGF_PG_DB:-aiguardfabric}
+      POSTGRES_USER: ${AGF_PG_USER:-agf}
+      POSTGRES_PASSWORD: ${AGF_PG_PASSWORD:?AGF_PG_PASSWORD 必须设置}
+      POSTGRES_INITDB_ARGS: "--data-checksums --encoding=UTF8"
+      TZ: UTC
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=timescaledb
+      - -c
+      - max_connections=200
+      - -c
+      - log_min_duration_statement=1000
+      - -c
+      - password_encryption=scram-sha-256
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/pg:/var/lib/postgresql/data
+      # 刻意**不**把 deploy/sql/migrations 挂到 /docker-entrypoint-initdb.d：
+      # 迁移的唯一权威路径是应用侧 `sqlx::migrate!`（agf-server 启动时执行，
+      # 且记入 `_sqlx_migrations` 版本表）。若同时交给 postgres initdb 直接跑，
+      # 会出现"表已建、版本表为空"的双写状态，后续迁移版本推进将无法判断。
+      # 需要手动初始化（例如离线交付）时用 `agfctl migrate`；默认内嵌历史 0001 的原字节分片。
+    ports:
+      - "${AGF_PG_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AGF_PG_USER:-agf} -d ${AGF_PG_DB:-aiguardfabric}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    logging: *default-logging
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4-alpine}
+    container_name: agf-redis
+    restart: unless-stopped
+    networks: [agf-net]
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "900 1"
+      - --maxmemory
+      - 512mb
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/redis:/data
+    ports:
+      - "${AGF_REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging: *default-logging
+
+  nats:
+    image: ${NATS_IMAGE:-nats:2.10-alpine}
+    container_name: agf-nats
+    restart: unless-stopped
+    networks: [agf-net]
+    command:
+      - -js
+      - -sd
+      - /data
+      - -m
+      - "8222"
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/nats:/data
+    ports:
+      - "${AGF_NATS_HOST_PORT:-4222}:4222"
+      - "${AGF_NATS_MONITOR_PORT:-8222}:8222"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8222/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
+
+  clickhouse:
+    image: ${CLICKHOUSE_IMAGE:-clickhouse/clickhouse-server:24.8-alpine}
+    container_name: agf-clickhouse
+    profiles: ["clickhouse"]
+    restart: unless-stopped
+    networks: [agf-net]
+    environment:
+      CLICKHOUSE_DB: ${AGF_CLICKHOUSE_DB:-agf}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+      TZ: UTC
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/clickhouse:/var/lib/clickhouse
+    ports:
+      - "${AGF_CLICKHOUSE_HOST_PORT:-8123}:8123"
+      - "${AGF_CLICKHOUSE_NATIVE_PORT:-9000}:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8123/ping | grep -q Ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    logging: *default-logging
+
+  minio:
+    image: ${MINIO_IMAGE:-quay.io/minio/minio:latest}
+    container_name: agf-minio
+    restart: unless-stopped
+    networks: [agf-net]
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${AGF_S3_ACCESS_KEY:-agfminio}
+      MINIO_ROOT_PASSWORD: ${AGF_S3_SECRET_KEY:?AGF_S3_SECRET_KEY 必须设置}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-http://127.0.0.1:9001}
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/minio:/data
+    ports:
+      - "${AGF_MINIO_PORT:-9000}:9000"
+      - "${AGF_MINIO_CONSOLE_PORT:-9001}:9001"
+    healthcheck:
+      test: ["CMD-SHELL", "mc ready local || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    logging: *default-logging
+
+  # 创建默认桶（一次性任务）
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-quay.io/minio/mc:latest}
+    container_name: agf-minio-init
+    networks: [agf-net]
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set agf http://minio:9000 ${AGF_S3_ACCESS_KEY:-agfminio} ${AGF_S3_SECRET_KEY} &&
+      mc mb --ignore-existing agf/${AGF_S3_BUCKET:-agf-evidence} &&
+      mc mb --ignore-existing agf/agf-raw-logs &&
+      mc mb --ignore-existing agf/agf-reports &&
+      mc anonymous set none agf/${AGF_S3_BUCKET:-agf-evidence} &&
+      echo 'minio buckets ready'
+      "
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # 应用面
+  # ---------------------------------------------------------------------------
+  agf-server:
+    <<: *app-defaults
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      target: server
+      args:
+        AGF_BUILD_CACHE_DIR: /app/.cargo
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-server:${AGF_IMAGE_TAG:-0.1.0}
+    container_name: agf-server
+    environment:
+      <<: *common-env
+      # 规则库/红队用例库/解析模板库：容器内固定 `/app/<name>`（见 deploy/docker/Dockerfile 的 COPY
+      # 与下面的只读卷；卷覆盖镜像内置副本，保证"改目录即生效"而无需重建镜像）
+      AGF_MCP_PROXY_PORT: "8091"
+      AGF_RULES_DIR: /app/rules
+      AGF_REDTEAM_DIR: /app/redteam
+      AGF_PARSERS_DIR: /app/parsers
+      # 演示数据灌库：把 ./data/seed 的合成数据集灌进 API 存储，让控制台列表页不是 total=0。
+      # 仅本编排（演示/联调）显式打开；生产编排不要设置 AGF_SEED_FIXTURES。
+      AGF_SEED_FIXTURES: "1"
+      AGF_SEED_DIR: /app/data/seed
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/evidence:/data/evidence
+      # 首次部署先执行scripts/prepare-audit-data.ps1；不让Docker创建无归属空目录。
+      - type: bind
+        source: ${AGF_DATA_DIR:-./data}/audit-witnesses-v1
+        target: /data/audit-witnesses-v1
+        read_only: false
+        bind:
+          create_host_path: false
+      - ./rules:/app/rules:ro
+      - ./redteam:/app/redteam:ro
+      - ./parsers:/app/parsers:ro
+      - ./data/seed:/app/data/seed:ro
+      - ./deploy/sql/migrations:/app/deploy/sql/migrations:ro
+      - ./dist/windows:/app/dist/windows:ro
+    ports:
+      - "${AGF_SERVER_PORT:-8080}:8080"
+      - "${AGF_MCP_PROXY_HOST_PORT:-8092}:8091"
+      - "${AGF_METRICS_PORT:-9100}:9100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/agf-server", "healthcheck", "--url", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    stop_grace_period: 30s
+
+  agf-ingest:
+    <<: *app-defaults
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      target: ingest
+      args:
+        AGF_BUILD_CACHE_DIR: /app/.cargo
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-ingest:${AGF_IMAGE_TAG:-0.1.0}
+    container_name: agf-ingest
+    environment:
+      <<: *common-env
+      AGF_INGEST_SQL_SINK: "1"
+      AGF_INGEST_HOST: 0.0.0.0
+      AGF_INGEST_TENANT_ID: ${AGF_INGEST_TENANT_ID:-00000000-0000-0000-0000-000000000001}
+      AGF_INGEST_INSTANCE_ID: ${AGF_INGEST_INSTANCE_ID:-local}
+      AGF_INGEST_SOURCE_IDS: ${AGF_INGEST_SOURCE_IDS:-}
+      AGF_INGEST_PORT: "8090"
+      AGF_SYSLOG_TCP_PORT: "5514"
+      AGF_SYSLOG_UDP_PORT: "5514"
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/evidence:/data/evidence
+      - ./rules:/app/rules:ro
+    ports:
+      - "${AGF_INGEST_PORT:-8090}:8090"
+      - "${AGF_SYSLOG_TCP_PORT:-5514}:5514/tcp"
+      - "${AGF_SYSLOG_UDP_PORT:-5514}:5514/udp"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    healthcheck:
+      # distroless 运行时没有 wget/curl，只能用自带 healthcheck 子命令
+      test: ["CMD", "/usr/local/bin/agf-ingest", "healthcheck", "--url", "http://127.0.0.1:8090/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  agf-scheduler:
+    <<: *app-defaults
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      target: scheduler
+      args:
+        AGF_BUILD_CACHE_DIR: /app/.cargo
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-scheduler:${AGF_IMAGE_TAG:-0.1.0}
+    container_name: agf-scheduler
+    ports:
+      - "${AGF_SCHEDULER_BIND:-127.0.0.1}:${AGF_SCHEDULER_PORT:-9101}:9101"
+    environment:
+      <<: *common-env
+      AGF_SCHEDULER_BACKEND: ${AGF_SCHEDULER_BACKEND:-local-cron}
+      AGF_SCHEDULER_TIMING: ${AGF_SCHEDULER_TIMING:-calendar}
+      AGF_SCHEDULER_TENANT_ID: ${AGF_SCHEDULER_TENANT_ID:-}
+      AGF_SCHEDULER_CALLBACK_APP_ID: ${AGF_SCHEDULER_CALLBACK_APP_ID:-}
+      AGF_SCHEDULER_CALLBACK_TOKEN: ${AGF_SCHEDULER_CALLBACK_TOKEN:-}
+      AGF_SCHEDULER_ASSET_INVENTORY_CRON: ${AGF_SCHEDULER_ASSET_INVENTORY_CRON:-}
+      AGF_SCHEDULER_AGENTTEAMS_SYNC_ENABLED: ${AGF_SCHEDULER_AGENTTEAMS_SYNC_ENABLED:-false}
+      AGF_SCHEDULER_AGENTTEAMS_CONFIRM_LIVE: ${AGF_SCHEDULER_AGENTTEAMS_CONFIRM_LIVE:-false}
+      AGF_SCHEDULER_LOG_PULL_CRON: ${AGF_SCHEDULER_LOG_PULL_CRON:-}
+      AGF_SCHEDULER_REDTEAM_CRUISE_CRON: ${AGF_SCHEDULER_REDTEAM_CRUISE_CRON:-}
+      AGF_SCHEDULER_RULE_HOT_RELOAD_CRON: ${AGF_SCHEDULER_RULE_HOT_RELOAD_CRON:-}
+      AGF_SCHEDULER_REPORT_GENERATE_CRON: ${AGF_SCHEDULER_REPORT_GENERATE_CRON:-}
+      AGF_SCHEDULER_COLD_ARCHIVE_CRON: ${AGF_SCHEDULER_COLD_ARCHIVE_CRON:-}
+      AGF_SCHEDULER_PORT: "9101"
+      AGF_SCHEDULER_INTERVAL_SECS: ${AGF_SCHEDULER_INTERVAL_SECS:-3600}
+      AGF_SCHEDULER_REDTEAM_GUARD: ${AGF_SCHEDULER_REDTEAM_GUARD:-30}
+      AGF_CMS_GROUP_ID: ${AGF_CMS_GROUP_ID:-}
+      AGF_MCP_PROXY_PORT: "8091"
+      AGF_RULES_DIR: /app/rules
+      AGF_REDTEAM_DIR: /app/redteam
+      AGF_REPORT_DIR: /data/reports
+      # 周期任务要调用 agf-api：**必须用 compose 服务名**（容器内的 127.0.0.1 不是宿主也不是 server），
+      # 否则 `asset-inventory`（GET /assets/stats）与 `rule-hot-reload`（POST /policies/reload）
+      # 会永远以"不可达"告负。本地直跑时默认值仍是 127.0.0.1:9100（见 apps/scheduler 文档）。
+      AGF_SERVER_URL: http://agf-server:8080
+      # 兼容旧本地解析统计模式；建议留空，改用控制台的持久 HTTP Pull 日志源。
+      AGF_SCHEDULER_PULL_URLS: ${AGF_SCHEDULER_PULL_URLS:-}
+      # 调用 agf-api 的凭据（**二选一**，同时给会优先校验 X-AGF-Key 而 401）：
+      #  * AGF_SCHEDULER_API_KEY → `X-AGF-Key`（服务账号推荐方式；本机 `.env` 已签发一把
+      #    scopes=assets:read + policies:write 的 Key，使 asset-inventory 与 rule-hot-reload 真正可用）
+      #  * AGF_SCHEDULER_API_TOKEN → `Authorization: Bearer <JWT>`（外部注入/轮换）
+      # 日志拉取另需 sources:read/write；红队巡航需 redteam:read/execute。
+      # 缺失权限时对应任务明确失败，不回退成本地成功。
+      AGF_SCHEDULER_API_KEY: ${AGF_SCHEDULER_API_KEY:-}
+      AGF_SCHEDULER_API_TOKEN: ${AGF_SCHEDULER_API_TOKEN:-}
+      # 冷归档：超过 N 天后 gzip 上传对象存储（未配置 AGF_S3_* 时降级为本地归档）
+      AGF_SCHEDULER_ARCHIVE_AFTER_DAYS: ${AGF_SCHEDULER_ARCHIVE_AFTER_DAYS:-7}
+      AGF_SCHEDULER_ARCHIVE_DIR: /data/archive
+    volumes:
+      - ./rules:/app/rules:ro
+      - ./redteam:/app/redteam:ro
+      - ${AGF_DATA_DIR:-./data}/reports:/data/reports
+      - ${AGF_DATA_DIR:-./data}/archive:/data/archive
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      # 必须等 agf-server 就绪：周期任务里有两条要调它（asset-inventory / rule-hot-reload），
+      # 而调度器的**首个 tick 是立即执行**的 —— 不等它就会在启动竞态里报"不可达"（实测踩过）。
+      agf-server:
+        condition: service_healthy
+    healthcheck:
+      # distroless 运行时没有 wget/curl，只能用自带 healthcheck 子命令
+      test: ["CMD", "/usr/local/bin/agf-scheduler", "healthcheck", "--url", "http://127.0.0.1:9101/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+
+  agf-web:
+    <<: *app-defaults
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      target: web
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-web:${AGF_IMAGE_TAG:-0.1.0}
+    container_name: agf-web
+    environment:
+      AGF_API_UPSTREAM: http://agf-server:8080
+    ports:
+      - "${AGF_WEB_PORT:-8081}:8080"
+    depends_on:
+      agf-server:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # 可观测性（可选 profile）
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: ${GRAFANA_IMAGE:-grafana/grafana:11.4.0}
+    container_name: agf-grafana
+    profiles: ["grafana"]
+    restart: unless-stopped
+    networks: [agf-net]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${AGF_GRAFANA_ADMIN_PASSWORD:?AGF_GRAFANA_ADMIN_PASSWORD 必须设置}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: ""
+      TZ: UTC
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/grafana:/var/lib/grafana
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "${AGF_GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      agf-server:
+        condition: service_started
+    logging: *default-logging
+
+networks:
+  agf-net:
+    name: agf-net
+    driver: bridge

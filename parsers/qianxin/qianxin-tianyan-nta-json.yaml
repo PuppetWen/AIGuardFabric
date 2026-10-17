@@ -1,0 +1,46 @@
+# 奇安信 天眼 —— NTA 流量告警（JSON 导出/推送）
+# 正样本：parsers/qianxin/samples.json 中 key = qianxin-tianyan-nta-json
+key: qianxin-tianyan-nta-json
+name: 奇安信天眼 NTA 流量告警
+vendor: 奇安信
+product: 天眼
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  alert=$.alert_name
+  src_ip=$.src_ip
+  dst_ip=$.dst_ip
+  dst_port=$.dst_port
+  proto=$.proto
+  sev=$.severity
+  kind=$.category
+  action=$.action
+  rule_id=$.rule_id
+  threat=$.threat_type
+mapping:
+  map:
+    ts: event.time
+    alert: rule.name
+    src_ip: source.ip
+    dst_ip: destination.ip
+    dst_port: destination.port
+    proto: network.transport
+    kind: event.category_raw
+    rule_id: rule.id
+    threat: threat.type
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    木马通信: malware
+    挖矿: malware
+    Web攻击: web
+  action_field: action
+  defaults:
+required_fields: [alert, src_ip]
+sample_fixture: parsers/qianxin/samples.json#qianxin-tianyan-nta-json
+description: 奇安信天眼 NTA 告警（alert_name/src_ip/dst_ip/dst_port/proto/severity/category/action）。

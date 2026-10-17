@@ -1,0 +1,64 @@
+# Wazuh —— 告警（alerts.json，rule.level 0-15 分级）
+# 正样本：parsers/wazuh/samples.json 中 key = wazuh-alert-json
+key: wazuh-alert-json
+name: Wazuh 告警（SSH 暴力破解）
+vendor: Wazuh
+product: Wazuh Manager
+protocols: [file, beats, webhook, http-pull]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  level=$.rule.level
+  rule_desc=$.rule.description
+  rule_id=$.rule.id
+  agent_name=$.agent.name
+  agent_ip=$.agent.ip
+  manager=$.manager.name
+  src_ip=$.data.srcip
+  src_user=$.data.srcuser
+  dst_ip=$.data.dstip
+  dst_port=$.data.dstport
+  location=$.location
+  full_log=$.full_log
+mapping:
+  map:
+    rule_desc: rule.description
+    rule_id: rule.id
+    agent_name: host.name
+    agent_ip: host.ip
+    manager: observer.name
+    src_ip: source.ip
+    src_user: user.name
+    dst_ip: destination.ip
+    dst_port: destination.port
+    location: log.file.path
+    full_log: message
+  time_field: ts
+  severity_field: level
+  severity_map:
+    '0': info
+    '1': info
+    '2': info
+    '3': info
+    '4': low
+    '5': low
+    '6': low
+    '7': medium
+    '8': medium
+    '9': medium
+    '10': high
+    '11': high
+    '12': high
+    '13': critical
+    '14': critical
+    '15': critical
+  category_map:
+    '5710': authentication
+    '5712': authentication
+    '5715': authentication
+    '550': file
+    '510': malware
+  defaults:
+required_fields: [rule_id, agent_name]
+sample_fixture: parsers/wazuh/samples.json#wazuh-alert-json
+description: Wazuh alerts.json 告警（rule.level 0-15 五级映射、agent/data/location/full_log），SSH 暴力破解归 authentication。

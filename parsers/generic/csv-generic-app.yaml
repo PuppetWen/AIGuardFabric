@@ -1,0 +1,32 @@
+# 通用 CSV —— 自研应用逗号分隔日志（模板声明列名）
+# 正样本：parsers/generic/samples.json 中 key = csv-generic-app
+key: csv-generic-app
+name: 通用 CSV（自研应用）
+vendor: generic
+product: 自研应用 CSV
+protocols: [file, beats, object-storage]
+engine: csv
+pattern: 'ts,level,app,client_ip,action,category,msg'
+mapping:
+  map:
+    app: service.name
+    client_ip: source.ip
+    category: event.category_raw
+    msg: message
+  time_field: ts
+  time_format: unix
+  severity_field: level
+  severity_map:
+    info: info
+    warn: medium
+    error: high
+    fatal: critical
+  category_map:
+    web: web
+    auth: authentication
+    process: process
+  action_field: action
+  defaults:
+required_fields: [app, msg]
+sample_fixture: parsers/generic/samples.json#csv-generic-app
+description: 自研应用 CSV 日志模板（表头由模板声明，按列序对齐；ts 为 Unix 秒），无表头文件同样适用。

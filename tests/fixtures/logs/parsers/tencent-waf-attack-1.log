@@ -1,0 +1,1 @@
+{"time":"2026-02-21T10:37:00+08:00","domain":"www.example.com","src_ip":"203.0.113.95","method":"POST","url":"/api/upload","attack_type":"webshell","action":"block","rule_id":"waf-tc-8801","rule_name":"WebShell上传","user_agent":"curl/8.5.0","http_version":"1.1","status":403}

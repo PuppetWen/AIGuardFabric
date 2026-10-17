@@ -1,0 +1,1 @@
+<134>Feb 21 10:23:47 nsfocus-ips1 LEEF:2.0|NSFOCUS|IPS|5.6.10.0|1001|^|devTime=Feb 21 2026 10:23:47^cat=Attack^sev=7^src=10.20.30.61^dst=203.0.113.11^spt=44321^dpt=443^proto=TCP^act=block^msg=Apache Log4j2 远程代码执行攻击^ruleId=NSF-2021-44228

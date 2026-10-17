@@ -1,0 +1,22 @@
+# 通用 LEEF —— 任意厂商的 LEEF 转发（IBM QRadar Log Event Extended Format）
+# 正样本：parsers/generic/samples.json 中 key = leef-generic-syslog
+# 说明：LEEF 1.0/1.1 用制表符分隔扩展段，LEEF 2.0 在第 6 段声明自定义分隔符（如 `^`）。
+#
+# 协议声明口径（见 parsers/README.md「协议声明与放宽匹配」）：`LEEF:` 字面标记 +
+# required_fields 已足以判定"这就是一条 LEEF 事件"，因此显式声明消息总线类接入协议
+# （kafka/mqtt/pulsar：同一条载荷可经任一总线到达）——走**严格趟**，不必依赖放宽趟兜底。
+key: leef-generic-syslog
+name: 通用 LEEF
+vendor: generic
+product: LEEF
+protocols: [syslog, beats, kafka, mqtt, pulsar]
+engine: leef
+pattern: 'LEEF:2.0'
+mapping:
+  category_map:
+    Authentication: authentication
+    NetworkActivity: network
+    IntrusionDetection: intrusion
+required_fields: [observer.vendor, message]
+sample_fixture: parsers/generic/samples.json#leef-generic-syslog
+description: 通用 LEEF 模板（1.0/2.0 均可）：se v 0-10 由引擎换算等级，usrName 改写为 user.name。

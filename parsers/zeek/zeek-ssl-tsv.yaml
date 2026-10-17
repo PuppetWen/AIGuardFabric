@@ -1,0 +1,34 @@
+# Zeek —— ssl.log TLS 握手日志（TSV）
+# 正样本：parsers/zeek/samples.json 中 key = zeek-ssl-tsv
+key: zeek-ssl-tsv
+name: Zeek ssl.log TLS 握手
+vendor: Zeek
+product: ssl.log
+protocols: [file, beats]
+engine: csv
+pattern: 'ts,uid,id.orig_h,id.orig_p,id.resp_h,id.resp_p,version,cipher,curve,server_name,resumed,last_alert,next_protocol,established,cert_chain_fuids,client_cert_chain_fuids,subject,issuer,client_subject,client_issuer,validation_status'
+mapping:
+  map:
+    uid: event.id
+    id.orig_h: source.ip
+    id.orig_p: source.port
+    id.resp_h: destination.ip
+    id.resp_p: destination.port
+    version: tls.version
+    cipher: tls.cipher
+    curve: tls.curve
+    server_name: url.domain
+    resumed: tls.resumed
+    next_protocol: network.protocol
+    established: tls.established
+    subject: tls.server.subject
+    issuer: tls.server.issuer
+    validation_status: tls.validation_status
+  time_field: ts
+  time_format: unix
+  defaults:
+    event.severity: info
+    event.category: network
+required_fields: [uid, server_name]
+sample_fixture: parsers/zeek/samples.json#zeek-ssl-tsv
+description: Zeek ssl.log（server_name/cipher/version/validation_status），加密流量与 SNI 资产识别来源。

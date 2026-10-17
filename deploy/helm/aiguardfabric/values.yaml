@@ -1,0 +1,1042 @@
+# =============================================================================
+# AIGuardFabric Helm 默认值（values.yaml）
+#
+# 设计原则（铁律）：
+#   1. 不硬编码绝对路径：所有路径都是容器内相对/约定路径（/app、/data、/app/rules）
+#   2. 绝不把明文密钥写进本文件：secrets.* 全为空串，由 --set / -f 私密值文件覆盖，
+#      或直接用 secrets.existingSecret 指向外部 Secret（Vault/SealedSecrets/KMS 注入）
+#   3. 与 docker-compose.yml 逐项对齐：镜像名、端口、健康检查、环境变量名
+#
+# 覆盖优先级建议：
+#   默认（本文件，开发/演示，内置依赖开启）
+#     → values-prod.yaml（外部托管库 + 高可用 + 内置依赖关闭）
+#     → values-airgap.yaml（离线私有 registry + 气隙 tag + imagePullSecrets）
+#     → 私密值文件（-f values-local.yaml，仅含 secrets.*，不入库）
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 全局设置（部分键会被子模板读取，如 global.imageRegistry）
+# -----------------------------------------------------------------------------
+nameOverride: ""
+fullnameOverride: ""
+
+global:
+  # 私有 registry 前缀。非空时，镜像地址渲染为 <registry>/<repository>:<tag>
+  # 例：registry.cn-hangzhou.aliyuncs.com/agf  或  192.168.1.10:5000/agf
+  # 空串 = 使用 image.repository 原样（Docker Hub / 公共 registry）
+  imageRegistry: ""
+  # 全局镜像拉取密钥（气隙环境必填，见 values-airgap.yaml）
+  imagePullSecrets: []
+  # 是否在生产路径启用更严格校验（由 values-prod.yaml 置 true）
+  productionMode: false
+
+# -----------------------------------------------------------------------------
+# 镜像总开关
+# 事实来源：deploy/docker/Dockerfile（--target server|ingest|scheduler|web）
+#          docker-compose.yml（image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-<svc>:${AGF_IMAGE_TAG:-0.1.0}）
+# -----------------------------------------------------------------------------
+image:
+  # 镜像仓库前缀（与 compose 的 AGF_IMAGE_PREFIX 语义一致）
+  repositoryPrefix: aiguardfabric
+  # 镜像 tag（与 compose 的 AGF_IMAGE_TAG 默认值 0.1.0 一致）
+  tag: ""
+  # 缺省 tag 回退（tag 为空时使用 .Chart.AppVersion）
+  pullPolicy: IfNotPresent
+
+# 全局镜像拉取密钥（可被各服务覆盖）
+imagePullSecrets:
+  - name: agf-registry-credentials
+
+# -----------------------------------------------------------------------------
+# 安全上下文（安全基线：§2.6 与 §9 prod compose 的 read_only + cap_drop + no-new-privileges）
+# Dockerfile 中 USER 10001:10001；nginx-unprivileged 监听 8080（非特权端口）
+# -----------------------------------------------------------------------------
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  fsGroupChangePolicy: OnRootMismatch
+  # 运行时默认 seccomp 画像（K8s >= 1.19 GA）
+  seccompProfile:
+    type: RuntimeDefault
+
+# 每个容器都套用的加固片段（不允许被 values 关闭，除非显式覆盖）
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# 全局调度约束
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -----------------------------------------------------------------------------
+# ServiceAccount / RBAC
+# -----------------------------------------------------------------------------
+serviceAccount:
+  create: true
+  # 留空则用 fullname 自动生成
+  name: ""
+  annotations: {}
+  # 绝大多数场景不需要 token（Pod 不访问 API Server）
+  automountServiceAccountToken: false
+
+# -----------------------------------------------------------------------------
+# 非敏感配置（渲染进 ConfigMap，再以 envFrom 注入）
+# 变量名严格取自 crates/agf-core/src/config.rs 与 .env.example
+# -----------------------------------------------------------------------------
+config:
+  # ---- 运行模式 ----
+  AGF_ENV: prod
+  AGF_MOCK_MODE: "0"
+  AGF_DEGRADE_ON_MISSING: "1"
+  AGF_LOG_LEVEL: info
+  AGF_LOG_FORMAT: json
+  # ---- 容器内路径（约定值，非宿主机绝对路径）----
+  AGF_PROJECT_ROOT: /app
+  AGF_DATA_DIR: /data
+  # ---- 服务监听（config.rs 默认值一致）----
+  AGF_SERVER_HOST: 0.0.0.0
+  AGF_SERVER_PORT: "8080"
+  AGF_INGEST_HOST: 0.0.0.0
+  AGF_INGEST_PORT: "8090"
+  AGF_SYSLOG_TCP_PORT: "5514"
+  AGF_SYSLOG_UDP_PORT: "5514"
+  AGF_MCP_PROXY_PORT: "8091"
+  AGF_METRICS_PORT: "9100"
+  AGF_API_PREFIX: /api/v1
+  AGF_MAX_BODY_BYTES: "16777216"
+  # ---- 数据库（K8s 内 DNS 名；外部托管时用 FQDN）----
+  AGF_PG_HOST: aiguardfabric-postgres
+  AGF_PG_PORT: "5432"
+  AGF_PG_DB: aiguardfabric
+  AGF_PG_USER: agf
+  AGF_PG_POOL_MAX: "50"
+  AGF_PG_POOL_MIN: "5"
+  AGF_PG_CONNECT_TIMEOUT_SECS: "10"
+  # ---- Redis ----
+  AGF_REDIS_URL: redis://aiguardfabric-redis:6379/0
+  AGF_REDIS_PREFIX: agf
+  # ---- NATS JetStream ----
+  AGF_NATS_ENABLED: "1"
+  AGF_NATS_URL: nats://aiguardfabric-nats:4222
+  AGF_NATS_STREAM: AGF_EVENTS
+  # ---- ClickHouse（可选冷热分层）----
+  AGF_CLICKHOUSE_ENABLED: "0"
+  AGF_CLICKHOUSE_URL: http://aiguardfabric-clickhouse:8123
+  AGF_CLICKHOUSE_DB: agf
+  AGF_CLICKHOUSE_USER: default
+  # ---- 对象存储（S3 兼容：MinIO / 阿里云 OSS / AWS S3）----
+  AGF_S3_ENDPOINT: http://aiguardfabric-minio:9000
+  AGF_S3_REGION: us-east-1
+  AGF_S3_BUCKET: agf-evidence
+  AGF_S3_FORCE_PATH_STYLE: "1"
+  # ---- 安全（非敏感部分；密钥见 secrets.*）----
+  AGF_JWT_ISSUER: aiguardfabric
+  AGF_JWT_ACCESS_TTL_SECS: "3600"
+  AGF_JWT_REFRESH_TTL_SECS: "259200"
+  AGF_KMS_BACKEND: local-file
+  AGF_FORCE_PASSWORD_CHANGE: "1"
+  AGF_PASSWORD_MIN_LENGTH: "12"
+  AGF_PASSWORD_REQUIRE_CLASSES: "1"
+  AGF_LOGIN_MAX_FAILURES: "5"
+  AGF_LOGIN_LOCKOUT_SECS: "900"
+  AGF_BOOTSTRAP_ADMIN_USER: admin
+  AGF_BOOTSTRAP_ADMIN_EMAIL: admin@aiguardfabric.local
+  # ---- 多租户与三级配额 ----
+  AGF_DEFAULT_TENANT_ID: 00000000-0000-0000-0000-000000000001
+  AGF_DEFAULT_TENANT_SLUG: default
+  AGF_TENANT_PHYSICAL_ISOLATION: "0"
+  AGF_QUOTA_TENANT_TOKENS_PER_DAY: "5000000"
+  AGF_QUOTA_AGENT_TOKENS_PER_DAY: "500000"
+  AGF_QUOTA_SESSION_TOKENS: "100000"
+  AGF_QUOTA_TENANT_REQ_PER_MIN: "6000"
+  # ---- 大模型网关（默认 mock，不调用外部；真实厂商 Key 走 Secret）----
+  AGF_LLM_DEFAULT_PROVIDER: mock
+  AGF_LLM_DEFAULT_MODEL: mock-analyst-1
+  AGF_LLM_ROUTING_STRATEGY: cost-first
+  AGF_LLM_REQUEST_TIMEOUT_SECS: "60"
+  AGF_LLM_MAX_RETRIES: "2"
+  AGF_LLM_SEMANTIC_CACHE: "1"
+  AGF_LLM_PRESCREEN: "1"
+  # ---- 可观测性 ----
+  AGF_OTEL_ENABLED: "0"
+  AGF_PROMETHEUS_ENABLED: "1"
+  AGF_OTEL_SERVICE_NAME: agf-server
+  # ---- 调度后端：local-cron | schedulerx3 ----
+  AGF_SCHEDULER_BACKEND: local-cron
+  # ---- 阿里云（Privatelink / 五底座；默认关闭）----
+  AGF_ALIYUN_ENABLED: "0"
+  AGF_ALIYUN_REGION_ID: cn-hangzhou
+
+# 附加到 ConfigMap 的任意键值（覆盖同名 config.*）
+extraConfig: {}
+
+# -----------------------------------------------------------------------------
+# 敏感配置
+#
+# ★ 安全约定：以下值**默认全为空串**，绝不写明文默认值。
+#   两种注入方式（推荐顺序）：
+#     A) secrets.existingSecret 指向外部托管 Secret（Vault / External Secrets /
+#        SealedSecrets / 云 KMS 注入）—— 推荐用于生产
+#     B) 在私密值文件中提供 secrets.* 字面值（helm 会用 b64enc 渲染进 Secret）
+#   若两者都为空，模板会**拒绝渲染**（fail），避免"能装上但跑不起来"或
+#   "猜测弱默认密钥"。
+# -----------------------------------------------------------------------------
+secrets:
+  # 优先使用的外部 Secret 名称；非空时忽略下面的字面值字段
+  existingSecret: ""
+  # 外部 Secret 的键名映射（默认与下面字段同名，可对齐既有 Secret 的键）
+  existingSecretKeys: {}
+
+  # B) 字面值（仅用于 helm template/install 时由 b64enc 渲染）
+  pgPassword: ""            # AGF_PG_PASSWORD（>=12 字节，禁止弱口令）
+  redisPassword: ""         # 用于拼装 AGF_REDIS_URL（为空则不加密码段）
+  clickhousePassword: ""    # AGF_CLICKHOUSE_PASSWORD
+  s3AccessKey: ""           # AGF_S3_ACCESS_KEY
+  s3SecretKey: ""           # AGF_S3_SECRET_KEY
+  jwtSecret: ""             # AGF_JWT_SECRET（>=32 字节）
+  masterKeyBase64: ""       # AGF_MASTER_KEY_BASE64（base64 编码 32 字节）
+  bootstrapAdminPassword: "" # AGF_BOOTSTRAP_ADMIN_PASSWORD（留空 = 首启随机生成）
+  aliyunAccessKeyId: ""     # AGF_ALIYUN_ACCESS_KEY_ID
+  aliyunAccessKeySecret: "" # AGF_ALIYUN_ACCESS_KEY_SECRET
+  aliyunStsToken: ""        # AGF_ALIYUN_STS_TOKEN（临时凭据优先）
+
+  # ---- 第三方依赖密码（仅当对应 *.enabled=true 且未指向外部实例时使用）----
+  postgresAdminPassword: ""
+  minioRootPassword: ""
+  grafanaAdminPassword: ""
+  clickhouseAdminPassword: ""
+
+# -----------------------------------------------------------------------------
+# 授权/提醒：existingSecret 必须包含的键清单（README 中有完整表格）
+# 参考键名：AGF_PG_PASSWORD / AGF_REDIS_PASSWORD / AGF_CLICKHOUSE_PASSWORD /
+#          AGF_S3_ACCESS_KEY / AGF_S3_SECRET_KEY / AGF_JWT_SECRET /
+#          AGF_MASTER_KEY_BASE64 / AGF_BOOTSTRAP_ADMIN_PASSWORD /
+#          AGF_ALIYUN_ACCESS_KEY_ID / AGF_ALIYUN_ACCESS_KEY_SECRET / AGF_ALIYUN_STS_TOKEN
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# 卷：证据包（对象存储缓存的本地暂存）/ 规则目录 / 临时目录
+# -----------------------------------------------------------------------------
+volumes:
+  # 证据与暂存目录。生产建议指向高 IOPS 的 PVC 或直接关闭（走对象存储）
+  evidence:
+    enabled: true
+    # 使用已有 PVC（空 = 由模板按 storageClass 动态创建）
+    existingClaim: ""
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 50Gi
+    # 保留策略：helm uninstall 时是否保留 PVC（数据安全优先）
+    keepOnUninstall: true
+  # 规则目录。/app/rules 只读挂载（与 compose 一致：./rules:/app/rules:ro）
+  rules:
+    # 以 ConfigMap 形式提供规则文件（少量规则）或挂载已有 PVC（大规模规则库）
+    configMapName: ""
+    existingClaim: ""
+  # /tmp（只读根文件系统下必须提供可写 tmpfs）
+  tmp:
+    sizeLimit: 256Mi
+    medium: Memory
+
+# -----------------------------------------------------------------------------
+# 端口约定（集中定义，供各服务与 NetworkPolicy / ServiceMonitor 复用）
+# 事实来源：docker-compose.yml 端口映射 + Dockerfile EXPOSE
+# -----------------------------------------------------------------------------
+ports:
+  api: 8080
+  ingestHttp: 8090
+  mcpProxy: 8091
+  syslogTcp: 5514
+  syslogUdp: 5514
+  metrics: 9100
+  schedulerHealth: 9101
+  web: 8080          # nginx-unprivileged 监听 8080
+  postgres: 5432
+  redis: 6379
+  nats: 4222
+  natsMonitor: 8222
+  minio: 9000
+  minioConsole: 9001
+  clickhouseHttp: 8123
+  clickhouseNative: 9000
+  grafana: 3000
+
+# =============================================================================
+# 服务定义
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# agf-server：HTTP API + 控制台后端 + 迁移 + 引导管理员
+# -----------------------------------------------------------------------------
+server:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: agf-server
+    tag: ""
+    pullPolicy: ""
+  imagePullSecrets: []
+
+  # 命令行参数（覆盖镜像 ENTRYPOINT 之后的参数；空 = 使用默认）
+  args: []
+
+  # 非敏感环境变量覆盖（与 config.* 合并，同名以本处为准）
+  env: {}
+  # 来自 Secret 的环境变量（键名用 valueFrom.secretKeyRef）
+  extraEnv: []
+  # 从其它 ConfigMap / Secret 全量注入
+  extraEnvFrom: []
+
+  service:
+    type: ClusterIP
+    annotations: {}
+    # 仅当 type=LoadBalancer 时生效
+    loadBalancerSourceRanges: []
+    # 会话保持（多副本 + WebSocket 长连接场景建议 ClientIP）
+    sessionAffinity: None
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+
+  livenessProbe:
+    enabled: true
+    # 使用 TCP 探针：数据库等依赖抖动不应导致 API 进程被反复重启
+    type: tcp
+    initialDelaySeconds: 20
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 4
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    # HTTP /healthz（与 compose healthcheck 的 URL 一致）
+    path: /healthz
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    enabled: true
+    path: /healthz
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 24   # 5s × 24 = 120s 启动预算（compose start_period=40s 的宽松余量）
+
+  # 优雅关闭：compose stop_grace_period=30s（prod=60s）
+  terminationGracePeriodSeconds: 60
+  # 容器内 preStop。distroless 镜像无 shell，故用 HTTP 端点触发优雅下线；
+  # 若镜像未实现该端点，探针失败不会阻塞终止（terminationGracePeriod 仍生效）。
+  preStop:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: api
+    # 在 HTTP preStop 之后追加的等待秒数（K8s 不支持 sleep+httpGet 组合，
+    # 这里通过 terminationGracePeriodSeconds 提供余量，此值仅作记录/文档用途）
+    graceNotes: "依赖 terminationGracePeriodSeconds=60 消化在途请求"
+
+  # 证据卷挂载（/data）
+  evidenceVolume:
+    enabled: true
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+  podAnnotations: {}
+  podLabels: {}
+
+  # 主容器之外的额外 initContainers（例如等待外部数据库就绪）
+  initContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+# -----------------------------------------------------------------------------
+# agf-ingest：MCP / Syslog / Webhook / Kafka 接入与解析归一
+# -----------------------------------------------------------------------------
+ingest:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: agf-ingest
+    tag: ""
+    pullPolicy: ""
+  imagePullSecrets: []
+
+  args: []
+  env: {}
+  extraEnv: []
+  extraEnvFrom: []
+
+  service:
+    type: ClusterIP
+    annotations: {}
+    # Syslog 需要 TCP+UDP 双协议；LoadBalancer 模式下需确认云 LB 支持 UDP
+    loadBalancerSourceRanges: []
+    sessionAffinity: None
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "4"
+      memory: 2Gi
+
+  livenessProbe:
+    enabled: true
+    type: tcp
+    initialDelaySeconds: 20
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 4
+  readinessProbe:
+    enabled: true
+    path: /healthz
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startupProbe:
+    enabled: true
+    path: /healthz
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 12
+
+  terminationGracePeriodSeconds: 45
+  preStop:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: ingestHttp
+
+  evidenceVolume:
+    enabled: true
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  podAnnotations: {}
+  podLabels: {}
+  initContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+# -----------------------------------------------------------------------------
+# agf-scheduler：资产盘点 / 日志拉取 / 红队巡航 / 规则热更新 / 报表 / 归档
+# 单副本语义（避免定时任务重复触发）；如需多副本请改用 SchedulerX3 后端：
+#   config.AGF_SCHEDULER_BACKEND=schedulerx3
+# -----------------------------------------------------------------------------
+scheduler:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: agf-scheduler
+    tag: ""
+    pullPolicy: ""
+  imagePullSecrets: []
+
+  args: []
+  env: {}
+  extraEnv: []
+  extraEnvFrom: []
+
+  service:
+    type: ClusterIP
+    annotations: {}
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+  # 调度进程无 HTTP 业务面，健康端口 9101 由 compose healthcheck 指定
+  livenessProbe:
+    enabled: true
+    type: tcp
+    port: schedulerHealth
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    # 就绪探针：有 /healthz 则用 HTTP，否则退化为 TCP
+    enabled: true
+    path: /healthz
+    port: schedulerHealth
+    initialDelaySeconds: 10
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 5
+  startupProbe:
+    enabled: false
+    path: /healthz
+    port: schedulerHealth
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 12
+
+  terminationGracePeriodSeconds: 60
+  preStop:
+    enabled: false
+    httpGet:
+      path: /healthz
+      port: schedulerHealth
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+  podLabels: {}
+  initContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+# -----------------------------------------------------------------------------
+# agf-web：nginx-unprivileged 静态控制台 + /api 反代
+# -----------------------------------------------------------------------------
+web:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: agf-web
+    tag: ""
+    pullPolicy: ""
+  imagePullSecrets: []
+
+  # nginx 反代上游（与 compose 的 AGF_API_UPSTREAM 一致）
+  apiUpstream: http://agf-server:8080
+  # nginx 配置以 ConfigMap 注入；留空则使用镜像内置的 deploy/docker/nginx.conf
+  nginxConfigMap: ""
+
+  env: {}
+  extraEnv: []
+  extraEnvFrom: []
+
+  service:
+    type: ClusterIP
+    annotations: {}
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: "1"
+      memory: 256Mi
+
+  livenessProbe:
+    enabled: true
+    type: http
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startupProbe:
+    enabled: true
+    path: /
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 12
+
+  terminationGracePeriodSeconds: 30
+  preStop:
+    enabled: false
+    httpGet:
+      path: /
+      port: web
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  podAnnotations: {}
+  podLabels: {}
+  initContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+
+# =============================================================================
+# Ingress / PrivateLink
+# =============================================================================
+ingress:
+  # 主入口（控制台 + API 同域，避免 CORS 与令牌泄露；与 nginx.conf 同源部署一致）
+  enabled: false
+  className: nginx
+  annotations: {}
+  # API 域名（/api、/ws 路径）
+  api:
+    host: agf.example.com
+    paths:
+      - path: /api
+        pathType: Prefix
+      - path: /ws
+        pathType: Prefix
+      - path: /healthz
+        pathType: Exact
+  # 控制台域名；留空表示与 api 同域（推荐，直接命中 agf-web 的 nginx 反代）
+  web:
+    host: ""
+    paths:
+      - path: /
+        pathType: Prefix
+  tls:
+    enabled: false
+    # 证书 Secret 名（cert-manager 或手动创建）
+    secretName: agf-tls
+  # 供 cert-manager 使用
+  certManager:
+    enabled: false
+    clusterIssuer: letsencrypt-prod
+
+# -----------------------------------------------------------------------------
+# 阿里云 PrivateLink / 终端节点接入
+#
+# 场景：客户 VPC 与 AIGuardFabric 所在 VPC 不同，要求流量**不经公网**，
+#       通过「终端节点服务（Endpoint Service）+ 终端节点（Endpoint）」私网互访。
+#
+# 落地方式（二选一）：
+#   A) CCM 注解式（本 Chart 默认）：给面向私网的 Service 打 ALB/NLB 注解，
+#      CCM 创建**私网** CLB/ALB，再由终端节点服务挂载该 LB。
+#          alicloud-loadbalancer-address-type: intranet   ← 关键：私网类型
+#   B) ALB Ingress 注解式（见 ingress.annotations 注释示例）
+#
+# 安全组最小化：由 NetworkPolicy 把可访问面收敛到必要端口（见 networkPolicy.*），
+# 再让终端节点服务所在安全组只放行这些端口，避免"LB 全端口暴露给对端 VPC"。
+# -----------------------------------------------------------------------------
+privateLink:
+  enabled: false
+  # 为 agf-server 的 API 暴露一个私网 LoadBalancer Service（供终端节点服务挂载）
+  # 注意：真正的终端节点服务/终端节点仍需在阿里云控制台或 Terraform 中创建
+  service:
+    enabled: true
+    apiPort: 8080
+    annotations:
+      # ---- 阿里云 CCM 关键注解 ----
+      # 私网类型负载均衡（Privatelink 前置条件：不能是公网 LB）
+      service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet
+      # 复用已有私网 SLB/ALB 实例（留空由 CCM 自动创建）
+      # service.beta.kubernetes.io/alicloud-loadbalancer-id: "lb-xxxxxxxx"
+      # 仅内网可访问，禁止公网 IP 绑定
+      service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: "true"
+      # 健康检查（指向服务端口）
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-flag: "on"
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-connect-port: "8080"
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-uri: "/healthz"
+      # 会话保持（WebSocket 长连接建议开启，300s）
+      service.beta.kubernetes.io/alicloud-loadbalancer-scheduler: "wrr"
+      service.beta.kubernetes.io/alicloud-loadbalancer-persistence-timeout: "300"
+      # 后端仅本集群 Pod
+      service.beta.kubernetes.io/alicloud-loadbalancer-backend-label: "app.kubernetes.io/name=aiguardfabric,app.kubernetes.io/component=server"
+    # 终端节点服务备注（仅文档用途，Cloud 侧仍需手工/Terraform 创建）
+    endpointServiceNotes: |
+      在阿里云控制台创建「终端节点服务」：
+        1. 关联上一步 CCM 创建的私网 CLB（或手动挂载为终端节点服务的后端）
+        2. 自动接受连接：按需开启（生产建议关闭，改为白名单审批）
+        3. 白名单：只加入客户 VPC 的终端节点 ID（ep-xxxxxxxx）
+        4. 安全组：仅放行 apiPort（默认 8080），其余端口一律拒绝
+      客户端侧创建「终端节点」后，用私网域名访问：
+        http://<ep-domain>:8080/api/v1/...
+
+  # Syslog 私网接入（可选；UDP 通常不走 PrivateLink，按需评估）
+  ingestService:
+    enabled: false
+    annotations:
+      service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-flag: "on"
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-connect-port: "8090"
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-uri: "/healthz"
+
+# =============================================================================
+# 自动扩缩容（HPA）
+# =============================================================================
+hpa:
+  server:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    behavior:
+      scaleUp:
+        stabilizationWindowSeconds: 60
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 60
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 25
+            periodSeconds: 120
+  ingest:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 12
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    # 接入面更适合按每秒事件数扩容（需 KEDA / Prometheus Adapter + 自定义指标）
+    custom:
+      enabled: false
+      metricName: agf_ingest_events_per_second
+      targetAverageValue: "5000"
+  web:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 75
+  scheduler:
+    # 调度器单副本语义，禁止 HPA 扩容（并发触发定时任务）
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80
+
+# =============================================================================
+# PodDisruptionBudget
+# =============================================================================
+pdb:
+  server:
+    enabled: true
+    minAvailable: 1
+  ingest:
+    enabled: true
+    minAvailable: 1
+  web:
+    enabled: true
+    minAvailable: 1
+  scheduler:
+    # 单副本 + minAvailable=1 会导致节点排空永远阻塞，故默认关闭
+    enabled: false
+    maxUnavailable: 1
+
+# =============================================================================
+# NetworkPolicy：默认拒绝 + 按需放行
+#
+# 设计：三组策略
+#   1) default-deny-all：命名空间内所有 Pod 的入站/出站全部拒绝
+#   2) allow-<svc>-ingress：放行必要入站（Ingress 控制器 / Prometheus / 同命名空间）
+#   3) allow-<svc>-egress：放行 DNS + 数据面端口（PG/Redis/NATS/S3/ClickHouse）
+# 安全组最小化配合：终端节点服务安全组只放行 NetworkPolicy 允许的端口
+# =============================================================================
+networkPolicy:
+  enabled: true
+  # 是否渲染"默认拒绝"策略（强烈建议保持 true）
+  defaultDeny: true
+  # 允许访问指标端口的来源标签（Prometheus）
+  metricsScrapeLabels:
+    app.kubernetes.io/name: prometheus
+  # 允许访问 API/控制台的来源（Ingress 控制器命名空间）
+  ingressControllerLabels:
+    kubernetes.io/metadata.name: ingress-nginx
+  # 外部依赖端点（留空则回退到 config 中的服务名 + 本命名空间）
+  externalEndpoints:
+    # 托管 PostgreSQL / Redis / NATS / S3 / ClickHouse 的出站 CIDR
+    # 例：["10.0.0.0/8", "172.16.0.0/12"]
+    cidrs: []
+  # 是否放行出站到公网 0.0.0.0/0（Mock 模式 / 内网大模型网关 场景需谨慎开启）
+  allowPublicEgress: false
+  # 允许访问 DNS（kube-system 的 CoreDNS）
+  dns:
+    enabled: true
+    namespaceSelector:
+      kubernetes.io/metadata.name: kube-system
+    port: 53
+  # Mock 模式下允许调用的厂商 API（通常不需要；真实网关调用请改用 externalEndpoints.cidrs）
+  llmGatewayCidrs: []
+
+# =============================================================================
+# ServiceMonitor（Prometheus Operator CRD；集群无该 CRD 时必须保持 false）
+# =============================================================================
+serviceMonitor:
+  enabled: false
+  # 与 Prometheus 实例的 selector 匹配
+  labels:
+    release: prometheus
+  interval: 30s
+  scrapeTimeout: 10s
+  # 指标路径与端口名
+  path: /metrics
+  portName: metrics
+  # 是否额外抓取 Service 本身（而非仅 Endpoints）
+  honorLabels: true
+  relabelings: []
+  metricRelabelings: []
+
+# =============================================================================
+# 可选内置组件（默认全部关闭：生产指向外部托管实例）
+#
+# ★ 生产建议：这些内置组件仅用于演示/自测/离线演练。
+#   生产环境请使用对应 Operator 或云托管服务，并把 *.enabled 置 false，
+#   同时把 config.AGF_PG_HOST 等指向托管端点。
+# =============================================================================
+postgresql:
+  enabled: false
+  image:
+    repository: timescale/timescaledb
+    tag: latest-pg16
+    pullPolicy: IfNotPresent
+  # 与 compose 一致的启动参数
+  command:
+    - postgres
+    - -c
+    - shared_preload_libraries=timescaledb
+    - -c
+    - max_connections=200
+    - -c
+    - log_min_duration_statement=1000
+    - -c
+    - password_encryption=scram-sha-256
+  auth:
+    database: aiguardfabric
+    username: agf
+    # 口令取自 secrets.pgPassword（**不在此处写明文**）
+  service:
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 100Gi
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 8Gi
+  # 可选自定义 PostgreSQL 初始化 SQL。不要把应用迁移挂在此处；
+  # agf-server 启动时运行内嵌 SQLx 迁移，避免与 initdb 双重执行。
+  initdbConfigMap: ""
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+redis:
+  enabled: false
+  image:
+    repository: redis
+    tag: 7.4-alpine
+    pullPolicy: IfNotPresent
+  command:
+    - redis-server
+    - --appendonly
+    - "yes"
+    - --save
+    - "900 1"
+    - --maxmemory
+    - 512mb
+    - --maxmemory-policy
+    - allkeys-lru
+  # 口令取自 secrets.redisPassword；非空时追加 --requirepass
+  service:
+    type: ClusterIP
+    port: 6379
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+nats:
+  enabled: false
+  image:
+    repository: nats
+    tag: 2.10-alpine
+    pullPolicy: IfNotPresent
+  command:
+    - -js
+    - -sd
+    - /data
+    - -m
+    - "8222"
+  service:
+    type: ClusterIP
+    port: 4222
+    monitorPort: 8222
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+minio:
+  enabled: false
+  image:
+    repository: quay.io/minio/minio
+    tag: latest
+    pullPolicy: IfNotPresent
+  # root 用户与口令取自 secrets.s3AccessKey / secrets.s3SecretKey
+  command:
+    - server
+    - /data
+    - --console-address
+    - :9001
+  service:
+    type: ClusterIP
+    port: 9000
+    consolePort: 9001
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 100Gi
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  # 一次性建桶任务（对应 compose 的 minio-init）
+  initBuckets:
+    enabled: true
+    image:
+      repository: quay.io/minio/mc
+      tag: latest
+    buckets:
+      - agf-evidence
+      - agf-raw-logs
+      - agf-reports
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+clickhouse:
+  enabled: false
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: 24.8-alpine
+    pullPolicy: IfNotPresent
+  auth:
+    database: agf
+    username: default
+    # 口令取自 secrets.clickhousePassword / secrets.clickhouseAdminPassword
+  service:
+    type: ClusterIP
+    httpPort: 8123
+    nativePort: 9000
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 200Gi
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 8Gi
+  # 与 compose 一致的 nofile 上限
+  ulimits:
+    nofile:
+      soft: 262144
+      hard: 262144
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+grafana:
+  enabled: false
+  image:
+    repository: grafana/grafana
+    tag: 11.4.0
+    pullPolicy: IfNotPresent
+  # 管理员口令取自 secrets.grafanaAdminPassword
+  env:
+    GF_USERS_ALLOW_SIGN_UP: "false"
+    GF_INSTALL_PLUGINS: ""
+    GF_SECURITY_DISABLE_GRAVATAR: "true"
+    GF_ANALYTICS_REPORTING_ENABLED: "false"
+  service:
+    type: ClusterIP
+    port: 3000
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+  # 预置数据源与仪表盘（与本仓库 deploy/grafana/** 对应）
+  # 说明：Chart 不内联 JSON 文件（体积大且易漂移），改用外部 ConfigMap：
+  #   kubectl create configmap agf-grafana-provisioning \
+  #     --from-file=deploy/grafana/provisioning -o yaml --dry-run=client | kubectl apply -f -
+  provisioning:
+    existingConfigMap: ""
+    dashboardsExistingConfigMap: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# =============================================================================
+# 逃生舱：额外渲染任意资源（谨慎使用，会绕过本 Chart 的安全基线）
+# =============================================================================
+extraManifests: []

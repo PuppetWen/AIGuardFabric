@@ -1,0 +1,53 @@
+# CrowdStrike Falcon —— DetectionSummaryEvent 检测事件（Webhook/流式 JSON）
+# 正样本：parsers/crowdstrike/samples.json 中 key = crowdstrike-falcon-detection-json
+key: crowdstrike-falcon-detection-json
+name: Falcon 检测事件（DetectionSummary）
+vendor: CrowdStrike
+product: Falcon
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.metadata.eventCreationTime
+  kind=$.metadata.eventType
+  detect_id=$.event.DetectId
+  detect_name=$.event.DetectName
+  sev=$.event.SeverityName
+  host=$.event.ComputerName
+  host_ip=$.event.LocalIP
+  user=$.event.UserName
+  pid=$.event.ProcessId
+  ppid=$.event.ParentProcessId
+  cmdline=$.event.CommandLine
+  fname=$.event.FileName
+  fpath=$.event.FilePath
+  tactic=$.event.Tactic
+  technique=$.event.Technique
+mapping:
+  map:
+    kind: event.category_raw
+    detect_id: rule.id
+    detect_name: rule.name
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    pid: process.pid
+    ppid: process.parent.pid
+    cmdline: process.command_line
+    fname: file.name
+    fpath: file.path
+    tactic: threat.tactic.name
+    technique: threat.technique.name
+  time_field: ts
+  time_format: unix_millis
+  severity_field: sev
+  severity_map:
+    Critical: critical
+    High: high
+    Medium: medium
+    Low: low
+    Informational: info
+  defaults:
+    event.category: intrusion
+required_fields: [detect_name, host]
+sample_fixture: parsers/crowdstrike/samples.json#crowdstrike-falcon-detection-json
+description: CrowdStrike Falcon DetectionSummaryEvent（eventCreationTime 毫秒、SeverityName、Tactic/Technique 映射 MITRE）。

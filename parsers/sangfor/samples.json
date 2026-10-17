@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "note": "深信服模板正样本与关键字段断言。CEF/LEEF 样本按公开事件格式重建（CEF 头 7 段 + 扩展键值对），KV 样本按 syslog 转发常见形态重建；未联网抓取。",
+  "samples": {
+    "sangfor-af-ips-cef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:23:45 sangfor-af1 CEF:0|Sangfor|AF|8.0.17|1001|SQL注入攻击|7|src=10.20.30.50 dst=203.0.113.10 spt=54321 dpt=80 proto=TCP act=block cat=入侵检测 msg=SQL注入攻击 cs1=AF-IPS-1001 request=http://www.example.com/login?id=1",
+      "expect": {
+        "observer.vendor": "Sangfor",
+        "observer.product": "AF",
+        "rule.id": "1001",
+        "rule.name": "SQL注入攻击",
+        "source.ip": "10.20.30.50",
+        "destination.ip": "203.0.113.10",
+        "source.port": "54321",
+        "destination.port": "80",
+        "network.transport": "TCP",
+        "event.category_raw": "入侵检测",
+        "event.action": "denied",
+        "event.action_raw": "block",
+        "message": "SQL注入攻击",
+        "url.full": "http://www.example.com/login?id=1",
+        "rule.external_id": "AF-IPS-1001",
+        "event.severity": "high",
+        "event.category": "intrusion"
+      }
+    },
+    "sangfor-af-ips-kv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:24:00 sangfor-af1 AF rule_id=AF-2001; type=ips; src=10.20.30.51; dst=203.0.113.11; dport=443; action=block; severity=high; msg=暴力破解尝试",
+      "expect": {
+        "host.name": "sangfor-af1",
+        "rule.id": "AF-2001",
+        "source.ip": "10.20.30.51",
+        "destination.ip": "203.0.113.11",
+        "destination.port": "443",
+        "message": "暴力破解尝试",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "intrusion"
+      }
+    },
+    "sangfor-ac-kv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:25:00 sangfor-ac1 AC user=alice src_ip=10.20.30.60 dst_ip=203.0.113.12 dst_port=443 domain=shop.example.com category=购物网站 action=block bytes=2048 app=HTTPS",
+      "expect": {
+        "host.name": "sangfor-ac1",
+        "user.name": "alice",
+        "source.ip": "10.20.30.60",
+        "destination.ip": "203.0.113.12",
+        "destination.port": "443",
+        "url.domain": "shop.example.com",
+        "rule.category": "购物网站",
+        "network.bytes_out": "2048",
+        "network.application": "HTTPS",
+        "event.severity": "low",
+        "event.action": "denied",
+        "event.category": "web"
+      }
+    },
+    "sangfor-edr-json": {
+      "protocol": "webhook",
+      "fixture": "parsers/sangfor-edr-1.log",
+      "line": "{\"time\":\"2026-02-21T10:26:00+08:00\",\"event_type\":\"malware_detect\",\"hostname\":\"WIN-APP-03\",\"host_ip\":\"10.20.30.110\",\"user\":\"admin\",\"process_name\":\"powershell.exe\",\"cmd_line\":\"powershell -enc SQBFAFgA\",\"file_path\":\"C:\\\\Users\\\\admin\\\\a.ps1\",\"md5\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"severity\":\"high\",\"action\":\"block\",\"rule_id\":\"EDR-5001\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:26:00.000Z",
+        "host.name": "WIN-APP-03",
+        "host.ip": "10.20.30.110",
+        "user.name": "admin",
+        "process.name": "powershell.exe",
+        "process.command_line": "powershell -enc SQBFAFgA",
+        "file.path": "C:\\Users\\admin\\a.ps1",
+        "file.hash.md5": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "rule.id": "EDR-5001",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "malware"
+      }
+    },
+    "sangfor-sip-cef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:27:00 sangfor-sip1 CEF:0|Sangfor|SIP|3.0.9|2001|横向移动告警|8|src=10.20.30.70 dst=10.20.30.71 spt=44521 dpt=445 proto=TCP act=alert cat=横向移动 suser=administrator msg=检测到SMB横向移动 cs1=SIP-2001",
+      "expect": {
+        "observer.product": "SIP",
+        "rule.id": "2001",
+        "source.ip": "10.20.30.70",
+        "destination.ip": "10.20.30.71",
+        "destination.port": "445",
+        "user.name": "administrator",
+        "event.category_raw": "横向移动",
+        "event.action": "alert",
+        "message": "检测到SMB横向移动",
+        "rule.external_id": "SIP-2001",
+        "event.severity": "high",
+        "event.category": "intrusion"
+      }
+    }
+  }
+}

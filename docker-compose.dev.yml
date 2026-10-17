@@ -1,0 +1,24 @@
+# =============================================================================
+# 开发用覆盖文件：只启动依赖（postgres/redis/nats/minio），
+# 应用在 Windows 宿主机上用 cargo / pnpm 热重载运行（scripts/dev-up.ps1）。
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# 注意：本文件只做减法（不定义新的构建产物），保证与主 compose 的配置同源。
+# =============================================================================
+
+services:
+  agf-server:
+    profiles: ["full"]
+
+  agf-ingest:
+    profiles: ["full"]
+
+  agf-scheduler:
+    profiles: ["full"]
+
+  agf-web:
+    profiles: ["full"]
+
+  minio-init:
+    profiles: ["objects"]

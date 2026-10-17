@@ -1,0 +1,22 @@
+# Linux sshd —— 登录认证日志（Grok，syslog 信封）
+# 正样本：parsers/os/samples.json 中 key = linux-sshd-auth-grok
+key: linux-sshd-auth-grok
+name: Linux sshd 登录认证
+vendor: Linux
+product: OpenSSH
+protocols: [syslog, file, beats]
+engine: grok
+pattern: '%{WORD:result} password for (?:invalid user )?%{USER:user} from %{IPORHOST:src_ip} port %{PORT:src_port} ssh2'
+mapping:
+  map:
+    user: user.name
+    src_ip: source.ip
+    src_port: source.port
+    result: event.outcome
+  defaults:
+    event.category: authentication
+    event.action: login
+    event.severity: medium
+required_fields: [user, src_ip]
+sample_fixture: tests/fixtures/logs/parsers/linux-sshd-auth-1.log
+description: sshd 口令认证日志（Failed/Accepted 落 event.outcome），暴力破解与撞库检测的基础来源。

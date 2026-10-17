@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "note": "GCP 模板正样本与关键字段断言。JSON 样本按 Cloud Audit Log、Security Command Center finding、VPC Flow Logs 的公开结构重建；未联网抓取，IP 用 RFC 5737 段。",
+  "samples": {
+    "gcp-cloud-audit-json": {
+      "protocol": "object-storage",
+      "line": "{\"insertId\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"logName\":\"projects/example-prod/logs/cloudaudit.googleapis.com%2Factivity\",\"protoPayload\":{\"@type\":\"type.googleapis.com/google.cloud.audit.AuditLog\",\"authenticationInfo\":{\"principalEmail\":\"ops-admin@example.com\"},\"requestMetadata\":{\"callerIp\":\"203.0.113.200\",\"callerSuppliedUserAgent\":\"google-cloud-sdk gcloud/450.0.0\"},\"serviceName\":\"compute.googleapis.com\",\"methodName\":\"v1.compute.instances.delete\",\"resourceName\":\"projects/example-prod/zones/us-central1-a/instances/vm-app-01\",\"authorizationInfo\":[{\"permission\":\"compute.instances.delete\",\"granted\":true}]},\"resource\":{\"type\":\"gce_instance\",\"labels\":{\"instance_id\":\"1234567890\",\"zone\":\"us-central1-a\"}},\"timestamp\":\"2026-02-21T10:59:00.123456789Z\",\"severity\":\"NOTICE\",\"receiveTimestamp\":\"2026-02-21T10:59:01.000Z\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:59:00.123Z",
+        "event.id": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "user.email": "ops-admin@example.com",
+        "source.ip": "203.0.113.200",
+        "user_agent.original": "google-cloud-sdk gcloud/450.0.0",
+        "event.provider": "compute.googleapis.com",
+        "event.action_raw": "v1.compute.instances.delete",
+        "cloud.resource_id": "projects/example-prod/zones/us-central1-a/instances/vm-app-01",
+        "cloud.resource_type": "gce_instance",
+        "host.id": "1234567890",
+        "cloud.availability_zone": "us-central1-a",
+        "log.name": "projects/example-prod/logs/cloudaudit.googleapis.com%2Factivity",
+        "event.severity": "low",
+        "event.category": "cloud-control"
+      }
+    },
+    "gcp-scc-finding-json": {
+      "protocol": "webhook",
+      "line": "{\"finding\":{\"name\":\"organizations/123/findings/9f2c1d4b\",\"parent\":\"organizations/123/sources/456\",\"resourceName\":\"//compute.googleapis.com/projects/example-prod/zones/us-central1-a/instances/vm-app-01\",\"state\":\"ACTIVE\",\"category\":\"OPEN_SSH_PORT\",\"severity\":\"HIGH\",\"eventTime\":\"2026-02-21T11:00:00Z\",\"createTime\":\"2026-02-21T11:00:00Z\",\"sourceProperties\":{\"sourceId\":\"456\",\"projectId\":\"example-prod\"},\"externalUri\":\"https://console.cloud.google.com/security/command-center/findings?finding=9f2c1d4b\"},\"resource\":{\"name\":\"//compute.googleapis.com/projects/example-prod/zones/us-central1-a/instances/vm-app-01\",\"type\":\"google.compute.Instance\",\"displayName\":\"vm-app-01\"}}",
+      "expect": {
+        "event.time": "2026-02-21T11:00:00.000Z",
+        "rule.id": "organizations/123/findings/9f2c1d4b",
+        "rule.name": "OPEN_SSH_PORT",
+        "event.outcome": "ACTIVE",
+        "cloud.resource_id": "//compute.googleapis.com/projects/example-prod/zones/us-central1-a/instances/vm-app-01",
+        "url.full": "https://console.cloud.google.com/security/command-center/findings?finding=9f2c1d4b",
+        "cloud.resource_type": "google.compute.Instance",
+        "host.name": "vm-app-01",
+        "cloud.project.id": "example-prod",
+        "event.severity": "high",
+        "event.action": "alert",
+        "event.category": "intrusion"
+      }
+    },
+    "gcp-vpc-flow-json": {
+      "protocol": "object-storage",
+      "line": "{\"insertId\":\"abc123\",\"jsonPayload\":{\"connection\":{\"dest_ip\":\"10.20.30.200\",\"dest_port\":443,\"protocol\":6,\"src_ip\":\"203.0.113.201\",\"src_port\":52100},\"bytes_sent\":2048,\"bytes_received\":4096,\"packets_sent\":20,\"packets_received\":22,\"start_time\":\"2026-02-21T11:01:00.000000000Z\",\"end_time\":\"2026-02-21T11:02:00.000000000Z\",\"reporter\":\"SRC\",\"src_instance\":{\"project_id\":\"example-prod\",\"vm_name\":\"vm-app-01\",\"zone\":\"us-central1-a\"},\"dest_instance\":{\"project_id\":\"example-prod\",\"vm_name\":\"vm-db-01\",\"zone\":\"us-central1-a\"},\"rtt_msec\":12},\"resource\":{\"type\":\"gce_subnetwork\",\"labels\":{\"subnetwork_name\":\"default\"}},\"logName\":\"projects/example-prod/logs/compute.googleapis.com%2Fvpc_flows\",\"timestamp\":\"2026-02-21T11:02:01Z\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:02:01.000Z",
+        "event.start": "2026-02-21T11:01:00.000000000Z",
+        "event.end": "2026-02-21T11:02:00.000000000Z",
+        "source.ip": "203.0.113.201",
+        "source.port": "52100",
+        "destination.ip": "10.20.30.200",
+        "destination.port": "443",
+        "network.iana_number": "6",
+        "source.bytes": "2048",
+        "destination.bytes": "4096",
+        "source.packets": "20",
+        "destination.packets": "22",
+        "network.round_trip_time": "12",
+        "source.host.name": "vm-app-01",
+        "destination.host.name": "vm-db-01",
+        "observer.name": "SRC",
+        "cloud.subnetwork": "default",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    }
+  }
+}

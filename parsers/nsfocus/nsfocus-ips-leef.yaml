@@ -1,0 +1,21 @@
+# 绿盟 IPS —— LEEF 2.0 告警（^ 分隔扩展段）
+# 正样本：parsers/nsfocus/samples.json 中 key = nsfocus-ips-leef
+key: nsfocus-ips-leef
+name: 绿盟 IPS 告警（LEEF 2.0）
+vendor: 绿盟
+product: IPS
+protocols: [syslog, beats]
+engine: leef
+pattern: 'LEEF:2.0'
+mapping:
+  map:
+    ruleId: rule.name
+  time_field: event.time_raw
+  time_format: '%b %e %Y %H:%M:%S'
+  category_map:
+    Attack: intrusion
+    WebAttack: web
+    Virus: malware
+required_fields: [message]
+sample_fixture: parsers/nsfocus/samples.json#nsfocus-ips-leef
+description: 绿盟 IPS LEEF 2.0 告警（cat=Attack → intrusion，sev 由引擎换算等级，devTime 落 event.time_raw）。

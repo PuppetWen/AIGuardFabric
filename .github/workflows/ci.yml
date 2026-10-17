@@ -1,0 +1,418 @@
+# =============================================================================
+# AIGuardFabric · CI 门禁（§6 门禁：fmt / clippy -D warnings / test / deny / 覆盖率 ≥70%）
+#
+# 触发条件
+#   * push 到 main / master / develop
+#   * 任意 pull_request
+#   * 手工 workflow_dispatch
+#
+# 八个 job（与验收标准 §11.8、§6 门禁一一对应）
+#   fmt       cargo fmt --all --check
+#   clippy    cargo clippy --workspace --all-targets --all-features -- -D warnings
+#   test      cargo test --workspace
+#   deny      cargo deny check
+#   coverage  cargo-llvm-cov（行覆盖阈值 70%，产物落 target/coverage/）
+#   web       pnpm --dir apps/web install --frozen-lockfile && lint && typecheck && test && build
+#   compose   docker compose -f <三个 compose 文件> config --quiet
+#   rules     cargo test -p agf-scan --test rules_library
+#
+# -----------------------------------------------------------------------------
+# AGF_OFFLINE 开关（离线自托管 runner 专用）
+# -----------------------------------------------------------------------------
+# 本仓库需要在**无外网**的自托管 runner 上也能跑门禁（客户内网 / 气隙环境）。
+# 每个 job 都显式声明了 AGF_OFFLINE，取值来源两处（按优先级）：
+#   1. 仓库变量：Settings → Secrets and variables → Actions → Variables → AGF_OFFLINE = 1
+#   2. 未设置时默认 '0'（即常规联网 runner）
+#
+# AGF_OFFLINE=1 时被跳过的步骤（均已用 `if: env.AGF_OFFLINE != '1'` 守卫）：
+#   * dtolnay/rust-toolchain 工具链下载 —— 离线 runner 必须**预装** Rust 工具链
+#     （含 rustfmt、clippy、llvm-tools-preview 组件）与 pnpm/node
+#   * actions/cache 的 save/restore —— 离线 runner 触达不到 GitHub 缓存服务
+#   * pnpm install / cargo install / npm registry 相关步骤 —— 依赖必须已预置在
+#     工作区内（apps/web/node_modules、tools/bin 下的 cargo 子命令）
+#   * docker buildx / 镜像推送 / SBOM 生成
+#   * actions/upload-artifact 在上传失败时不阻断门禁（continue-on-error）
+#
+# 重要：AGF_OFFLINE **只跳过"需要外网"的步骤**，绝不跳过任何检查本身。
+#       离线 runner 上 fmt/clippy/test/deny/coverage/web 检查/compose 校验/规则回归
+#       仍然全量执行 —— 离线不等于豁免门禁。
+# =============================================================================
+
+name: ci
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+# 同一分支的新提交取消旧运行，避免自托管 runner 上排队堆积
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. 格式门禁
+  # ---------------------------------------------------------------------------
+  fmt:
+    name: fmt (cargo fmt --all --check)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # 离线 runner 必须预装 rustfmt，故此步在离线时跳过
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Show toolchain versions
+        run: |
+          rustc --version
+          cargo --version
+          cargo fmt --version
+
+      - name: cargo fmt --all --check
+        run: cargo fmt --all --check
+
+  # ---------------------------------------------------------------------------
+  # 2. Clippy（-D warnings：警告即失败）
+  # ---------------------------------------------------------------------------
+  clippy:
+    name: clippy (cargo clippy -- -D warnings)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      # 缓存 target/ 与项目内 CARGO_HOME（铁律 2：缓存也重定向进项目内）
+      - name: Restore cargo cache (target/)
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            .cargo/registry
+            .cargo/git
+          key: ${{ runner.os }}-clippy-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-clippy-
+
+      - name: cargo clippy --workspace --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  # ---------------------------------------------------------------------------
+  # 3. 单元/集成测试
+  # ---------------------------------------------------------------------------
+  test:
+    name: test (cargo test --workspace)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      CARGO_INCREMENTAL: "0"
+      # 测试默认走 Mock/回放，不依赖真实外部系统（§0.2 阶段一）
+      AGF_MOCK_MODE: "1"
+      RUST_BACKTRACE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore cargo cache (target/)
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            .cargo/registry
+            .cargo/git
+          key: ${{ runner.os }}-test-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-test-
+
+      - name: cargo test --workspace
+        run: cargo test --workspace
+
+  # ---------------------------------------------------------------------------
+  # 4. 依赖合规与安全审计（licenses / bans / advisories / sources）
+  # ---------------------------------------------------------------------------
+  deny:
+    name: deny (cargo deny check)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+
+      # cargo-deny 装到项目内 tools/（铁律 2：不污染全局环境）
+      - name: Install cargo-deny into ./tools
+        if: env.AGF_OFFLINE != '1'
+        run: cargo install cargo-deny --locked --root tools
+
+      # 离线模式：使用预置的 tools/bin/cargo-deny（由 runner 镜像或离线包提供）
+      - name: Locate cargo-deny
+        id: locator
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -x "tools/bin/cargo-deny" ]; then
+            echo "path=tools/bin/cargo-deny" >> "$GITHUB_OUTPUT"
+          elif command -v cargo-deny >/dev/null 2>&1; then
+            echo "path=cargo-deny" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::cargo-deny 不可用：离线 runner 需预置 tools/bin/cargo-deny，或设置 AGF_OFFLINE=0 联网安装"
+            exit 1
+          fi
+
+      - name: cargo deny check
+        run: ${{ steps.locator.outputs.path }} check
+
+  # ---------------------------------------------------------------------------
+  # 5. 覆盖率（行覆盖 ≥70%，报告落 target/coverage/）
+  # ---------------------------------------------------------------------------
+  coverage:
+    name: coverage (cargo-llvm-cov, threshold 70%)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      CARGO_INCREMENTAL: "0"
+      AGF_MOCK_MODE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Restore cargo cache (target/)
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            .cargo/registry
+            .cargo/git
+          key: ${{ runner.os }}-coverage-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-coverage-
+
+      - name: Install cargo-llvm-cov into ./tools
+        if: env.AGF_OFFLINE != '1'
+        run: cargo install cargo-llvm-cov --locked --root tools
+
+      - name: Locate cargo-llvm-cov
+        id: locator
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -x "tools/bin/cargo-llvm-cov" ]; then
+            echo "path=tools/bin/cargo-llvm-cov" >> "$GITHUB_OUTPUT"
+          elif command -v cargo-llvm-cov >/dev/null 2>&1; then
+            echo "path=cargo-llvm-cov" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::cargo-llvm-cov 不可用：离线 runner 需预置 tools/bin/cargo-llvm-cov，或设置 AGF_OFFLINE=0 联网安装"
+            exit 1
+          fi
+
+      - name: Prepare coverage output dir
+        run: mkdir -p target/coverage
+
+      # 采集：生成 lcov.info + profdata（产物目录与 Justfile/M9 约定一致）
+      - name: Collect coverage (lcov)
+        run: ${{ steps.locator.outputs.path }} --workspace --all-features --lcov --output-path target/coverage/lcov.info
+
+      # 阈值门禁：低于 70% 时 cargo-llvm-cov 以非零码退出，CI 变红
+      - name: Enforce line coverage threshold (>= 70%)
+        run: ${{ steps.locator.outputs.path }} report --json --output-path target/coverage/summary.json --fail-under-lines 70
+
+      - name: Render HTML report
+        run: ${{ steps.locator.outputs.path }} report --html --output-dir target/coverage/html
+
+      - name: Coverage summary to job summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("target/coverage/summary.json")
+          if not p.exists():
+              print("coverage summary.json 缺失")
+              raise SystemExit(0)
+          data = json.loads(p.read_text(encoding="utf-8"))
+          totals = data.get("data", [{}])[0].get("totals", {})
+          lines = totals.get("lines", {})
+          pct = lines.get("percent", 0.0)
+          print("### 覆盖率（行）")
+          print(f"- 行覆盖：**{pct:.2f}%**（阈值 70%）")
+          print(f"- 覆盖行数：{lines.get('covered', 0)} / {lines.get('count', 0)}")
+          PY
+
+      # 产物落 target/coverage/（上传失败不影响门禁结论）
+      - name: Upload coverage artifacts
+        if: env.AGF_OFFLINE != '1'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/coverage/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # 6. 前端控制台（lint / typecheck / test / build）
+  # ---------------------------------------------------------------------------
+  web:
+    name: web (pnpm lint + typecheck + test + build)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # 联网 runner：装 pnpm + node；离线 runner 必须预置（见文件头说明）
+      - name: Setup pnpm
+        if: env.AGF_OFFLINE != '1'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+
+      - name: Show versions
+        run: |
+          node --version
+          pnpm --version
+
+      # 冻结锁文件安装：锁文件与 package.json 不一致时直接失败
+      - name: pnpm install --frozen-lockfile
+        if: env.AGF_OFFLINE != '1'
+        run: pnpm --dir apps/web install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --dir apps/web run lint
+
+      - name: Typecheck
+        run: pnpm --dir apps/web run typecheck
+
+      - name: Unit tests
+        run: pnpm --dir apps/web run test
+
+      - name: Build
+        run: pnpm --dir apps/web run build
+
+  # ---------------------------------------------------------------------------
+  # 7. Compose 编排校验（三个 compose 文件都必须可解析）
+  # ---------------------------------------------------------------------------
+  compose:
+    name: compose (docker compose config --quiet)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      # compose 文件中的 `${VAR:?}` 强制项需要被填充；此处用**仅用于校验**的占位值，
+      # 不是真实凭据，也不落盘（docker compose config 只在内存中展开）。
+      AGF_PG_PASSWORD: ci-config-check-only
+      AGF_S3_SECRET_KEY: ci-config-check-only
+      AGF_JWT_SECRET: ci-config-check-only-placeholder-value-32b
+      AGF_MASTER_KEY_BASE64: Y2ktY29uZmlnLWNoZWNrLW9ubHktMzJieXRlcyE=
+      AGF_GRAFANA_ADMIN_PASSWORD: ci-config-check-only
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: docker compose version
+        run: docker compose version
+
+      - name: Validate docker-compose.yml
+        run: docker compose -f docker-compose.yml config --quiet
+
+      - name: Validate docker-compose.dev.yml (overlay)
+        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml config --quiet
+
+      - name: Validate docker-compose.prod.yml
+        run: docker compose -f docker-compose.prod.yml config --quiet
+
+  # ---------------------------------------------------------------------------
+  # 8. 规则库回归（§11 验收 7：五大域各 ≥10 条规则 + 正负样本全绿）
+  # ---------------------------------------------------------------------------
+  rules:
+    name: rules (cargo test -p agf-scan --test rules_library)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore cargo cache (target/)
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            .cargo/registry
+            .cargo/git
+          key: ${{ runner.os }}-rules-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rules-
+
+      # 规则库是解耦的 YAML（rules/**/*.yaml），改了规则必须让这个 job 变红才能合入
+      - name: cargo test -p agf-scan --test rules_library
+        run: cargo test -p agf-scan --test rules_library

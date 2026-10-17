@@ -1,0 +1,58 @@
+[package]
+name = "agf-agent"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 终端 Agent：跨平台 AI Agent/MCP/凭据采集器（单二进制，主动出网，零入向端口）"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+agf-core.workspace = true
+agf-ebpf.workspace = true
+
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+regex.workspace = true
+walkdir.workspace = true
+sysinfo.workspace = true
+hostname.workspace = true
+reqwest.workspace = true
+clap.workspace = true
+dirs.workspace = true
+glob.workspace = true
+sha2.workspace = true
+hex.workspace = true
+base64.workspace = true
+ed25519-dalek.workspace = true
+toml.workspace = true
+serde_yaml.workspace = true
+# 上行令牌以 SecretString 承载（Debug 掩码、Drop 清零），与 agf-core/agf-storage 口径一致
+secrecy.workspace = true
+# mTLS 上行（`client::tls*`）：rustls 装配客户端身份 + tokio-rustls 驱动握手。
+# 刻意不用 reqwest 的 `Identity`：那条路径无法同时表达"跳过校验"与"证书即身份对象"。
+rustls.workspace = true
+tokio-rustls.workspace = true
+rustls-pki-types.workspace = true
+rustls-pemfile.workspace = true
+webpki-roots.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+tempfile.workspace = true
+# 端到端 mTLS 测试需要在**进程内**起一个真 rustls 服务端（要求并读取客户端证书），
+# 因此测试侧生成自签 PKI：不依赖本机 openssl，也不依赖外部进程。
+rcgen.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,48 @@
+[package]
+name = "agf-alicloud"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 阿里云适配器：AgentTeams + CMS/APIG/MSE/Privatelink/SchedulerX3（含 MockAdapter 与云环境自检）"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+reqwest.workspace = true
+regex.workspace = true
+sha1.workspace = true
+sha2.workspace = true
+hmac.workspace = true
+md-5.workspace = true
+base64.workspace = true
+hex.workspace = true
+percent-encoding.workspace = true
+url.workspace = true
+indexmap.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+secrecy.workspace = true
+# TLS 端到端测试：测试内自签证书 + 本地 TLS 服务端（证明"默认拒绝自签、放开后可连"）
+rcgen.workspace = true
+tokio-rustls.workspace = true
+
+[lints]
+workspace = true

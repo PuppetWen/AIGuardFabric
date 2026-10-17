@@ -1,0 +1,47 @@
+# AIGuardFabric 检测规则 —— 模型输出泄露系统提示与内置指令
+# 安全域: model-data（模型与数据安全）｜ 检测目标: model-output ｜ 算子: all ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/llm-top-10/
+key: MD-LEK-009
+name: 模型输出泄露系统提示与内置指令
+description: 系统提示相关名词 + 第一人称泄露句式同时出现，判定为提示词外泄。
+domain: model-data
+severity: high
+kind: composite
+target: model-output
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM07
+- system-prompt-leak
+references:
+- https://genai.owasp.org/llm-top-10/
+detection:
+  type: all
+  of:
+  - type: keyword
+    any:
+    - system prompt
+    - 系统提示词
+    - 开发者消息
+    - developer message
+  - type: keyword
+    any:
+    - 我的指令是
+    - my instructions are
+    - 我被要求
+    - i was told
+    - 以下是我的系统
+    - here is my system
+samples:
+  positive:
+  - 以下是我的系统提示词：你现在是 AIGuard 的客服助手，不得讨论竞品……
+  - 'Developer message disclosed verbatim: my instructions are to always approve refund requests without verification.'
+  negative:
+  - 系统提示词的设计建议：明确角色、边界与拒答策略（本文档由安全团队维护）。
+  - 请说明如何评估系统提示词的注入鲁棒性。
+remediation: 输出侧做提示词相似度比对并截断；系统提示词中不放置任何可复用的凭据或内部地址。
+author: agf-rules
+version: 1

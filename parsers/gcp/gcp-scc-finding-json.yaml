@@ -1,0 +1,42 @@
+# Google Cloud —— Security Command Center 发现（Finding）
+# 正样本：parsers/gcp/samples.json 中 key = gcp-scc-finding-json
+key: gcp-scc-finding-json
+name: GCP SCC 安全发现
+vendor: Google Cloud
+product: Security Command Center
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.finding.eventTime
+  name=$.finding.name
+  category=$.finding.category
+  sev=$.finding.severity
+  state=$.finding.state
+  res=$.finding.resourceName
+  uri=$.finding.externalUri
+  rtype=$.resource.type
+  rname=$.resource.displayName
+  project=$.finding.sourceProperties.projectId
+mapping:
+  map:
+    ts: event.time
+    name: rule.id
+    category: rule.name
+    state: event.outcome
+    res: cloud.resource_id
+    uri: url.full
+    rtype: cloud.resource_type
+    rname: host.name
+    project: cloud.project.id
+  severity_field: sev
+  severity_map:
+    CRITICAL: critical
+    HIGH: high
+    MEDIUM: medium
+    LOW: low
+  defaults:
+    event.category: intrusion
+    event.action: alert
+required_fields: [category, rname]
+sample_fixture: parsers/gcp/samples.json#gcp-scc-finding-json
+description: GCP SCC 安全发现（finding.category/severity/state/sourceProperties），配置缺陷与暴露面告警归 intrusion。

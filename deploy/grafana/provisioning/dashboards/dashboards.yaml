@@ -1,0 +1,32 @@
+# =============================================================================
+# Grafana 仪表盘预置（provisioning/dashboards —— file provider）
+# 对应 docker-compose.yml 的挂载：./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+#
+# 关键点：
+#   * allowUiUpdates: true —— 允许在 UI 里临时调参；如需"配置即代码"的强一致，
+#     改为 false（此时 UI 的改动不会落盘，重启即回到 JSON 版本）
+#   * foldersFromFilesStructure: false —— 全部平铺到 "AIGuardFabric" 目录下，
+#     仪表盘 JSON 无需关心子目录结构
+#   * updateIntervalSeconds 与 JSON 文件热更新联动：挂载卷内容变更后 30s 内生效
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: AIGuardFabric
+    orgId: 1
+    # 仪表盘在 Grafana UI 侧边栏中的目录名（中文便于识别）
+    folder: AIGuardFabric 智御矩阵
+    folderUid: agf-folder
+    type: file
+    # 关闭 UI 删除（避免误删后被 JSON 重新拉回造成困惑）
+    disableDeletion: true
+    # 允许 UI 内修改（便于现场排障时临时调整查询）
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    # 只扫描目录第一层（本仓库的 dashboards/*.json 即第一层）
+    foldersFromFilesStructure: false
+    options:
+      path: /var/lib/grafana/dashboards
+      # 递归扫描子目录（与 foldersFromFilesStructure: false 配合使用）
+      foldersFromFilesStructure: false

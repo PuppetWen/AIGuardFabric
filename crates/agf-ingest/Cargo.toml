@@ -1,0 +1,161 @@
+[package]
+name = "agf-ingest"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 统一接入：MCP/Syslog/Webhook/Kafka/NATS 接入、解析框架、AGF-ECS 归一化、原始日志回放"
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+# 默认启用 NATS（订阅/发布）。离线/最小化部署可用 `--no-default-features` 关闭，
+# 关闭后 NATS 相关类型不存在，接入与解析能力不受影响（属"可选依赖"降级）。
+default = ["nats"]
+nats = ["dep:async-nats", "dep:percent-encoding"]
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+agf-asset.workspace = true
+
+# Rust 动态库插件宿主加载器（`engine: plugin` 模板）：版本化稳定 C ABI
+# （`agf_plugin_descriptor_v1`）+ `abi_version` 门禁 + 明确的加载失败分类。
+# 同进程、同权限，**不做沙箱承诺**（只应加载可信插件）——见 `crates/agf-plugin/src/lib.rs`。
+agf-plugin.workspace = true
+
+tokio.workspace = true
+# MSSQL 的 `tiberius` 走 `futures_util` 的 AsyncRead/AsyncWrite：
+# `tokio::net::TcpStream` 需要 compat 层适配（`TokioAsyncWriteCompatExt::compat_write`）。
+tokio-util = { workspace = true, features = ["compat"] }
+async-trait.workspace = true
+futures.workspace = true
+bytes.workspace = true
+
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+ipnet.workspace = true
+
+regex.workspace = true
+grok.workspace = true
+jsonpath-rust.workspace = true
+jaq-core.workspace = true
+jaq-std.workspace = true
+jaq-json.workspace = true
+# CEL 派生字段（模板 `derived` 段）：纯 Rust 表达式求值（workspace 已声明，json 特性已开）
+cel-interpreter.workspace = true
+
+axum.workspace = true
+# NATS 事件总线/订阅（可选，默认开启；见 [features]）
+async-nats = { workspace = true, optional = true }
+percent-encoding = { workspace = true, optional = true }
+quick-xml.workspace = true
+flate2.workspace = true
+base64.workspace = true
+indexmap.workspace = true
+
+# 落库（SqlSink）与 HTTP 拉取（HttpPullReceiver）使用，均为 workspace 已声明的依赖
+# 同一份 `sqlx` 同时提供 PostgreSQL 与 MySQL 驱动（workspace 特性里两个都开），
+# SQL 拉取接收器按 DSN scheme 选驱动——游标/分页/落盘逻辑只有一份（见 `crate::jdbc`）。
+sqlx.workspace = true
+reqwest.workspace = true
+
+# 冷归档列式格式（Parquet）：SNAPPY 压缩；写出走低层列式 API，读回走 arrow RecordBatchReader
+parquet.workspace = true
+# 冷归档 arrow 列式回灌：`RecordBatch` / 数组类型 / `Schema`（`arrow` facade）
+arrow.workspace = true
+
+# SNMP v3 USM 认证（RFC3414）：HMAC-MD5-96 / HMAC-SHA-96
+hmac.workspace = true
+md-5.workspace = true
+sha1.workspace = true
+# SNMP v3 authPriv（RFC3414 §8 CBC-DES / RFC3826 CFB128-AES-128）：分组密码原语；
+# CBC / CFB128 两种模式在 `snmp::priv` 里按 RFC 显式实现（带 NIST/FIPS 向量单测）
+aes.workspace = true
+des.workspace = true
+
+# Syslog over TLS（RFC5425）监听器：`tokio-rustls` + rustls ring provider（workspace 已声明）
+tokio-rustls.workspace = true
+
+# OTLP/gRPC(4317) 日志接收器（见 src/otlp_grpc.rs）：官方 `LogsService/Export` 服务端。
+# `tonic` 只用于 HTTP/2 传输与服务端承载，`opentelemetry-proto` 提供生成代码；
+# 消息 → 归一化事件的映射仍复用 `otlp` 模块（不另造一套）。
+tonic.workspace = true
+opentelemetry-proto.workspace = true
+
+# ---------------------------------------------------------------------------
+# 接入接收器新增依赖（均来自 workspace.dependencies，零新增传递依赖树）
+# ---------------------------------------------------------------------------
+# ObjectStorage 拉取（S3/OSS/MinIO 兼容）：与 agf-storage 同一 SDK 与同一签名实现
+aws-sdk-s3.workspace = true
+# MQTT 订阅（QoS1/QoS2、遗嘱、共享订阅由 rumqttc 提供）；
+# `websocket` 特性提供 `Transport::Ws` / `Transport::Wss`（MQTT over WebSocket，
+# 与 TCP/TLS 共用同一份接收/解析/落库路径）。MQTT 5 客户端是 rumqttc 的 `v5` 模块，无需额外特性。
+rumqttc = { workspace = true, features = ["websocket"] }
+# Kafka 消费者：纯 Rust（无 librdkafka/C 工具链），offset 由本接收器显式管理并持久化。
+#
+# 版本**显式钉到 0.6**（不再继承 workspace.dependencies 的 `rskafka = "0.5"`）：
+# 0.6 才提供 SASL/SCRAM-SHA-256/512（内置 `rsasl`）与 rustls 0.23 传输层——
+# 与 workspace 既有 `rustls = "0.23"` 同版本，不引入第二套 TLS 栈。
+# `transport-tls` 是可选特性，必须显式开启才编译 TLS 传输。
+rskafka = { version = "0.6", features = ["transport-tls"] }
+# Kafka **消费者组协议**客户端（JoinGroup/SyncGroup/Heartbeat/OffsetCommit/OffsetFetch…）
+# 的报文编解码；`agf-ingest::kafka::group` 在其上实现协调器会话状态机与分配器。
+kafka-protocol.workspace = true
+# MSSQL（TDS）纯 Rust 驱动：`agf-ingest::jdbc` 的 `SqlDialect::MsSql` 方言实现。
+# 游标/分页/落盘/幂等仍是**一份实现**，MSSQL 只贡献方言差异（占位符/转型/标识符/行解码）。
+tiberius.workspace = true
+# Oracle（OCI/ODPI-C）驱动：`agf-ingest::jdbc` 的 `SqlDialect::Oracle` 方言实现。
+# 游标/分页/落盘/幂等仍是**一份实现**，Oracle 只贡献方言差异（占位符 `:1`/转型/标识符/行解码）。
+# 与 MSSQL 的差异是**构建期需要 C 编译器**（随包编译 ODPI-C，无需 Oracle SDK 头文件）；
+# 运行期由 `AGF_ORACLE_CLIENT_LIB_DIR` 指向仓库内 instantclient（见 tools/oracle/README.md）。
+oracle.workspace = true
+# MSSQL / Oracle DSN（`mssql://user:pass@host:1433/db`、`oracle://user:pass@host:1521/svc`）
+# 的解析与百分号解码
+url.workspace = true
+# Kafka TLS 传输层：复用 workspace 已声明的 rustls 0.23（ring provider）与 webpki 根证书
+rustls.workspace = true
+webpki-roots.workspace = true
+# MQTT over TLS（`mqtts://`）的 PEM 装配：CA / 客户端证书 / 私钥解析（rustls-pemfile 2.x）
+rustls-pemfile.workspace = true
+
+# ---------------------------------------------------------------------------
+# Pulsar **原生二进制协议**消费者（见 `src/pulsar.rs` 与 `src/pulsar/`）
+# ---------------------------------------------------------------------------
+# `prost` 只提供 protobuf 编解码原语；`PulsarApi.proto` 的消息子集是**手写**的
+# （`src/pulsar/proto.rs`，无 protoc、无 .proto 编译期依赖）。
+# 关键点：所有可能取 0 值的 **proto2 required** 字段（`BaseCommand.type` /
+# `CommandAck.ack_type` / `CommandSubscribe.subType` / `CommandMessage` 的 message_id）
+# 都声明成 `optional`（`Option<T>`）——prost 对 `Option` 字段是"Some 就写"，
+# 若用裸标量会按 proto3 语义省略零值，broker 的 proto2 解析器会报 missing required fields。
+prost.workspace = true
+# 消息帧 CRC32C（Castagnoli）校验：`[MAGIC 0x0e01][CHECKSUM u32 LE??]` —— Pulsar 默认开启，
+# 必须真校验（失败计数并按 ValidationError 回 ack，绝不静默丢）。
+crc32c.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+# 真机端到端用例（`tests/kafka_group_live.rs`）在 AGF_E2E_LOG=1 时打开 tracing 输出：
+# 组协议每一步（FindCoordinator/JoinGroup/SyncGroup/Heartbeat/OffsetCommit）都要在原始输出里可见。
+# 同理，Pulsar 原生协议的真机用例要**贴出退避重连日志**（`agf_ingest::pulsar` 用 tracing 记录重连），
+# 因此测试里装一个最小 subscriber（`--nocapture` 时直接打到 stdout）——**两个用途共用这一条依赖**
+# （此前两条 agent 各自追加过同名键，cargo 报 `duplicate key` 会让整个 workspace 加载失败）。
+tracing-subscriber.workspace = true
+# axum Router 的单测（`ServiceExt::oneshot`），不发起真实网络请求
+tower.workspace = true
+# TLS 监听器的端到端单测：测试内自签证书（**不落盘、不入库私钥**）
+rcgen.workspace = true
+# 冷归档回灌账本落盘/临时目录用例（进程退出自动清理）
+tempfile.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,154 @@
+[
+  {
+    "action": "GetPluginAttachment",
+    "version": "2024-03-27",
+    "method": "GET",
+    "path": "/v1/plugin-attachments/{pluginAttachmentId}",
+    "style": "ROA",
+    "read_only": true,
+    "parameters": [
+      {
+        "name": "pluginAttachmentId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      }
+    ]
+  },
+  {
+    "action": "UpdateHttpApi",
+    "version": "2024-03-27",
+    "method": "PUT",
+    "path": "/v1/http-apis/{httpApiId}",
+    "style": "ROA",
+    "read_only": false,
+    "parameters": [
+      {
+        "name": "httpApiId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      },
+      {
+        "name": "body",
+        "location": "body",
+        "style": "json",
+        "schema": {
+          "type": "object",
+          "required": true,
+          "properties": {
+            "basePath": {
+              "type": "string",
+              "required": true,
+              "maxLength": 1024
+            },
+            "deployConfigs": {
+              "type": "array",
+              "required": false,
+              "items": {
+                "type": "object",
+                "required": false
+              }
+            },
+            "agentProtocols": {
+              "type": "array",
+              "required": false
+            },
+            "aiProtocols": {
+              "type": "array",
+              "required": false
+            },
+            "authConfig": {
+              "type": "object",
+              "required": false
+            },
+            "description": {
+              "type": "string",
+              "required": false
+            },
+            "enableAuth": {
+              "type": "boolean",
+              "required": false
+            },
+            "firstByteTimeout": {
+              "type": "integer",
+              "required": false
+            },
+            "protocols": {
+              "type": "array",
+              "required": false
+            },
+            "removeBasePathOnForward": {
+              "type": "boolean",
+              "required": false
+            },
+            "onlyChangeConfig": {
+              "type": "boolean",
+              "required": false
+            },
+            "versionConfig": {
+              "type": "object",
+              "required": false
+            },
+            "ingressConfig": {
+              "type": "object",
+              "required": false
+            },
+            "dryRun": {
+              "type": "boolean",
+              "required": false
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "action": "DeployHttpApi",
+    "version": "2024-03-27",
+    "method": "POST",
+    "path": "/v1/http-apis/{httpApiId}/deploy",
+    "style": "ROA",
+    "read_only": false,
+    "parameters": [
+      {
+        "name": "httpApiId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      },
+      {
+        "name": "body",
+        "location": "body",
+        "style": "json",
+        "schema": {
+          "type": "object",
+          "required": true,
+          "properties": {
+            "routeId": {
+              "type": "string",
+              "required": false
+            },
+            "restApiConfig": {
+              "type": "object",
+              "required": false
+            },
+            "httpApiConfig": {
+              "type": "object",
+              "required": false
+            }
+          }
+        }
+      }
+    ]
+  }
+]

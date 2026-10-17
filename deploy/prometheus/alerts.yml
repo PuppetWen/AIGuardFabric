@@ -1,0 +1,334 @@
+# =============================================================================
+# AIGuardFabric · Prometheus 告警规则
+#
+# 用法：由 prometheus.yml 的 rule_files 引用（容器内 /etc/prometheus/alerts.yml）。
+#
+# -----------------------------------------------------------------------------
+# ⚠ 指标名现状（同 prometheus.yml 文件头说明，登记于 PV-DEPLOY-002）
+# -----------------------------------------------------------------------------
+#   下列 `agf_*` 指标名是**约定占位名**，不是从 Rust 代码中读到的既有事实——
+#   `/metrics` 端点尚未注册（全仓库 grep `/metrics` 在 `*.rs` 下零命中，
+#   apps/*/src/main.rs 仍为脚手架）。服务埋点落地后按同一契约命名即可生效。
+#
+# 规则清单（14 条）
+#   可用性   AgfServiceDown / AgfDependencyDown / AgfRedisUnavailable / AgfSchedulerJobStalled
+#   接入     AgfEpsDrop / AgfParseFailureRateHigh / AgfParseFailureRateCritical / AgfIngestQueueBacklog
+#   安全      AgfAuditChainVerifyFailed / AgfHeartbeatMissing / AgfApiHighErrorRate
+#   网关配额 AgfQuotaNearLimit / AgfQuotaExhausted / AgfGatewayDegradedSpike
+#   证书     AgfTlsCertExpiringSoon / AgfTlsCertExpiringCritical
+#
+# 严重级别约定（labels.severity）
+#   critical —— 影响安全或可用性，需立即处置（安全事件类一律 critical）
+#   warning  —— 需关注、按计划处置
+#   info     —— 仅记录，供看板展示
+# =============================================================================
+
+groups:
+  # ===========================================================================
+  # 1. 服务可用性
+  # ===========================================================================
+  - name: agf-availability
+    interval: 30s
+    rules:
+      # 服务宕机：进程崩溃 / 端口未监听 / NetworkPolicy 拦截
+      - alert: AgfServiceDown
+        expr: up{job=~"agf-.+"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: platform
+        annotations:
+          summary: "AIGuardFabric 服务不可达：{{ $labels.job }}"
+          description: |
+            抓取目标 {{ $labels.instance }}（job={{ $labels.job }}）已连续 2 分钟无法抓取 /metrics。
+            常见原因：进程崩溃 CrashLoop、容器被 OOMKill、端口未监听、NetworkPolicy 未放行
+            Prometheus → 9100、或 readiness 探针失败被摘流量。
+            处置：docker compose ps / kubectl describe pod 查看重启次数与事件；
+            kubectl logs 查看退出原因；确认 9100 端口与 /metrics 路径可达。
+
+      # 依赖不可用（postgres / nats / clickhouse / s3 任一）
+      - alert: AgfDependencyDown
+        expr: agf_dependency_up{dependency!~"redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: dependency
+        annotations:
+          summary: "AIGuardFabric 依赖不可用：{{ $labels.dependency }}"
+          description: |
+            平台依赖 {{ $labels.dependency }} 连续 2 分钟不可用。平台在 AGF_DEGRADE_ON_MISSING=1 下
+            会降级运行（部分功能不可演示），但持久化/事件总线不可用会导致数据丢失风险。
+            处置：检查对应容器健康状态与连接串配置（AGF_PG_* / AGF_NATS_* / AGF_S3_*）。
+
+      # Redis 不可用（配额计数、语义缓存、限流窗口的载体）
+      - alert: AgfRedisUnavailable
+        expr: agf_dependency_up{dependency="redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis 不可用 —— 配额/限流/缓存降级"
+          description: |
+            Redis（{{ $labels.instance }}）连续 2 分钟不可用。影响面：
+            * 三级配额（租户/Agent/会话）计数失去共享状态 → 可能放行超额 Token；
+            * 语义缓存失效 → 大模型成本上升；
+            * 限流窗口与去重失效。
+            处置：docker compose ps redis、redis-cli ping；检查 maxmemory 是否触发 OOM、
+            AOF 重写失败或磁盘写满（data/redis）。
+
+      # 调度任务停滞（心跳/盘点/红队巡航/报表依赖调度器）
+      - alert: AgfSchedulerJobStalled
+        expr: time() - agf_scheduler_last_success_timestamp_seconds > 3600
+        for: 15m
+        labels:
+          severity: warning
+          component: scheduler
+        annotations:
+          summary: "调度任务超过 1 小时未成功：{{ $labels.job_name }}"
+          description: |
+            任务 {{ $labels.job_name }} 最近一次成功执行距今已超过 1 小时
+            （当前值：{{ $value | humanizeDuration }}）。影响：资产盘点/日志拉取/红队巡航/
+            规则热更新/报表/归档中依赖该任务的链路会静默停摆。
+            处置：查看 agf-scheduler 日志与 AGF_SCHEDULER_BACKEND（local-cron 或 SchedulerX3）；
+            检查是否存在锁竞争、依赖服务超时或任务本身报错
+            （配合 agf_scheduler_job_failures_total 定位）。
+
+  # ===========================================================================
+  # 2. 日志接入与解析
+  # ===========================================================================
+  - name: agf-ingest
+    interval: 30s
+    rules:
+      # EPS 骤降：与 1 小时前相比跌破 30%，且原基线有实际流量（避免夜间低谷误报）
+      - alert: AgfEpsDrop
+        expr: |
+          (
+            sum(rate(agf_ingest_events_total[5m]))
+            /
+            clamp_min(sum(rate(agf_ingest_events_total[5m] offset 1h)), 0.001)
+          ) < 0.3
+          and
+          sum(rate(agf_ingest_events_total[5m] offset 1h)) > 1
+        for: 15m
+        labels:
+          severity: warning
+          component: ingest
+        annotations:
+          summary: "日志接入 EPS 骤降（低于 1 小时前的 30%）"
+          description: |
+            当前 EPS 为 {{ $value | humanize }} × 基线，持续 15 分钟。典型原因：
+            采集器掉线、厂商设备静默、Syslog/Webhook 端口被防火墙拦、解析器崩溃、
+            或 NATS 消费受阻导致背压。
+            处置：先看 AgfIngestQueueBacklog 是否同时触发；再按 source/vendor 维度下钻
+            （02 号面板），确认是"全源下降"还是"单一厂商断流"。
+
+      # 解析失败率高（warning）
+      - alert: AgfParseFailureRateHigh
+        expr: |
+          100
+          * sum(rate(agf_ingest_parse_total{result="failure"}[5m]))
+          / clamp_min(sum(rate(agf_ingest_parse_total[5m])), 1)
+          > 5
+        for: 10m
+        labels:
+          severity: warning
+          component: parser
+        annotations:
+          summary: "日志解析失败率 > 5%（当前 {{ $value | printf \"%.2f\" }}%）"
+          description: |
+            解析失败率持续 10 分钟高于 5%。最常见根因是**厂商改了日志格式**导致模板失配，
+            其次是字符编码异常、Grok/JSONPath 表达式错误、模板版本回滚。
+            处置：在 02 号面板按 vendor/result 下钻定位厂商；核对
+            tests/fixtures/logs/ 的样本是否仍能匹配当前模板；必要时灰度新模板版本。
+
+      # 解析失败率极高（critical，覆盖厂商格式大改或模板批量失效）
+      - alert: AgfParseFailureRateCritical
+        expr: |
+          100
+          * sum(rate(agf_ingest_parse_total{result="failure"}[5m]))
+          / clamp_min(sum(rate(agf_ingest_parse_total[5m])), 1)
+          > 30
+        for: 5m
+        labels:
+          severity: critical
+          component: parser
+        annotations:
+          summary: "日志解析失败率 > 30%（当前 {{ $value | printf \"%.2f\" }}%）—— 接入大面积失效"
+          description: |
+            近 5 分钟解析失败率超过 30%，说明日志"进来了但没被理解"：事件表不会产生归一化记录，
+            风险检测、关联分析、告警全部失效（等于监控盲区）。
+            处置：立即切到原始载荷回放（raw_logs 保真存储）确认是格式变更还是模板加载失败
+            （规则/模板目录挂载是否为空，见 deploy 挂载 ./rules:/app/rules:ro）。
+
+      # 队列积压（接入背压）
+      - alert: AgfIngestQueueBacklog
+        expr: |
+          max by (queue) (
+            agf_ingest_queue_depth
+            / clamp_min(agf_ingest_queue_capacity, 1)
+          ) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: ingest
+        annotations:
+          summary: "接入队列积压超过容量 80%：{{ $labels.queue }}"
+          description: |
+            队列 {{ $labels.queue }} 已用容量 {{ $value | printf "%.0f" }}%（按 queue 分组），
+            持续 10 分钟。持续积压最终会导致丢弃事件或内存溢出。
+            处置：确认下游消费能力（解析 CPU、ClickHouse/PG 写入延迟、NATS 消费组）；
+            必要时扩容 agf-ingest 副本（Helm 的 HPA 或 compose scale）。
+
+  # ===========================================================================
+  # 3. 安全完整性（审计链 / 心跳 / 接口错误）
+  # ===========================================================================
+  - name: agf-security
+    interval: 30s
+    rules:
+      # 审计链校验失败 —— 任何非零都是安全事件（防篡改保证被破坏）
+      - alert: AgfAuditChainVerifyFailed
+        expr: increase(agf_audit_chain_verify_failures_total[10m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: audit
+        annotations:
+          summary: "审计哈希链校验失败 —— 审计日志可能被篡改或链已断裂"
+          description: |
+            近 10 分钟内审计链校验失败 {{ $value | humanize }} 次。审计链
+            （audit_logs.entry_hash = SHA256(prev_hash ‖ 载荷)）断裂意味着：
+            记录被直接改写/删除、写入路径被绕过、或并发写入未正确串行化。
+            合规影响重大（防篡改审计是商用基线）。
+            处置：立即隔离写入口，对 audit_logs 做完整链式重算定位首个断点；
+            保全数据库快照与访问日志；按安全事件流程上报。
+
+      # 运行时防护心跳丢失（策略代理不可被被管 Agent 关闭的兜底告警）
+      - alert: AgfHeartbeatMissing
+        expr: increase(agf_heartbeat_missing_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: runtime
+        annotations:
+          summary: "运行时防护心跳丢失：{{ $labels.component }}"
+          description: |
+            组件 {{ $labels.component }}（租户 {{ $labels.tenant_id }}）近 15 分钟出现
+            {{ $value | humanize }} 次心跳丢失。心跳丢失可能意味着防护代理被终止/绕过，
+            使运行时拦截与配额失效——这是**防护绕过**信号，不是普通可用性问题。
+            处置：核对代理进程是否存活、策略签名校验是否失败、主机是否存在可疑终止操作；
+            对被管 Agent 临时收紧策略（deny 优先）直至心跳恢复。
+
+      # HTTP 5xx 错误率
+      - alert: AgfApiHighErrorRate
+        expr: |
+          100
+          * sum(rate(agf_http_requests_total{status=~"5.."}[5m]))
+          / clamp_min(sum(rate(agf_http_requests_total[5m])), 1)
+          > 5
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "控制台/API 5xx 错误率 > 5%（当前 {{ $value | printf \"%.2f\" }}%）"
+          description: |
+            agf-server 近 5 分钟 5xx 占比持续 10 分钟超过 5%。会影响控制台可用性与
+            API 集成方。处置：按 path 维度定位（{{ $labels.path }}）；检查数据库连接池
+            耗尽、Redis 超时、迁移未完成（缺失表）等。
+
+  # ===========================================================================
+  # 4. 配额与 AI 网关
+  # ===========================================================================
+  - name: agf-quota-gateway
+    interval: 30s
+    rules:
+      # 配额逼近（三级配额：租户 → Agent → 会话）
+      - alert: AgfQuotaNearLimit
+        expr: |
+          max by (tenant_id, scope, metric) (
+            agf_quota_usage
+            / clamp_min(agf_quota_limit, 1)
+          ) > 0.9
+        for: 15m
+        labels:
+          severity: warning
+          component: quota
+        annotations:
+          summary: "配额逼近上限（{{ $labels.scope }} / {{ $labels.metric }}）：{{ $labels.tenant_id }}"
+          description: |
+            租户 {{ $labels.tenant_id }} 的 {{ $labels.scope }} 级 {{ $labels.metric }} 配额
+            已使用 {{ $value | printf "%.1f" }}%，持续 15 分钟。>95% 将触发限流
+            （Token/次数/并发/金额四维度）。处置：通知租户、核对是否存在异常消耗
+            （被盗用/被注入放大/循环调用），必要时提升配额或收紧策略。
+
+      # 配额耗尽（已进入限流/拒绝）
+      - alert: AgfQuotaExhausted
+        expr: |
+          max by (tenant_id, scope, metric) (
+            agf_quota_usage
+            / clamp_min(agf_quota_limit, 1)
+          ) >= 1
+        for: 5m
+        labels:
+          severity: critical
+          component: quota
+        annotations:
+          summary: "配额已耗尽（{{ $labels.scope }} / {{ $labels.metric }}）：{{ $labels.tenant_id }}"
+          description: |
+            租户 {{ $labels.tenant_id }} 的 {{ $labels.scope }} 级 {{ $labels.metric }} 配额
+            已达 100%，业务调用正在被限流或拒绝。处置：确认是业务增长还是异常消耗
+            （结合 03 号面板的 Token/成本曲线与 04 号面板的拦截动作分布），
+            并按流程审批临时提额。
+
+      # AI 网关降级激增（厂商侧不可用或配额被限）
+      - alert: AgfGatewayDegradedSpike
+        expr: |
+          sum(rate(agf_gateway_degraded_total[5m]))
+          / clamp_min(sum(rate(agf_gateway_requests_total[5m])), 0.001)
+          > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: gateway
+        annotations:
+          summary: "AI 网关降级率 > 10% —— 厂商链路异常"
+          description: |
+            近 5 分钟网关降级占比 {{ $value | printf "%.1f" }}%（持续 10 分钟）。
+            表示自动降级到备用模型/Mock 的比例异常升高：厂商 429/5xx、凭据失效、
+            网络不通或熔断打开。处置：按 provider 查看
+            agf_gateway_circuit_open_total 与错误分布，核对厂商侧状态与配额；
+            确认降级策略是否符合预期（降级到本地模型可保数据不出域）。
+
+  # ===========================================================================
+  # 5. 证书有效期（TLS 可选但一旦启用必须有到期预警）
+  # ===========================================================================
+  - name: agf-certificates
+    interval: 300s
+    rules:
+      # 证书 30 天内到期
+      - alert: AgfTlsCertExpiringSoon
+        expr: (agf_tls_cert_not_after_timestamp_seconds - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          component: tls
+        annotations:
+          summary: "TLS 证书 30 天内到期：{{ $labels.service }}"
+          description: |
+            服务 {{ $labels.service }} 的证书将在 {{ $value | printf "%.1f" }} 天后到期。
+            处置：走内部 CA/证书流程续签并滚动重启；确认私钥轮换与 KMS/Secret 挂载同步更新。
+
+      # 证书 7 天内到期
+      - alert: AgfTlsCertExpiringCritical
+        expr: (agf_tls_cert_not_after_timestamp_seconds - time()) / 86400 < 7
+        for: 30m
+        labels:
+          severity: critical
+          component: tls
+        annotations:
+          summary: "TLS 证书 7 天内到期：{{ $labels.service }}"
+          description: |
+            服务 {{ $labels.service }} 的证书仅剩 {{ $value | printf "%.1f" }} 天。
+            到期后将导致：控制台不可访问、采集器 mTLS 上行中断、跨网段 PrivateLink 链路失败。
+            **必须在本周内完成续签**；若已进入气隙环境，按离线证书更换流程执行。

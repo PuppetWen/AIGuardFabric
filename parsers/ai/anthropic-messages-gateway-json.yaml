@@ -1,0 +1,43 @@
+# Anthropic Messages API —— 网关调用日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = anthropic-messages-gateway-json
+key: anthropic-messages-gateway-json
+name: Anthropic Messages 网关日志
+vendor: Anthropic
+product: Messages API 网关
+protocols: [webhook, http-push, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.time
+  trace=$.trace_id
+  provider=$.provider
+  model=$.model
+  path=$.path
+  status=$.http_status
+  input_tokens=$.input_tokens
+  output_tokens=$.output_tokens
+  cache_tokens=$.cache_read_input_tokens
+  cost=$.cost_micro
+  user=$.user_id
+  client_ip=$.source_ip
+  stop=$.stop_reason
+mapping:
+  map:
+    ts: event.time
+    trace: trace.id
+    provider: ai.provider
+    model: ai.model
+    path: url.path
+    status: http.response.status_code
+    input_tokens: ai.prompt_tokens
+    output_tokens: ai.completion_tokens
+    cache_tokens: ai.cache_read_tokens
+    cost: ai.cost_micro
+    user: user.name
+    client_ip: source.ip
+    stop: ai.stop_reason
+  defaults:
+    event.category: ai-model
+    event.severity: info
+required_fields: [model, trace]
+sample_fixture: parsers/ai/samples.json#anthropic-messages-gateway-json
+description: Anthropic /v1/messages 网关日志（input/output tokens、prompt cache 命中、stop_reason），成本与配额核对来源。

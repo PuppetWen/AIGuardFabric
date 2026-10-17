@@ -1,0 +1,49 @@
+# 华为云 云防火墙 CFW —— 南北向流量日志（JSON）
+# 正样本：parsers/huawei/samples.json 中 key = huawei-cfw-log-json
+key: huawei-cfw-log-json
+name: 华为云 CFW 流量日志
+vendor: 华为云
+product: 云防火墙 CFW
+protocols: [webhook, http-pull, kafka, object-storage]
+engine: json-path
+pattern: |
+  ts=$.start_time
+  end=$.end_time
+  src_ip=$.src_ip
+  src_port=$.src_port
+  dst_ip=$.dst_ip
+  dst_port=$.dst_port
+  proto=$.protocol
+  app=$.app
+  action=$.action
+  direction=$.direction
+  bytes=$.bytes
+  packets=$.packets
+  rule_id=$.rule_id
+  kind=$.log_type
+mapping:
+  map:
+    ts: event.time
+    end: event.end
+    src_ip: source.ip
+    src_port: source.port
+    dst_ip: destination.ip
+    dst_port: destination.port
+    proto: network.transport
+    app: network.application
+    direction: network.direction
+    bytes: network.bytes_out
+    packets: network.packets_out
+    rule_id: rule.id
+    kind: event.category_raw
+  category_map:
+    flow: network
+    acl: network
+    ips: intrusion
+    threat: intrusion
+  action_field: action
+  defaults:
+    event.severity: low
+required_fields: [src_ip, dst_ip]
+sample_fixture: parsers/huawei/samples.json#huawei-cfw-log-json
+description: 华为云 CFW 云防火墙流量日志（start_time/src_ip/dst_ip/protocol/action/direction/bytes/packets/rule_id）。

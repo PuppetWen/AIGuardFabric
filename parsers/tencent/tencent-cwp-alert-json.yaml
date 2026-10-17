@@ -1,0 +1,47 @@
+# 腾讯云 主机安全（云镜 CWP）—— 入侵检测告警（JSON）
+# 正样本：parsers/tencent/samples.json 中 key = tencent-cwp-alert-json
+key: tencent-cwp-alert-json
+name: 腾讯云主机安全告警
+vendor: 腾讯云
+product: 主机安全
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.event_time
+  kind=$.event_type
+  host=$.hostname
+  host_id=$.quuid
+  src_ip=$.src_ip
+  user=$.user_name
+  pname=$.process_name
+  cmdline=$.cmd_line
+  level=$.level
+  status=$.status
+  desc=$.description
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    host_id: host.id
+    src_ip: source.ip
+    user: user.name
+    pname: process.name
+    cmdline: process.command_line
+    status: event.action_raw
+    desc: message
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    进程异常: process
+    暴力破解: authentication
+    反弹Shell: intrusion
+    文件篡改: file
+  defaults:
+required_fields: [host, kind]
+sample_fixture: parsers/tencent/samples.json#tencent-cwp-alert-json
+description: 腾讯云主机安全（云镜）入侵检测告警（event_time/event_type/hostname/quuid/process_name/cmd_line/level）。

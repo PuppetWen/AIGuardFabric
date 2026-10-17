@@ -1,0 +1,39 @@
+# 华为云 WAF —— 访问日志（JSON，用于流量基线与误报回溯）
+# 正样本：parsers/huawei/samples.json 中 key = huawei-waf-access-json
+key: huawei-waf-access-json
+name: 华为云 WAF 访问日志
+vendor: 华为云
+product: Web应用防火墙
+protocols: [http-pull, object-storage, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.time
+  host=$.host
+  src_ip=$.client_ip
+  method=$.request_method
+  uri=$.request_uri
+  status=$.status
+  sent=$.bytes_sent
+  rt=$.request_time
+  ua=$.user_agent
+  upstream=$.upstream_status
+  region=$.region
+mapping:
+  map:
+    ts: event.time
+    host: host.name
+    src_ip: source.ip
+    method: http.request.method
+    uri: url.path
+    status: http.response.status_code
+    sent: http.response.body.bytes
+    rt: event.duration
+    ua: user_agent.original
+    upstream: http.response.status_code_upstream
+    region: cloud.region
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [host, status]
+sample_fixture: parsers/huawei/samples.json#huawei-waf-access-json
+description: 华为云 WAF 访问日志（含 bytes_sent/request_time/upstream_status），用于入网流量基线与规则误报回溯。

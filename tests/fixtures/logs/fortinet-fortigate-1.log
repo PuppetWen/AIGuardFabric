@@ -1,0 +1,1 @@
+<189>date=2026-02-21 time=10:23:45 devname="FGT-EDGE-01" devid="FGT60F0000000001" eventtime=1771674225 logid="0419016384" type="utm" subtype="ips" level="alert" srcip=203.0.113.90 srcport=51234 dstip=10.20.30.90 dstport=443 proto=6 action="dropped" attack="Apache.Log4j.Error.Log.Remote.Code.Execution" severity="critical" crscore=50 msg="IP 203.0.113.90 上的 Apache Log4j RCE 攻击已阻断"

@@ -1,0 +1,55 @@
+# AWS GuardDuty —— 威胁发现（JSON）
+# 正样本：parsers/aws/samples.json 中 key = aws-guardduty-json
+key: aws-guardduty-json
+name: AWS GuardDuty 威胁发现
+vendor: AWS
+product: GuardDuty
+protocols: [webhook, http-pull, kafka, object-storage]
+engine: json-path
+pattern: |
+  ts=$.createdAt
+  guard_id=$.id
+  account=$.account
+  region=$.region
+  kind=$.type
+  sev=$.severity
+  title=$.title
+  desc=$.description
+  res_type=$.resource.resourceType
+  instance=$.resource.instanceDetails.instanceId
+  remote_ip=$.service.action.networkConnectionAction.remoteIpDetails.ipAddressV4
+  remote_port=$.service.action.networkConnectionAction.remotePortDetails.port
+  local_port=$.service.action.networkConnectionAction.localPortDetails.port
+  action_type=$.service.action.actionType
+mapping:
+  map:
+    guard_id: rule.id
+    account: cloud.account.id
+    region: cloud.region
+    kind: rule.name
+    title: rule.description
+    desc: message
+    res_type: cloud.resource_type
+    instance: host.id
+    remote_ip: source.ip
+    remote_port: source.port
+    local_port: destination.port
+    action_type: event.type
+  time_field: ts
+  severity_field: sev
+  severity_map:
+    '1': low
+    '2': low
+    '3': low
+    '4': medium
+    '5': medium
+    '6': medium
+    '7': high
+    '8': high
+    '9': critical
+    '10': critical
+  defaults:
+    event.category: intrusion
+required_fields: [kind, guard_id]
+sample_fixture: parsers/aws/samples.json#aws-guardduty-json
+description: AWS GuardDuty 发现（severity 1-10 五档映射、type/title/remoteIpDetails），失陷与横向告警归 intrusion。

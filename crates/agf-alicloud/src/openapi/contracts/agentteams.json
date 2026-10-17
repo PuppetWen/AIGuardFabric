@@ -1,0 +1,128 @@
+[
+{"action": "ListTeams", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "NameLike", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "GetTeam", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}}
+ ]},
+{"action": "CreateTeam", "version": "2026-06-05", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "TeamMembers", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}}}}},
+  {"name": "Description", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AdminName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ClientToken", "location": "formData", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "UpdateTeam", "version": "2026-06-05", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Description", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ClientToken", "location": "formData", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "TeamMembers", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}}}}}
+ ]},
+{"action": "ListWorkers", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "Mcp", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "NameLike", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ModelName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ModelProvider", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "VersionCode", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Group", "location": "query", "style": "json", "schema": {"type": "object", "required": false, "properties": {"Type": {"type": "string", "required": false}, "Name": {"type": "string", "required": false}, "Role": {"type": "string", "required": false}}}},
+  {"name": "Template", "location": "query", "style": "json", "schema": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}, "Version": {"type": "string", "required": false}, "Label": {"type": "string", "required": false}}}},
+  {"name": "AgentType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Credential", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "GetWorker", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}}
+ ]},
+{"action": "UpdateWorker", "version": "2026-06-05", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "VersionCode", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Model", "location": "query", "style": "json", "schema": {"type": "object", "required": false, "properties": {"ModelName": {"type": "string", "required": false}, "ModelProvider": {"type": "string", "required": false}}}},
+  {"name": "Template", "location": "query", "style": "json", "schema": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}, "Version": {"type": "string", "required": false}, "Label": {"type": "string", "required": false}}}},
+  {"name": "McpServers", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}}}}},
+  {"name": "Channels", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Type": {"type": "string", "required": false}, "Enabled": {"type": "boolean", "required": false}, "Config": {"type": "object", "required": false, "properties": {"ClientId": {"type": "string", "required": false}, "RobotCode": {"type": "string", "required": false}, "ShowThinking": {"type": "boolean", "required": false}, "ShowToolCalls": {"type": "boolean", "required": false}, "StreamingEnabled": {"type": "boolean", "required": false}, "MessageType": {"type": "string", "required": false, "enum": ["markdown", "card"]}, "CardTemplateId": {"type": "string", "required": false}, "Extension": {"type": "string", "required": false}}}, "Secrets": {"type": "object", "required": false, "properties": {"ClientSecret": {"type": "string", "required": false}}}}}}},
+  {"name": "ClientToken", "location": "formData", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Soul", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Agents", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Skills", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}, "Version": {"type": "string", "required": false}, "Label": {"type": "string", "required": false}}}}},
+  {"name": "Credentials", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Name": {"type": "string", "required": false}}}}},
+  {"name": "LimitConfig", "location": "query", "style": "json", "schema": {"type": "object", "required": false, "properties": {"UsageLimit": {"type": "integer", "required": false, "format": "int64"}, "LimitType": {"type": "string", "required": false}, "PeriodType": {"type": "string", "required": false}}}}
+ ]},
+{"action": "ListTeamTasks", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Team", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListTeamDetails", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "StartTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "GetModelInvocationSummary", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "StartTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "GetTokenTrend", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "StartTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "GroupBy", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListMcps", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListModels", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ProviderName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Id", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]}
+,
+{"action": "ListUsers", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name":"InstanceId","location":"query","style":"repeatList","schema":{"type":"string","required":true}},
+  {"name":"NameLike","location":"query","style":"repeatList","schema":{"type":"string","required":false}},
+  {"name":"MaxResults","location":"query","style":"repeatList","schema":{"type":"integer","required":false,"format":"int32"}},
+  {"name":"NextToken","location":"query","style":"repeatList","schema":{"type":"string","required":false}}
+ ]},
+{"action": "GetUser", "version": "2026-06-05", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name":"InstanceId","location":"query","style":"repeatList","schema":{"type":"string","required":true}},
+  {"name":"Name","location":"query","style":"repeatList","schema":{"type":"string","required":true}}
+ ]},
+{"action": "DeleteTeam", "version": "2026-06-05", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name":"InstanceId","location":"query","style":"repeatList","schema":{"type":"string","required":true}},
+  {"name":"Name","location":"query","style":"repeatList","schema":{"type":"string","required":true}}
+ ]}
+]

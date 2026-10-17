@@ -1,0 +1,1 @@
+{"alertName":"SSH 暴力破解","alertType":"crack","level":"serious","uuid":"c8f2b1a0-1f2e-4d3c-9a8b-7e6f5d4c3b2a","instanceName":"ecs-prod-01","internetIp":"47.98.12.34","intranetIp":"10.20.30.41","occurrenceTime":"2026-02-21 10:23:45","detail":"检测到来自 203.0.113.77 的 12 次 SSH 登录失败，账号 root 已被锁定 5 分钟","region":"cn-hangzhou"}

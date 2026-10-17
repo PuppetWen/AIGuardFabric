@@ -1,0 +1,94 @@
+{
+    "version": 1,
+    "generator": "scripts/fetch-fixtures.ps1",
+    "fetchedAt": "2026-09-17T18:36:11.7400281+08:00",
+    "note": "公开来源真实样本清单；只登记实际抓取成功的来源。失败项见 failures。",
+    "successCount": 7,
+    "failureCount": 0,
+    "sources": [
+                    {
+                        "name": "suricata-eve-json",
+                        "vendor": "Suricata / OISF",
+                        "url": "https://raw.githubusercontent.com/OISF/suricata/master/doc/userguide/output/eve/eve-json-format.rst",
+                        "path": "tests\\fixtures\\downloaded\\suricata\\eve-json-format.rst",
+                        "httpCode": 200,
+                        "sha256": "9d7e5c0e560c922df0f1ff33b9525c23ddc0afb164f73548c91e28fac95d3b14",
+                        "bytes": 98478,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "Suricata eve.json 事件字段集与枚举原文（校验 agf-ingest 解析模板）",
+                        "error": ""
+                    },
+                    {
+                        "name": "zeek-conn-log",
+                        "vendor": "Zeek",
+                        "url": "https://raw.githubusercontent.com/zeek/zeek-docs/master/logs/conn.rst",
+                        "path": "tests\\fixtures\\downloaded\\zeek\\conn-log.rst",
+                        "httpCode": 200,
+                        "sha256": "668d92b3a46393132abeee7401818d9f6dc4b96547c31b7e6d76e7bf233a4340",
+                        "bytes": 17159,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "Zeek conn.log 字段集与 TSV 头格式原文",
+                        "error": ""
+                    },
+                    {
+                        "name": "fluentbit-parsers",
+                        "vendor": "Fluent Bit",
+                        "url": "https://raw.githubusercontent.com/fluent/fluent-bit/master/conf/parsers.conf",
+                        "path": "tests\\fixtures\\downloaded\\fluentbit\\parsers.conf",
+                        "httpCode": 200,
+                        "sha256": "760e6a347874a6cbdc10c6cd21d82d1ee5388c8573ddfaab05ef37904749dbe1",
+                        "bytes": 6487,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "Fluent Bit 官方解析器定义（regex/JSON 解析器的真实配置形态）",
+                        "error": ""
+                    },
+                    {
+                        "name": "prometheus-scrape-config",
+                        "vendor": "Prometheus",
+                        "url": "https://raw.githubusercontent.com/prometheus/prometheus/main/documentation/examples/prometheus.yml",
+                        "path": "tests\\fixtures\\downloaded\\prometheus\\prometheus.yml",
+                        "httpCode": 200,
+                        "sha256": "aafcee2a237ad599327d07ed79e57ba1e57bdcf5a4bba6e3ba22eb09e25af479",
+                        "bytes": 1128,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "Prometheus 官方抓取配置样例（指标门禁与自监控接入参考）",
+                        "error": ""
+                    },
+                    {
+                        "name": "minio-config-doc",
+                        "vendor": "MinIO",
+                        "url": "https://raw.githubusercontent.com/minio/minio/master/docs/config/README.md",
+                        "path": "tests\\fixtures\\downloaded\\minio\\config-README.md",
+                        "httpCode": 200,
+                        "sha256": "08c5b1a7af3db5462da42a48c9eb3751f5adc79631cb3571c6973cf6b33819d1",
+                        "bytes": 18584,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "MinIO 配置项原文（证据包对象存储接入参考）",
+                        "error": ""
+                    },
+                    {
+                        "name": "timescaledb-readme",
+                        "vendor": "TimescaleDB",
+                        "url": "https://raw.githubusercontent.com/timescale/timescaledb/main/README.md",
+                        "path": "tests\\fixtures\\downloaded\\timescaledb\\README.md",
+                        "httpCode": 200,
+                        "sha256": "e1b995d3ad7a4728f02b8adb4cb250da925f50c933c0bd2edfdae290b6652195",
+                        "bytes": 19720,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "TimescaleDB 能力与版本说明（时序事件表设计参考）",
+                        "error": ""
+                    },
+                    {
+                        "name": "nats-server-readme",
+                        "vendor": "NATS",
+                        "url": "https://raw.githubusercontent.com/nats-io/nats-server/main/README.md",
+                        "path": "tests\\fixtures\\downloaded\\nats\\README.md",
+                        "httpCode": 200,
+                        "sha256": "af1a7d8d9cc9314ac8ccaa5b851b148de1ca0a781e48a63b7204921abce0b3e6",
+                        "bytes": 4576,
+                        "fetchedAt": "2026-09-17",
+                        "purpose": "NATS JetStream 说明（事件总线接入参考）",
+                        "error": ""
+                    }
+                ]
+}

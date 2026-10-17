@@ -1,0 +1,18 @@
+{
+  "algorithm": "classic RAM: base64 HMAC-SHA1 UTF8(resource + '+' + timestamp)",
+  "source": "https://raw.githubusercontent.com/nacos-group/nacos-sdk-nodejs/master/packages/nacos-config/src/aliyun_auth.ts",
+  "sourceObservedAt": "2026-10-01",
+  "sourceFunctions": ["getConfigSignResource", "buildConfigAuthHeaders", "hmacSha1"],
+  "sourceExcerptEncoding": "UTF-8, LF, one trailing LF; selected source statements only",
+  "sourceExcerpt": "return crypto.createHmac('sha1', key)\n    .update(data).digest()\n    .toString('base64');\nsignStr = data.tenant + '+' + data.group;\nconst signature = hmacSha1(signStr + '+' + timestamp, getActualAccessKeySecret(credentials));\n",
+  "sourceExcerptSha256": "4A6BC38D5FEE2455FC96B40171C148BD5202E36EF12206D4799B65AE08C6C2DE",
+  "releaseReference": "v2.6.3: a096ee55e88c13c0cacb69948d72d0c41be1e819, official tags/releases verified; pinned file body not accessible in browser cache, not asserted equal to observed master",
+  "vectorGenerator": "independent Python 3.11 stdlib hmac/hashlib/base64, no Rust signer used",
+  "timestamp": 1760000000000,
+  "secret": "owned-sdk-vector-secret",
+  "vectors": [
+    {"namespaceId":"","group":"AGF","signature":"s7qYCYPgvUcTWNf3ld02Ge50oCA="},
+    {"namespaceId":"namespace-owned","group":"AGF","signature":"wk7XGH5/2vKSEXtqCxfcysaMh4U="},
+    {"namespaceId":"namespace-owned","group":"审计+组","signature":"zdnqObmTEBNcc99SWJyeJMbqpBY="}
+  ]
+}

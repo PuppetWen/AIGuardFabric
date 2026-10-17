@@ -1,0 +1,49 @@
+# Suricata —— eve.json flow 流记录
+# 正样本：parsers/suricata/samples.json 中 key = suricata-eve-flow-json
+key: suricata-eve-flow-json
+name: Suricata eve.json 流记录
+vendor: Suricata
+product: eve.json
+protocols: [file, beats, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  kind=$.event_type
+  src_ip=$.src_ip
+  src_port=$.src_port
+  dest_ip=$.dest_ip
+  dest_port=$.dest_port
+  proto=$.proto
+  pkts_ts=$.flow.pkts_toserver
+  pkts_tc=$.flow.pkts_toclient
+  bytes_ts=$.flow.bytes_toserver
+  bytes_tc=$.flow.bytes_toclient
+  start=$.flow.start
+  end=$.flow.end
+  age=$.flow.age
+  state=$.flow.state
+  reason=$.flow.reason
+mapping:
+  map:
+    kind: event.type
+    src_ip: source.ip
+    src_port: source.port
+    dest_ip: destination.ip
+    dest_port: destination.port
+    proto: network.transport
+    pkts_ts: source.packets
+    pkts_tc: destination.packets
+    bytes_ts: source.bytes
+    bytes_tc: destination.bytes
+    start: event.start
+    end: event.end
+    age: event.duration
+    state: network.connection_state
+    reason: event.reason
+  time_field: ts
+  defaults:
+    event.severity: info
+    event.category: network
+required_fields: [state, src_ip]
+sample_fixture: parsers/suricata/samples.json#suricata-eve-flow-json
+description: Suricata eve.json flow 记录（双向包/字节数、流状态与时长），流量基线来源。

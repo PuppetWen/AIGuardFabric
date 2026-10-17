@@ -1,0 +1,21 @@
+# 启明星辰 SOC 安管平台 —— 关联分析告警 LEEF 2.0
+# 正样本：parsers/venustech/samples.json 中 key = venustech-soc-leef
+key: venustech-soc-leef
+name: 启明星辰 SOC 关联告警（LEEF 2.0）
+vendor: 启明星辰
+product: SOC
+protocols: [syslog, beats]
+engine: leef
+pattern: 'LEEF:2.0'
+mapping:
+  map:
+    ruleId: rule.name
+  time_field: event.time_raw
+  time_format: '%b %e %Y %H:%M:%S'
+  category_map:
+    Intrusion: intrusion
+    WebAttack: web
+    Malware: malware
+required_fields: [message]
+sample_fixture: parsers/venustech/samples.json#venustech-soc-leef
+description: 启明星辰 SOC 安管平台 LEEF 2.0 关联告警（cat=Intrusion → intrusion，usrName → user.name）。

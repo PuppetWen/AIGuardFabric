@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "note": "Fortinet 模板正样本与关键字段断言。KV 样本按 FortiGate syslog 公开字段（devname/logid/type/subtype/srcip/qname 等）重建；CEF 按 CEF 公开格式重建；未联网抓取。",
+  "samples": {
+    "fortinet-fortigate-traffic-kv": {
+      "protocol": "syslog",
+      "line": "<189>date=2026-02-21 time=10:23:45 devname=\"FGT-EDGE-01\" devid=\"FG100F0000000001\" logid=\"0000000013\" type=\"traffic\" subtype=\"forward\" level=\"warning\" srcip=203.0.113.90 srcport=51422 dstip=10.20.30.120 dstport=443 proto=6 action=\"accept\" sentbyte=2048 rcvdbyte=4096 duration=12",
+      "expect": {
+        "host.name": "FGT-EDGE-01",
+        "host.id": "FG100F0000000001",
+        "rule.id": "0000000013",
+        "event.category_raw": "forward",
+        "source.ip": "203.0.113.90",
+        "source.port": "51422",
+        "destination.ip": "10.20.30.120",
+        "destination.port": "443",
+        "network.iana_number": "6",
+        "source.bytes": "2048",
+        "destination.bytes": "4096",
+        "event.duration": "12",
+        "event.severity": "medium",
+        "event.action": "allowed",
+        "event.category": "network"
+      }
+    },
+    "fortinet-fortigate-dns-kv": {
+      "protocol": "syslog",
+      "fixture": "parsers/fortinet-fortigate-dns-1.log",
+      "line": "<189>date=2026-02-21 time=10:27:00 devname=\"FGT-EDGE-01\" devid=\"FG100F0000000001\" logid=\"1500054000\" type=\"utm\" subtype=\"dns\" eventtype=\"dns-query\" level=\"information\" srcip=10.20.30.50 srcport=53122 dstip=8.8.8.8 dstport=53 proto=17 action=\"pass\" qname=\"malware-c2.example.net\" qtype=1 catdesc=\"Malicious Websites\"",
+      "expect": {
+        "host.name": "FGT-EDGE-01",
+        "rule.id": "1500054000",
+        "event.category_raw": "dns",
+        "source.ip": "10.20.30.50",
+        "destination.ip": "8.8.8.8",
+        "destination.port": "53",
+        "network.iana_number": "17",
+        "dns.question.name": "malware-c2.example.net",
+        "rule.category": "Malicious Websites",
+        "event.severity": "info",
+        "event.action": "allowed",
+        "event.category": "network"
+      }
+    },
+    "fortinet-fortigate-utm-cef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:24:00 FGT-EDGE-01 CEF:0|Fortinet|FortiGate|7.0.5|0419016384|IPS 攻击|7|src=203.0.113.90 dst=10.20.30.121 spt=51423 dpt=80 proto=TCP act=block cat=入侵检测 msg=Apache Log4j2 RCE cs1=0419016384",
+      "expect": {
+        "observer.vendor": "Fortinet",
+        "observer.product": "FortiGate",
+        "rule.id": "0419016384",
+        "rule.name": "IPS 攻击",
+        "source.ip": "203.0.113.90",
+        "destination.ip": "10.20.30.121",
+        "destination.port": "80",
+        "network.transport": "TCP",
+        "event.category_raw": "入侵检测",
+        "event.action": "denied",
+        "message": "Apache Log4j2 RCE",
+        "rule.external_id": "0419016384",
+        "event.severity": "high",
+        "event.category": "intrusion"
+      }
+    },
+    "fortinet-fortiweb-json": {
+      "protocol": "webhook",
+      "line": "{\"timestamp\":\"2026-02-21T10:25:00+08:00\",\"devname\":\"FWB-01\",\"src_ip\":\"203.0.113.91\",\"dst_ip\":\"10.20.30.122\",\"method\":\"POST\",\"url\":\"/login\",\"http_status\":403,\"attack_type\":\"SQL Injection\",\"action\":\"Alert_Deny\",\"severity\":\"High\",\"policy\":\"web-protect\",\"rule_id\":\"FWEB-1001\",\"user_agent\":\"sqlmap/1.7.2#stable\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:25:00.000Z",
+        "host.name": "FWB-01",
+        "source.ip": "203.0.113.91",
+        "destination.ip": "10.20.30.122",
+        "http.request.method": "POST",
+        "url.path": "/login",
+        "http.response.status_code": "403",
+        "rule.name": "SQL Injection",
+        "rule.category": "web-protect",
+        "rule.id": "FWEB-1001",
+        "user_agent.original": "sqlmap/1.7.2#stable",
+        "event.severity": "high",
+        "event.action": "alert_deny",
+        "event.category": "web"
+      }
+    },
+    "fortinet-fortiedr-json": {
+      "protocol": "webhook",
+      "line": "{\"timestamp\":\"2026-02-21T10:26:00+08:00\",\"device\":\"WIN-APP-03\",\"host_ip\":\"10.20.30.110\",\"user\":\"admin\",\"event_type\":\"malicious_process\",\"process_name\":\"powershell.exe\",\"cmd_line\":\"powershell -enc SQBFAFgA\",\"file_hash\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c\",\"destination_ip\":\"198.51.100.20\",\"severity\":\"High\",\"action\":\"block\",\"rule_id\":\"FEDR-2001\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:26:00.000Z",
+        "host.name": "WIN-APP-03",
+        "host.ip": "10.20.30.110",
+        "user.name": "admin",
+        "process.name": "powershell.exe",
+        "process.command_line": "powershell -enc SQBFAFgA",
+        "file.hash.sha256": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c",
+        "destination.ip": "198.51.100.20",
+        "rule.id": "FEDR-2001",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "intrusion"
+      }
+    }
+  }
+}

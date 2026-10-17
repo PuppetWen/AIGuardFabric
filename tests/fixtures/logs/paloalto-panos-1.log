@@ -1,0 +1,1 @@
+Feb 21 10:23:45 PA-VM-FW1 1,2026/02/21 10:23:45,001801000001,TRAFFIC,end,2049,2026/02/21 10:23:45,10.20.30.100,203.0.113.100,allow-web,rule-1,vsys1,trust,untrust,ethernet1/1,ethernet1/2,12345,51234,443,tcp,allow,1500,800,700,10,any

@@ -1,0 +1,38 @@
+# 通用 JQ —— 复杂 JSON 的字段挑选与重命名（纯 Rust jaq 执行）
+# 正样本：parsers/generic/samples.json 中 key = jq-generic-normalize
+key: jq-generic-normalize
+name: 通用 JQ 归一化
+vendor: generic
+product: JQ 变换
+protocols: [file, beats, kafka, webhook]
+engine: jq
+pattern: |
+  {
+    "ts": .ts,
+    "level": .severity,
+    "action": .event.action,
+    "src_ip": .event.src,
+    "msg": .detail,
+    "rule_id": .rule
+  }
+mapping:
+  map:
+    ts: event.time
+    action: event.action
+    src_ip: source.ip
+    msg: message
+    rule_id: rule.id
+  severity_field: level
+  severity_map:
+    info: info
+    low: low
+    medium: medium
+    high: high
+    critical: critical
+  category_map:
+    POLICY-001: policy
+  defaults:
+    event.category: policy
+required_fields: [msg, rule_id]
+sample_fixture: parsers/generic/samples.json#jq-generic-normalize
+description: 通用 JQ 变换模板 —— 输出对象的键即扁平字段名（形如 `{"键" 对应表达式}`），适合结构多变的自研 JSON 日志。

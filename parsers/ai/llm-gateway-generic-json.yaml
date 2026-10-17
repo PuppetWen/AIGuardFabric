@@ -1,0 +1,47 @@
+# 自研 LLM 网关 —— 统一调用与策略拦截日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = llm-gateway-generic-json
+key: llm-gateway-generic-json
+name: 自研 LLM 网关调用日志
+vendor: 自研
+product: LLM 网关
+protocols: [webhook, http-push, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.ts
+  gw_id=$.gw_request_id
+  provider=$.provider
+  upstream=$.upstream
+  route=$.route
+  status=$.status
+  elapsed=$.elapsed_ms
+  tokens_in=$.tokens_in
+  tokens_out=$.tokens_out
+  fee=$.fee_micro
+  app_id=$.app_id
+  session=$.session_id
+  client_ip=$.client_ip
+  policy=$.policy_hit
+  action=$.action
+mapping:
+  map:
+    ts: event.time
+    gw_id: event.id
+    provider: ai.provider
+    upstream: ai.model
+    route: ai.route
+    status: event.outcome
+    elapsed: event.duration
+    tokens_in: ai.prompt_tokens
+    tokens_out: ai.completion_tokens
+    fee: ai.cost_micro
+    app_id: service.name
+    session: ai.session_id
+    client_ip: source.ip
+    policy: ai.rule_keys
+  action_field: action
+  defaults:
+    event.category: ai-model
+    event.severity: medium
+required_fields: [upstream, gw_id]
+sample_fixture: parsers/ai/samples.json#llm-gateway-generic-json
+description: 自研 LLM 网关日志（路由/上游模型/Token/费用/命中策略 policy_hit/动作），策略拦截与成本治理主来源。

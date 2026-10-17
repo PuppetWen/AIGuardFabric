@@ -1,0 +1,39 @@
+# MCP 代理 —— tools/call 拦截日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = mcp-proxy-tool-call-json
+key: mcp-proxy-tool-call-json
+name: MCP 代理工具调用拦截
+vendor: 自研
+product: MCP 代理
+protocols: [mcp, webhook, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.time
+  server_id=$.mcp_server_id
+  agent_id=$.agent_id
+  session=$.session_id
+  tool=$.tool
+  method=$.method
+  action=$.action
+  rule=$.rule_keys[0]
+  client_ip=$.client_ip
+  rpc_id=$.jsonrpc_id
+  duration=$.duration_ms
+mapping:
+  map:
+    ts: event.time
+    server_id: ai.mcp_server_id
+    agent_id: ai.agent_id
+    session: ai.session_id
+    tool: ai.tool_name
+    method: rpc.method
+    rule: ai.rule_keys
+    client_ip: source.ip
+    rpc_id: rpc.id
+    duration: event.duration
+  action_field: action
+  defaults:
+    event.category: ai-tool-call
+    event.severity: medium
+required_fields: [tool, server_id]
+sample_fixture: parsers/ai/samples.json#mcp-proxy-tool-call-json
+description: MCP 代理 tools/call 日志（server_id/agent_id/session_id/tool/命中策略），高危工具拦截与 Agent 行为审计来源。

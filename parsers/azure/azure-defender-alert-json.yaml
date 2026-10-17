@@ -1,0 +1,45 @@
+# Microsoft Defender for Cloud —— 安全告警（JSON 导出）
+# 正样本：parsers/azure/samples.json 中 key = azure-defender-alert-json
+key: azure-defender-alert-json
+name: Azure Defender 安全告警
+vendor: Microsoft Azure
+product: Microsoft Defender for Cloud
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.timeGeneratedUtc
+  start=$.startTimeUtc
+  alert=$.alertDisplayName
+  alert_id=$.systemAlertId
+  sev=$.severity
+  status=$.status
+  host=$.compromisedEntity
+  vendor=$.vendorName
+  product=$.productName
+  pname=$.extendedProperties.processName
+  cmd=$.extendedProperties.commandLine
+  rtype=$.extendedProperties.resourceType
+mapping:
+  map:
+    ts: event.time
+    start: event.start
+    alert: rule.name
+    alert_id: rule.id
+    status: event.outcome
+    host: host.name
+    vendor: observer.vendor
+    product: observer.product
+    pname: process.name
+    cmd: process.command_line
+    rtype: cloud.resource_type
+  severity_field: sev
+  severity_map:
+    High: high
+    Medium: medium
+    Low: low
+    Informational: info
+  defaults:
+    event.category: intrusion
+required_fields: [alert, host]
+sample_fixture: parsers/azure/samples.json#azure-defender-alert-json
+description: Microsoft Defender for Cloud 告警（alertDisplayName/systemAlertId/severity/compromisedEntity/extendedProperties）。

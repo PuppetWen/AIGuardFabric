@@ -1,0 +1,39 @@
+# MCP 代理 —— JQ 变换版（嵌套 server/agent 对象扁平化）
+# 正样本：parsers/ai/samples.json 中 key = mcp-proxy-jq
+key: mcp-proxy-jq
+name: MCP 代理日志（JQ）
+vendor: 自研
+product: MCP 代理
+protocols: [mcp, kafka, file]
+engine: jq
+pattern: |
+  {
+    "ts": .timestamp,
+    "server_id": .server.id,
+    "server_name": .server.name,
+    "session": .session,
+    "tool": .tool_name,
+    "action": .decision,
+    "latency": .latency_ms,
+    "agent_id": .agent.id,
+    "agent_flavor": .agent.flavor,
+    "ip": .ip
+  }
+mapping:
+  map:
+    ts: event.time
+    server_id: ai.mcp_server_id
+    server_name: service.name
+    session: ai.session_id
+    tool: ai.tool_name
+    latency: event.duration
+    agent_id: ai.agent_id
+    agent_flavor: ai.agent_flavor
+    ip: source.ip
+  action_field: action
+  defaults:
+    event.category: ai-tool-call
+    event.severity: info
+required_fields: [tool, server_id]
+sample_fixture: parsers/ai/samples.json#mcp-proxy-jq
+description: MCP 代理日志的 JQ 变换模板：嵌套 server/agent 对象在模板内扁平化，输出键名即映射源字段。

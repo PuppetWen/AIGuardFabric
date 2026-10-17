@@ -1,0 +1,49 @@
+# Build the scheduler from the project's checked local Cargo registry.
+# docker buildx build --load --pull=false --network=none --build-context agf-cargo-cache=./.cargo/registry \
+#   -f deploy/docker/Dockerfile.scheduler.offline -t aiguardfabric/agf-scheduler:0.1.0 .
+# The apt/cargo-chef layers match Dockerfile.offline and must already be cached.
+# Missing images, layers or registry entries fail; do not retry with network access.
+ARG RUST_VERSION=1.97
+FROM rust:${RUST_VERSION}-slim AS builder
+WORKDIR /app
+ARG AGF_BUILD_CACHE_DIR=/app/.cargo
+ENV CARGO_HOME=${AGF_BUILD_CACHE_DIR} \
+    CARGO_TARGET_DIR=/app/target \
+    CARGO_NET_RETRY=10 \
+    RUST_BACKTRACE=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        pkg-config libssl-dev cmake clang libclang-dev protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+RUN cargo install cargo-chef --locked --version ^0.1
+COPY Cargo.toml Cargo.lock ./
+COPY vendor/yara-x ./vendor/yara-x
+COPY crates ./crates
+COPY apps ./apps
+COPY tests/fixtures/alicloud ./tests/fixtures/alicloud
+COPY tools/simulators/agf-mtls-terminator ./tools/simulators/agf-mtls-terminator
+COPY deploy ./deploy
+COPY rules ./rules
+COPY redteam ./redteam
+COPY parsers ./parsers
+RUN --mount=type=bind,from=agf-cargo-cache,source=/,target=/app/.cargo/registry,readonly \
+    --mount=type=cache,id=agf-rust-release-v1,target=/app/target,sharing=locked \
+    CARGO_NET_OFFLINE=true cargo build --release --locked -p agf-scheduler -p agf-cli \
+    && mkdir -p /out \
+    && cp /app/target/release/agf-scheduler /app/target/release/agfctl /out/
+
+FROM gcr.io/distroless/cc-debian13:nonroot AS scheduler
+WORKDIR /app
+ENV AGF_ENV=prod \
+    AGF_PROJECT_ROOT=/app \
+    AGF_DATA_DIR=/data \
+    RUST_LOG=info
+USER 10001:10001
+EXPOSE 9101
+COPY --from=builder /out/agf-scheduler /usr/local/bin/agf-scheduler
+COPY --from=builder /out/agfctl /usr/local/bin/agfctl
+COPY --from=builder /app/rules /app/rules
+COPY --from=builder /app/redteam /app/redteam
+COPY --from=builder /app/parsers /app/parsers
+HEALTHCHECK --interval=15s --timeout=5s --retries=8 --start-period=30s \
+    CMD ["/usr/local/bin/agf-scheduler", "healthcheck", "--url", "http://127.0.0.1:9101/healthz"]
+ENTRYPOINT ["/usr/local/bin/agf-scheduler"]

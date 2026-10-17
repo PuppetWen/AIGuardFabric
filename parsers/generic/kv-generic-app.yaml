@@ -1,0 +1,39 @@
+# 通用 KV —— 自研应用 `k=v` 日志（无 syslog 信封）
+# 正样本：parsers/generic/samples.json 中 key = kv-generic-app
+key: kv-generic-app
+name: 通用 KV（自研应用）
+vendor: generic
+product: 自研应用 KV
+protocols: [file, beats, webhook, http-push]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    ts: event.time
+    app: service.name
+    trace: trace.id
+    msg: message
+    duration_ms: event.duration
+    user: user.name
+    category: event.category_raw
+  severity_field: level
+  severity_map:
+    trace: info
+    debug: info
+    info: info
+    warn: medium
+    warning: medium
+    error: high
+    fatal: critical
+    critical: critical
+  category_map:
+    web: web
+    auth: authentication
+    process: process
+    file: file
+    network: network
+    ai: ai-tool-call
+  defaults:
+required_fields: [app, msg]
+sample_fixture: parsers/generic/samples.json#kv-generic-app
+description: 自研应用 KV 日志模板（ts/level/app/trace/category/msg/duration_ms/user），字段名可按客户规范改写。

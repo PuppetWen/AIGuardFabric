@@ -1,0 +1,55 @@
+# AIGuardFabric 检测规则 —— PEM 私钥块（YARA 规则）
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: file-content ｜ 算子: yara ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-KEY-005
+name: PEM 私钥块（YARA 规则）
+description: 用 YARA 表达『BEGIN 与 PRIVATE KEY 同时出现』的结构化特征，作为关键词规则的交叉验证。
+domain: credential-leak
+severity: critical
+kind: yara
+target: file-content
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- YARA
+- private-key
+- file-scan
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: yara
+  rule_name: agf_private_key_pem
+  source: |-
+    rule agf_private_key_pem
+    {
+        strings:
+            $begin = "-----BEGIN "
+            $priv  = "PRIVATE KEY-----"
+        condition:
+            all of them
+    }
+samples:
+  positive:
+  - '-----BEGIN EC PRIVATE KEY-----
+
+    MHcCAQEEIJ8yQm3Rt6Vw9Yb2Nc5Zd8Hf1Gj4Kl7Mn0Pq
+
+    -----END EC PRIVATE KEY-----'
+  - '-----BEGIN PRIVATE KEY-----
+
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQ
+
+    -----END PRIVATE KEY-----'
+  negative:
+  - '-----BEGIN PUBLIC KEY-----
+
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+
+    -----END PUBLIC KEY-----'
+  - 本文档说明如何在 CI 中以只读方式挂载证书，私钥不落盘。
+remediation: 对仓库/制品做 YARA 扫描；命中即阻断发布并触发密钥轮换流程。
+author: agf-rules
+version: 1

@@ -1,0 +1,45 @@
+[package]
+name = "agf-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 领域内核：领域模型、错误、通用类型与安全原语"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+tokio = { workspace = true, features = ["time", "macros", "rt", "sync"] }
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+uuid = { workspace = true, features = ["v4", "v5", "v7", "serde", "js"] }
+chrono.workspace = true
+time.workspace = true
+base64.workspace = true
+hex.workspace = true
+regex.workspace = true
+once_cell.workspace = true
+indexmap.workspace = true
+rand.workspace = true
+zeroize.workspace = true
+secrecy.workspace = true
+strum.workspace = true
+url.workspace = true
+ipnet.workspace = true
+ipnetwork.workspace = true
+cidr.workspace = true
+sha2.workspace = true
+subtle.workspace = true
+jsonschema = { version = "0.30", optional = true }
+
+[features]
+default = []
+schema = ["dep:jsonschema"]
+
+[lints]
+workspace = true

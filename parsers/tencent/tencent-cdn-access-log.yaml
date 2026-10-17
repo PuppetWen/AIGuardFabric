@@ -1,0 +1,29 @@
+# 腾讯云 CDN —— 访问日志（类 common log + 加速域名列）
+# 正样本：parsers/tencent/samples.json 中 key = tencent-cdn-access-log
+key: tencent-cdn-access-log
+name: 腾讯云 CDN 访问日志
+vendor: 腾讯云
+product: CDN
+protocols: [file, object-storage, beats]
+engine: grok
+pattern: '%{IPORHOST:client_ip} - - \[%{HTTPDATE:ts}\] "%{WORD:method} %{NOTSPACE:uri} HTTP/%{NUMBER:http_version}" %{INT:status} %{INT:bytes} "%{DATA:referer}" "%{DATA:user_agent}" "%{NOTSPACE:domain}"'
+mapping:
+  map:
+    client_ip: source.ip
+    ts: event.time
+    method: http.request.method
+    uri: url.path
+    http_version: http.version
+    status: http.response.status_code
+    bytes: http.response.body.bytes
+    referer: http.request.referrer
+    user_agent: user_agent.original
+    domain: url.domain
+  time_field: ts
+  time_format: '%d/%b/%Y:%H:%M:%S %z'
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [client_ip, domain]
+sample_fixture: parsers/tencent/samples.json#tencent-cdn-access-log
+description: 腾讯云 CDN 访问日志（客户端 IP/时间/请求行/状态码/流量/Referer/UA/加速域名）。

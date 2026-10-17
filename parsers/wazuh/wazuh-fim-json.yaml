@@ -1,0 +1,52 @@
+# Wazuh —— 文件完整性监控（syscheck/FIM）
+# 正样本：parsers/wazuh/samples.json 中 key = wazuh-fim-json
+key: wazuh-fim-json
+name: Wazuh 文件完整性监控
+vendor: Wazuh
+product: Wazuh Manager
+protocols: [file, beats, webhook]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  level=$.rule.level
+  rule_id=$.rule.id
+  rule_desc=$.rule.description
+  fpath=$.syscheck.path
+  sha256=$.syscheck.sha256_after
+  md5=$.syscheck.md5_after
+  uname=$.syscheck.uname_after
+  fop=$.syscheck.event
+  agent_name=$.agent.name
+  agent_ip=$.agent.ip
+  location=$.location
+mapping:
+  map:
+    rule_id: rule.id
+    rule_desc: rule.description
+    fpath: file.path
+    sha256: file.hash.sha256
+    md5: file.hash.md5
+    uname: user.name
+    fop: file.operation
+    agent_name: host.name
+    agent_ip: host.ip
+    location: log.file.path
+  time_field: ts
+  severity_field: level
+  severity_map:
+    '0': info
+    '3': info
+    '6': low
+    '7': medium
+    '9': medium
+    '10': high
+    '12': high
+    '15': critical
+  category_map:
+    '550': file
+    '554': file
+  defaults:
+    event.category: file
+required_fields: [fpath, rule_id]
+sample_fixture: parsers/wazuh/samples.json#wazuh-fim-json
+description: Wazuh syscheck/文件完整性监控（path/sha256_after/md5_after/uname_after/event），归 file。

@@ -1,0 +1,39 @@
+key: zeek-conn-json
+name: Zeek conn.log JSON 连接日志
+vendor: Zeek
+product: conn.log
+protocols: [file, beats, object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.ts
+  uid=$.uid
+  src=$['id.orig_h']
+  src_port=$['id.orig_p']
+  dst=$['id.resp_h']
+  dst_port=$['id.resp_p']
+  proto=$.proto
+  service=$.service
+  duration=$.duration
+  orig_bytes=$.orig_bytes
+  resp_bytes=$.resp_bytes
+  state=$.conn_state
+mapping:
+  map:
+    ts: event.time
+    uid: event.id
+    src: source.ip
+    src_port: source.port
+    dst: destination.ip
+    dst_port: destination.port
+    proto: network.transport
+    service: network.application
+    duration: event.duration
+    orig_bytes: source.bytes
+    resp_bytes: destination.bytes
+    state: network.connection_state
+  defaults:
+    event.category: network
+    event.severity: info
+required_fields: [uid, src, dst]
+sample_fixture: tests/fixtures/logs/public/zeek-conn-json.log
+description: Zeek JSON conn.log 使用带点的原始键；保留 TSV 模板，JSON 输入不再按列误读。

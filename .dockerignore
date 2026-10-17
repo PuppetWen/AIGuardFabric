@@ -1,0 +1,91 @@
+# =============================================================================
+# Docker 构建上下文裁剪（铁律 2/4：构建产物与依赖缓存都留在项目内，不进镜像层）
+#
+# 不裁剪的后果：target/ 单目录可达数十 GB，.cargo/registry 也在 GB 级，
+# 每次 docker build 都要把这些内容打包上传给 daemon，构建时间与磁盘占用都不可接受。
+# 运行镜像真正需要的只有：源码（crates/apps）、Cargo.toml/Cargo.lock、
+# rust-toolchain.toml、deploy/、rules/、redteam/、parsers/。
+# =============================================================================
+
+# ---- 构建产物与缓存 ----
+target/
+.rustup/
+.cargo/registry/
+.cargo/git/
+.cargo/bin/
+.cargo/advisory-dbs/
+.cargo/.global-cache
+.cargo/.package-cache
+.cargo/.package-cache-mutate
+.pnpm-store/
+.npm/
+.venv/
+tools/
+# 例外：`tools/simulators/agf-mtls-terminator` 是 workspace 成员（本地 mTLS 终结器，仅测试/联调）。
+# 被整体忽略后 `cargo metadata` 会因为找不到该成员而失败（cargo-chef 的 planner 阶段直接挂），
+# 因此这里显式放行这一个 crate（其余 tools/ 内容仍不进构建上下文）。
+!tools/simulators/agf-mtls-terminator/
+!tools/simulators/agf-mtls-terminator/**
+vendor/*
+models/
+data/
+
+# ---- 前端依赖与产物（容器内重新安装/构建）----
+**/node_modules/
+apps/web/dist/
+apps/web/.vite/
+apps/web/coverage/
+
+# ---- 版本控制与 CI ----
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# ---- 文档、测试夹具与脚本（运行镜像不需要）----
+docs/
+tests/**
+!tests/fixtures/
+!tests/fixtures/alicloud/
+!tests/fixtures/alicloud/openapi-*.json
+!tests/fixtures/alicloud/apig-policy-driver.json
+scripts/
+Justfile
+*.md
+!rules/**/*.md
+!redteam/**/*.md
+!parsers/**/*.md
+!deploy/**/*.md
+
+# ---- 日志与覆盖率产物 ----
+*.log
+**/*.log
+**/*.profraw
+**/*.profdata
+coverage/
+lcov.info
+
+# ---- 编辑器/系统垃圾 ----
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Task scratch files and native runtime bundles are not image build inputs.
+.tmp/
+/dist/
+.task/
+.environment/
+.env
+.env.*
+!.env.example
+/deploy/runtime/
+
+# Pinned third-party YARA dependency is required during offline Rust builds.
+!vendor/yara-x/
+!vendor/yara-x/**
+
+# Runtime parser samples include public-source attribution and license files.
+!tests/fixtures/logs/
+!tests/fixtures/logs/**

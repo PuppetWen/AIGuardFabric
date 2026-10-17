@@ -1,0 +1,85 @@
+# ---- 构建产物 ----
+/target/
+dist/
+*.pdb
+*.ilk
+
+# ---- 运行期数据卷（铁律 3）----
+/data/
+!data/.gitkeep
+
+# ---- 项目内安装的依赖与二进制（铁律 2/3）----
+/tools/
+/vendor/*
+!/vendor/manifest/
+!/vendor/README.md
+/models/*
+!/models/README.md
+/.cargo/registry/
+/.cargo/git/
+/.cargo/bin/
+/.pnpm-store/
+/.venv/
+/node_modules/
+**/node_modules/
+
+# ---- 日志与临时文件 ----
+*.log
+logs/
+*.tmp
+*.bak
+.tmp/
+
+# ---- 密钥与本地配置（绝不入库）----
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+!crates/**/tests/**/*.pem
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- 测试产物 ----
+/tests/replay/artifacts/
+/coverage/
+*.profraw
+*.profdata
+/target/coverage/
+# cargo-deny 的 RustSec 公告库缓存（联网自动拉取，不入库）
+.cargo/advisory-dbs/
+/.cargo/.global-cache
+/.cargo/.package-cache
+/.cargo/.package-cache-mutate
+
+# ---- 解析模板样本例外（必须入库：缺样本时内置模板与模板库测试会失败）----
+# `logs/` 与 `*.log` 会连坐忽略 tests/fixtures/logs/ 下的样本、manifest.json 与 SOURCES.md；
+# 这里对 tests/fixtures/logs/ 做**目录级**反向例外（先解除父目录，再解除内容与 *.log）。
+!tests/fixtures/logs/
+!tests/fixtures/logs/**
+
+# Local dependency caches, site credentials and host-specific accepted runtime.
+/.task/
+/.npm/
+/.environment/
+!/tools/
+/tools/*
+!/tools/simulators/
+/tools/simulators/*
+!/tools/simulators/agf-mtls-terminator/
+!/tools/simulators/agf-mtls-terminator/**
+!/vendor/yara-x/
+!/vendor/yara-x/**
+/deploy/runtime/
+/.deployment/
+.env.*
+!.env.example
+!**/.env.example
+*.clixml
+*.p12
+*.pfx

@@ -1,0 +1,40 @@
+# 华为云 HSS 主机安全 —— 文件完整性/勒索加密告警（JSON）
+# 正样本：parsers/huawei/samples.json 中 key = huawei-hss-filechange-json
+key: huawei-hss-filechange-json
+name: 华为云 HSS 文件变更告警
+vendor: 华为云
+product: 主机安全服务
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.occur_time
+  kind=$.event_type
+  host=$.host_name
+  fpath=$.file_path
+  fop=$.file_operation
+  fhash=$.file_hash
+  sev=$.severity
+  action=$.action
+  user=$.user
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    fpath: file.path
+    fop: file.operation
+    fhash: file.hash.sha256
+    user: user.name
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    file_change: file
+    ransomware: malware
+  action_field: action
+required_fields: [fpath]
+sample_fixture: parsers/huawei/samples.json#huawei-hss-filechange-json
+description: 华为云 HSS 文件完整性监控告警（file_path/file_operation/file_hash），勒索加密归 malware。

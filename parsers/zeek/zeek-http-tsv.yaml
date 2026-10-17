@@ -1,0 +1,35 @@
+# Zeek —— http.log 请求日志（TSV）
+# 正样本：parsers/zeek/samples.json 中 key = zeek-http-tsv
+key: zeek-http-tsv
+name: Zeek http.log 请求日志
+vendor: Zeek
+product: http.log
+protocols: [file, beats]
+engine: csv
+pattern: 'ts,uid,id.orig_h,id.orig_p,id.resp_h,id.resp_p,trans_depth,method,host,uri,referrer,version,user_agent,request_body_len,response_body_len,status_code,status_msg,info_code,info_msg,tags,username,password,proxied,mime_types,resp_fuids'
+mapping:
+  map:
+    uid: event.id
+    id.orig_h: source.ip
+    id.orig_p: source.port
+    id.resp_h: destination.ip
+    id.resp_p: destination.port
+    method: http.request.method
+    host: url.domain
+    uri: url.path
+    referrer: http.request.referrer
+    version: http.version
+    user_agent: user_agent.original
+    response_body_len: http.response.body.bytes
+    status_code: http.response.status_code
+    status_msg: http.response.status_message
+    mime_types: http.response.mime_type
+    username: user.name
+  time_field: ts
+  time_format: unix
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [uid, host]
+sample_fixture: parsers/zeek/samples.json#zeek-http-tsv
+description: Zeek http.log（method/host/uri/user_agent/status_code），Web 访问审计与上传行为分析来源。

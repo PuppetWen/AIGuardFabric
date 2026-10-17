@@ -1,0 +1,44 @@
+# Fortinet FortiGate —— 流量日志（syslog KV，type=traffic）
+# 正样本：parsers/fortinet/samples.json 中 key = fortinet-fortigate-traffic-kv
+key: fortinet-fortigate-traffic-kv
+name: FortiGate 流量日志
+vendor: Fortinet
+product: FortiGate
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    devname: host.name
+    devid: host.id
+    logid: rule.id
+    subtype: event.category_raw
+    srcip: source.ip
+    srcport: source.port
+    dstip: destination.ip
+    dstport: destination.port
+    proto: network.iana_number
+    sentbyte: source.bytes
+    rcvdbyte: destination.bytes
+    duration: event.duration
+  severity_field: level
+  severity_map:
+    emergency: critical
+    alert: critical
+    critical: critical
+    error: high
+    warning: medium
+    notification: low
+    information: info
+    debug: info
+  category_map:
+    forward: network
+    local: network
+    ips: intrusion
+    virus: malware
+    webfilter: web
+    dns: network
+  action_field: action
+required_fields: [devname, srcip]
+sample_fixture: parsers/fortinet/samples.json#fortinet-fortigate-traffic-kv
+description: FortiGate 流量日志（type=traffic：devname/devid/logid/subtype/srcip/dstip/proto/action/sentbyte），level 按 FortiGate 八级词表映射。

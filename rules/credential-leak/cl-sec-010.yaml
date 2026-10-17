@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— 云厂商 SecretKey 明文
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: config ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-SEC-010
+name: 云厂商 SecretKey 明文
+description: secretKey / secretId 等字段直接赋值高长度随机串。
+domain: credential-leak
+severity: critical
+kind: regex
+target: config
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-798
+- cloud-credential
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: regex
+  pattern: '(?i)(secret[_-]?access[_-]?key|secret[_-]?key|secretid|secretaccesskey)["'']?\s*[:=]\s*["'']?[A-Za-z0-9+/]{28,}={0,2}'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - secretKey = "Gu5t9xGARNpq86cd98joQYCN3Cozk1qA"
+  - 'secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+  negative:
+  - 'secretKey: ${TENCENT_SECRET_KEY}'
+  - secretKey 请通过 KMS 获取，不要硬编码在代码或配置里。
+remediation: 吊销该 SecretKey 并重新签发；对配置仓库与镜像层做密钥扫描。
+author: agf-rules
+version: 1

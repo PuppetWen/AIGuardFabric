@@ -1,0 +1,47 @@
+[package]
+name = "agf-scan"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 风险引擎：规则加载与匹配、五大安全域检测、AI 红队编排与报告"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+regex.workspace = true
+grok.workspace = true
+regorus.workspace = true
+cel-interpreter.workspace = true
+glob.workspace = true
+globset.workspace = true
+yara-x.workspace = true
+walkdir.workspace = true
+sha2.workspace = true
+base64.workspace = true
+indexmap.workspace = true
+reqwest.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+proptest.workspace = true
+wiremock.workspace = true
+
+[lints]
+workspace = true

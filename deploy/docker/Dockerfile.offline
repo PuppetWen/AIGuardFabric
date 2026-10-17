@@ -1,0 +1,75 @@
+# Offline server image from dependencies already cached under this project.
+# Build with:
+# docker buildx build --load --pull=false --build-context agf-cargo-cache=./.cargo/registry \
+#   --build-context agf-upx-cache=./tools/upx/5.2.1 \
+#   -f deploy/docker/Dockerfile.offline -t aiguardfabric/agf-server:0.1.0 .
+ARG RUST_VERSION=1.97
+FROM rust:${RUST_VERSION}-slim AS builder
+WORKDIR /app
+ARG AGF_BUILD_CACHE_DIR=/app/.cargo
+ENV CARGO_HOME=${AGF_BUILD_CACHE_DIR} \
+    CARGO_TARGET_DIR=/app/target \
+    CARGO_NET_RETRY=10 \
+    RUST_BACKTRACE=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        pkg-config libssl-dev cmake clang libclang-dev protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+RUN cargo install cargo-chef --locked --version ^0.1
+COPY Cargo.toml Cargo.lock ./
+COPY vendor/yara-x ./vendor/yara-x
+COPY crates ./crates
+COPY apps ./apps
+COPY tests/fixtures/alicloud ./tests/fixtures/alicloud
+COPY tests/fixtures/logs ./tests/fixtures/logs
+COPY tools/simulators/agf-mtls-terminator ./tools/simulators/agf-mtls-terminator
+COPY deploy ./deploy
+COPY rules ./rules
+COPY redteam ./redteam
+COPY parsers ./parsers
+# The named context is a read-only bind mount, never an image layer.
+RUN --mount=type=bind,from=agf-cargo-cache,source=/,target=/app/.cargo/registry,readonly \
+    --mount=type=cache,id=agf-rust-release-v1,target=/app/target,sharing=locked \
+    CARGO_NET_OFFLINE=true cargo build --release --locked -p agf-server -p agf-agent \
+    && mkdir -p /out \
+    && cp /app/target/release/agf-server /app/target/release/agf-agent /out/
+
+# 原版 UPX 仅从项目专属命名上下文只读挂载；构建时不会访问网络。
+# 额外参数：--build-context agf-upx-cache=./tools/upx/5.2.1
+FROM builder AS packed-server
+RUN --mount=type=bind,from=agf-upx-cache,source=/,target=/upx-cache,readonly \
+    cp /upx-cache/upx-5.2.1-amd64_linux.tar.xz /tmp/upx-5.2.1-amd64_linux.tar.xz \
+    && printf '%s  %s\n' '402162aad30af47e60dbd767fb2e64ca394ace9727ba1f40283641f1d1b91657' /tmp/upx-5.2.1-amd64_linux.tar.xz | sha256sum -c - \
+    && printf '%s  %s\n' '2e1fd7577f8dff116a31a5b55daa47fea3f87fb3590ab2046a60a3dfd26faa5f' /upx-cache/upx-5.2.1-amd64_linux.tar | sha256sum -c - \
+    && mkdir -p /tmp/upx-tool /packed /packer-licenses \
+    && tar -xf /upx-cache/upx-5.2.1-amd64_linux.tar -C /tmp/upx-tool \
+    && /tmp/upx-tool/upx-5.2.1-amd64_linux/upx --best --lzma --no-progress --no-env -o /packed/agf-server /out/agf-server \
+    && /tmp/upx-tool/upx-5.2.1-amd64_linux/upx --no-env -t /packed/agf-server \
+    && /tmp/upx-tool/upx-5.2.1-amd64_linux/upx --no-env -d -o /tmp/agf-server-restored /packed/agf-server \
+    && cmp /out/agf-server /tmp/agf-server-restored \
+    && cp /tmp/upx-tool/upx-5.2.1-amd64_linux/LICENSE /packer-licenses/UPX-LICENSE.txt \
+    && cp /tmp/upx-tool/upx-5.2.1-amd64_linux/COPYING /packer-licenses/UPX-COPYING.txt
+FROM gcr.io/distroless/cc-debian13:nonroot AS server
+WORKDIR /app
+ENV AGF_ENV=prod \
+    AGF_PROJECT_ROOT=/app \
+    AGF_DATA_DIR=/data \
+    AGF_SERVER_HOST=0.0.0.0 \
+    AGF_SERVER_PORT=8080 \
+    RUST_LOG=info
+USER 10001:10001
+EXPOSE 8080 8090 8091 9100 9101 5514
+COPY --from=packed-server /packed/agf-server /usr/local/bin/agf-server
+COPY --from=builder /out/agf-agent /app/dist/linux/agf-agent
+COPY --from=builder /app/crates/agf-api/resources/fonts/OFL.txt /app/licenses/NotoSansCJKsc-OFL.txt
+COPY --from=packed-server /packer-licenses/UPX-LICENSE.txt /app/licenses/UPX-LICENSE.txt
+COPY --from=packed-server /packer-licenses/UPX-COPYING.txt /app/licenses/UPX-COPYING.txt
+LABEL org.aiguardfabric.packer.version="UPX 5.2.1 unmodified official amd64 Linux"
+LABEL org.aiguardfabric.font.noto-cjk.source="https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf" \
+      org.aiguardfabric.font.noto-cjk.license="SIL OFL 1.1"
+COPY --from=builder /app/deploy/sql/migrations /app/deploy/sql/migrations
+COPY --from=builder /app/deploy/sql/migration_parts /app/deploy/sql/migration_parts
+COPY --from=builder /app/rules /app/rules
+COPY --from=builder /app/redteam /app/redteam
+COPY --from=builder /app/parsers /app/parsers
+COPY --from=builder /app/tests/fixtures/logs /app/tests/fixtures/logs
+ENTRYPOINT ["/usr/local/bin/agf-server"]

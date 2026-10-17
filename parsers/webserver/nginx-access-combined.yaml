@@ -1,0 +1,28 @@
+# Nginx —— access.log（combined 格式）
+# 正样本：parsers/webserver/samples.json 中 key = nginx-access-combined
+key: nginx-access-combined
+name: Nginx 访问日志（combined）
+vendor: Nginx
+product: Nginx
+protocols: [file, beats, syslog]
+engine: grok
+pattern: '%{IPORHOST:client_ip} - %{NOTSPACE:remote_user} \[%{HTTPDATE:ts}\] "%{WORD:method} %{NOTSPACE:uri} HTTP/%{NUMBER:http_version}" %{INT:status} %{INT:body_bytes} "%{DATA:referer}" "%{DATA:user_agent}"'
+mapping:
+  map:
+    client_ip: source.ip
+    remote_user: user.name
+    method: http.request.method
+    uri: url.path
+    http_version: http.version
+    status: http.response.status_code
+    body_bytes: http.response.body.bytes
+    referer: http.request.referrer
+    user_agent: user_agent.original
+  time_field: ts
+  time_format: '%d/%b/%Y:%H:%M:%S %z'
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [client_ip, status]
+sample_fixture: parsers/webserver/samples.json#nginx-access-combined
+description: Nginx combined 访问日志（client_ip/时间/请求行/状态码/body_bytes/Referer/UA），Web 审计与扫描探测基线。

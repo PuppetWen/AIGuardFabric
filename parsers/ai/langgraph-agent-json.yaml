@@ -1,0 +1,43 @@
+# LangGraph —— Agent 节点/工具执行日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = langgraph-agent-json
+key: langgraph-agent-json
+name: LangGraph Agent 执行日志
+vendor: LangGraph
+product: Agent 运行时
+protocols: [webhook, http-push, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.ts
+  run_id=$.run_id
+  thread=$.thread_id
+  graph=$.graph
+  node=$.node
+  tool=$.tool
+  action=$.action
+  duration=$.duration_ms
+  tokens_in=$.input_tokens
+  tokens_out=$.output_tokens
+  model=$.model
+  provider=$.provider
+  err=$.error_msg
+mapping:
+  map:
+    ts: event.time
+    run_id: ai.session_id
+    thread: ai.thread_id
+    graph: ai.agent_flavor
+    node: ai.node
+    tool: ai.tool_name
+    duration: event.duration
+    tokens_in: ai.prompt_tokens
+    tokens_out: ai.completion_tokens
+    model: ai.model
+    provider: ai.provider
+    err: message
+  action_field: action
+  defaults:
+    event.category: ai-tool-call
+    event.severity: medium
+required_fields: [graph, node]
+sample_fixture: parsers/ai/samples.json#langgraph-agent-json
+description: LangGraph/自研 Agent 运行时日志（graph/node/tool/action/Token/错误信息），Agentic 攻击链的时间轴与因果图来源。

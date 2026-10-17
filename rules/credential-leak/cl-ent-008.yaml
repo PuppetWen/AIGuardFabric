@@ -1,0 +1,34 @@
+# AIGuardFabric 检测规则 —— 高熵密钥字面量（熵检测）
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: prompt ｜ 算子: entropy ｜ 等级: medium
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-ENT-008
+name: 高熵密钥字面量（熵检测）
+description: 对没有固定前缀的自研密钥，用长度 + 香农熵识别随机串。
+domain: credential-leak
+severity: medium
+kind: entropy
+target: prompt
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-798
+- entropy
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: entropy
+  min_length: 32
+  min_entropy: 4.2
+samples:
+  positive:
+  - signing_key=Zq8vK3xR9pLm2Nt7Yb4Wd6Hs1Jc5Ae0U
+  - 请用这个 JWT 签名材料计算示例：mF7hQ2wS9dR4tY6uI1oP3aS8fG5jK0lZ
+  negative:
+  - 计费系统每分钟处理约 500 个请求，平均延迟 120 毫秒。
+  - 请把这段日志按时间排序并统计每个错误码出现的次数。
+remediation: 熵检测只作为线索：命中后由人工确认是否真实密钥，确认后按密钥事件处置。
+author: agf-rules
+version: 1

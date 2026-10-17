@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "note": "Web 服务器模板正样本与关键字段断言。combined 日志、error_log 行按 Nginx/Apache 公开日志格式重建，JSON 访问日志按 log_format escape=json 常见字段重建；未联网抓取。",
+  "samples": {
+    "nginx-access-combined": {
+      "protocol": "file",
+      "line": "203.0.113.160 - - [21/Feb/2026:10:40:00 +0800] \"GET /index.html HTTP/1.1\" 200 1024 \"https://www.example.com/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\"",
+      "expect": {
+        "source.ip": "203.0.113.160",
+        "user.name": "-",
+        "event.time": "2026-02-21T02:40:00.000Z",
+        "http.request.method": "GET",
+        "url.path": "/index.html",
+        "http.version": "1.1",
+        "http.response.status_code": "200",
+        "http.response.body.bytes": "1024",
+        "http.request.referrer": "https://www.example.com/",
+        "user_agent.original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "nginx-error-regex": {
+      "protocol": "file",
+      "line": "2026/02/21 10:41:00 [error] 1234#1234: *5678 open() \"/var/www/html/upload.php\" failed (2: No such file or directory), client: 203.0.113.161, server: www.example.com, request: \"GET /upload.php HTTP/1.1\"",
+      "expect": {
+        "event.time": "2026-02-21T10:41:00.000Z",
+        "process.pid": "1234",
+        "event.sequence": "5678",
+        "source.ip": "203.0.113.161",
+        "host.name": "www.example.com",
+        "http.request.method": "GET",
+        "url.path": "/upload.php",
+        "http.version": "1.1",
+        "message": "open() \"/var/www/html/upload.php\" failed (2: No such file or directory)",
+        "event.severity": "high",
+        "event.category": "web"
+      }
+    },
+    "nginx-json-access": {
+      "protocol": "file",
+      "line": "{\"time\":\"2026-02-21T10:42:00+08:00\",\"remote_addr\":\"203.0.113.162\",\"remote_user\":\"alice\",\"request_method\":\"POST\",\"request_uri\":\"/api/v1/upload\",\"status\":201,\"body_bytes_sent\":512,\"request_time\":0.045,\"http_referer\":\"https://www.example.com/\",\"http_user_agent\":\"curl/8.5.0\",\"http_x_forwarded_for\":\"203.0.113.162, 10.20.30.1\",\"upstream_status\":\"201\",\"server_name\":\"www.example.com\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:42:00.000Z",
+        "source.ip": "203.0.113.162",
+        "user.name": "alice",
+        "http.request.method": "POST",
+        "url.path": "/api/v1/upload",
+        "http.response.status_code": "201",
+        "http.response.body.bytes": "512",
+        "event.duration": "0.045",
+        "http.request.referrer": "https://www.example.com/",
+        "user_agent.original": "curl/8.5.0",
+        "http.request.forwarded_for": "203.0.113.162, 10.20.30.1",
+        "http.response.status_code_upstream": "201",
+        "host.name": "www.example.com",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "apache-access-combined": {
+      "protocol": "file",
+      "line": "203.0.113.163 - alice [21/Feb/2026:10:43:00 +0800] \"POST /admin/login HTTP/1.1\" 302 512 \"-\" \"curl/8.5.0\"",
+      "expect": {
+        "source.ip": "203.0.113.163",
+        "user.name": "alice",
+        "event.time": "2026-02-21T02:43:00.000Z",
+        "http.request.method": "POST",
+        "url.path": "/admin/login",
+        "http.response.status_code": "302",
+        "http.response.body.bytes": "512",
+        "http.request.referrer": "-",
+        "user_agent.original": "curl/8.5.0",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "apache-error-regex": {
+      "protocol": "file",
+      "line": "[Sat Feb 21 10:44:00.123456 2026] [core:error] [pid 2345:tid 140234567890] [client 203.0.113.164:52001] AH00124: Request exceeded the limit of 10 internal redirects due to probable configuration error.",
+      "expect": {
+        "event.time": "2026-02-21T10:44:00.123Z",
+        "log.logger": "core",
+        "process.pid": "2345",
+        "source.ip": "203.0.113.164",
+        "source.port": "52001",
+        "error.code": "AH00124",
+        "message": "Request exceeded the limit of 10 internal redirects due to probable configuration error.",
+        "event.severity": "high",
+        "event.category": "web"
+      }
+    }
+  }
+}

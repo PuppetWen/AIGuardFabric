@@ -1,0 +1,29 @@
+# 启明星辰 WAF —— Web 攻击拦截（syslog KV）
+# 正样本：parsers/venustech/samples.json 中 key = venustech-waf-kv
+key: venustech-waf-kv
+name: 启明星辰 WAF 告警（KV）
+vendor: 启明星辰
+product: WAF
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    src: source.ip
+    dst: destination.ip
+    method: http.request.method
+    uri: url.path
+    attack: rule.name
+    rule_id: rule.id
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  action_field: action
+  defaults:
+    event.category: web
+required_fields: [src, attack]
+sample_fixture: parsers/venustech/samples.json#venustech-waf-kv
+description: 启明星辰 WAF syslog KV 拦截日志（src/dst/method/uri/attack/level/action）。

@@ -1,0 +1,47 @@
+[package]
+name = "agf-adapters"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 外部系统适配器：青藤云、各厂商 WAF/EDR、消息中间件（统一 Adapter trait + Mock）"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+
+tokio.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+reqwest.workspace = true
+async-nats.workspace = true
+# SMTP 真实发送（email 适配器）：默认特性关闭，只启用在用的传输/TLS 组合
+lettre.workspace = true
+quick-xml.workspace = true
+regex.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+base64.workspace = true
+url.workspace = true
+indexmap.workspace = true
+# 凭据一律以 SecretString 承载（Debug 为 [REDACTED]，Drop 时清零），与 agf-core/agf-storage 口径一致
+secrecy.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+wiremock.workspace = true
+tokio = { workspace = true }
+
+[lints]
+workspace = true

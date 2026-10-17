@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "note": "Kubernetes/Docker 模板正样本与关键字段断言。JSON 样本按 audit.k8s.io/v1 Event、core/v1 Event 与 docker json-file 日志的公开结构重建；未联网抓取。",
+  "samples": {
+    "k8s-audit-json": {
+      "protocol": "file",
+      "line": "{\"kind\":\"Event\",\"apiVersion\":\"audit.k8s.io/v1\",\"level\":\"RequestResponse\",\"auditID\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"stage\":\"ResponseComplete\",\"requestURI\":\"/api/v1/namespaces/default/secrets/app-secret\",\"verb\":\"get\",\"user\":{\"username\":\"system:serviceaccount:default:ci-runner\",\"uid\":\"a1b2c3d4-0000-0000-0000-000000000000\",\"groups\":[\"system:serviceaccounts\",\"system:authenticated\"]},\"sourceIPs\":[\"10.20.30.220\"],\"userAgent\":\"kubectl/v1.29.0 (linux/amd64) kubernetes/1a2b3c4\",\"objectRef\":{\"resource\":\"secrets\",\"namespace\":\"default\",\"name\":\"app-secret\",\"apiVersion\":\"v1\"},\"responseStatus\":{\"metadata\":{},\"code\":200},\"requestReceivedTimestamp\":\"2026-02-21T11:05:00.123456Z\",\"stageTimestamp\":\"2026-02-21T11:05:00.234567Z\",\"annotations\":{\"authorization.k8s.io/decision\":\"allow\",\"authorization.k8s.io/reason\":\"RBAC: allowed by ClusterRole\"}}",
+      "expect": {
+        "event.time": "2026-02-21T11:05:00.234Z",
+        "event.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "event.type": "ResponseComplete",
+        "log.level": "RequestResponse",
+        "event.action_raw": "get",
+        "user.name": "system:serviceaccount:default:ci-runner",
+        "user.id": "a1b2c3d4-0000-0000-0000-000000000000",
+        "source.ip": "10.20.30.220",
+        "user_agent.original": "kubectl/v1.29.0 (linux/amd64) kubernetes/1a2b3c4",
+        "kubernetes.resource": "secrets",
+        "host.k8s_namespace": "default",
+        "kubernetes.object.name": "app-secret",
+        "http.response.status_code": "200",
+        "url.path": "/api/v1/namespaces/default/secrets/app-secret",
+        "event.outcome": "allow",
+        "event.severity": "info",
+        "event.category": "cloud-control"
+      }
+    },
+    "k8s-audit-jq": {
+      "protocol": "file",
+      "line": "{\"kind\":\"Event\",\"apiVersion\":\"audit.k8s.io/v1\",\"level\":\"Metadata\",\"stage\":\"ResponseComplete\",\"requestURI\":\"/api/v1/namespaces/default/pods\",\"verb\":\"create\",\"user\":{\"username\":\"admin@example.com\"},\"sourceIPs\":[\"10.20.30.221\"],\"objectRef\":{\"resource\":\"pods\",\"namespace\":\"default\",\"name\":\"web-7d9f8b6c5d-abcde\"},\"responseStatus\":{\"code\":201},\"stageTimestamp\":\"2026-02-21T11:06:00.000000Z\",\"annotations\":{\"authorization.k8s.io/decision\":\"allow\"}}",
+      "expect": {
+        "event.time": "2026-02-21T11:06:00.000Z",
+        "event.action_raw": "create",
+        "user.name": "admin@example.com",
+        "host.k8s_namespace": "default",
+        "kubernetes.resource": "pods",
+        "kubernetes.object.name": "web-7d9f8b6c5d-abcde",
+        "http.response.status_code": "201",
+        "source.ip": "10.20.30.221",
+        "log.level": "Metadata",
+        "url.path": "/api/v1/namespaces/default/pods",
+        "event.outcome": "allow",
+        "event.category": "cloud-control",
+        "event.severity": "info"
+      }
+    },
+    "k8s-event-json": {
+      "protocol": "file",
+      "line": "{\"kind\":\"Event\",\"apiVersion\":\"v1\",\"metadata\":{\"name\":\"web-7d9f8b6c5d-abcde.17a1b2c3\",\"namespace\":\"default\",\"creationTimestamp\":\"2026-02-21T11:07:00Z\"},\"involvedObject\":{\"kind\":\"Pod\",\"namespace\":\"default\",\"name\":\"web-7d9f8b6c5d-abcde\",\"uid\":\"9f2c1d4b\"},\"reason\":\"FailedScheduling\",\"message\":\"0/3 nodes are available: 3 Insufficient cpu.\",\"source\":{\"component\":\"default-scheduler\",\"host\":\"node-01\"},\"firstTimestamp\":\"2026-02-21T11:07:00Z\",\"lastTimestamp\":\"2026-02-21T11:07:30Z\",\"count\":5,\"type\":\"Warning\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:07:30.000Z",
+        "event.start": "2026-02-21T11:07:00Z",
+        "rule.name": "FailedScheduling",
+        "message": "0/3 nodes are available: 3 Insufficient cpu.",
+        "event.count": "5",
+        "host.k8s_pod": "web-7d9f8b6c5d-abcde",
+        "host.k8s_namespace": "default",
+        "kubernetes.object.kind": "Pod",
+        "observer.name": "default-scheduler",
+        "host.name": "node-01",
+        "event.severity": "medium",
+        "event.category": "configuration"
+      }
+    },
+    "docker-container-json": {
+      "protocol": "file",
+      "line": "{\"log\":\"{\\\"level\\\":\\\"error\\\",\\\"msg\\\":\\\"Handler for POST /v1.41/containers/create returned error\\\",\\\"time\\\":\\\"2026-02-21T11:08:00.123456789Z\\\"}\\n\",\"stream\":\"stderr\",\"time\":\"2026-02-21T11:08:00.123456789Z\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:08:00.123Z",
+        "message": "{\"level\":\"error\",\"msg\":\"Handler for POST /v1.41/containers/create returned error\",\"time\":\"2026-02-21T11:08:00.123456789Z\"}\n",
+        "log.stream": "stderr",
+        "event.severity": "info",
+        "event.category": "process"
+      }
+    }
+  }
+}

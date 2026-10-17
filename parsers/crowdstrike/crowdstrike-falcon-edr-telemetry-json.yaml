@@ -1,0 +1,38 @@
+# CrowdStrike Falcon —— 端点遥测事件（ProcessRollup2 等 EDR 遥测流）
+# 正样本：parsers/crowdstrike/samples.json 中 key = crowdstrike-falcon-edr-telemetry-json
+key: crowdstrike-falcon-edr-telemetry-json
+name: Falcon 端点遥测（ProcessRollup）
+vendor: CrowdStrike
+product: Falcon
+protocols: [http-pull, kafka, object-storage]
+engine: json-path
+pattern: |
+  ts=$.metadata.eventCreationTime
+  kind=$.metadata.eventType
+  host=$.event.ComputerName
+  user=$.event.UserName
+  pid=$.event.ProcessId
+  exe=$.event.ImageFileName
+  cmdline=$.event.CommandLine
+  parent=$.event.ParentImageFileName
+  md5=$.event.MD5HashData
+  sha256=$.event.SHA256HashData
+mapping:
+  map:
+    kind: event.category_raw
+    host: host.name
+    user: user.name
+    pid: process.pid
+    exe: process.executable
+    cmdline: process.command_line
+    parent: process.parent.executable
+    md5: process.hash.md5
+    sha256: process.hash.sha256
+  time_field: ts
+  time_format: unix_millis
+  defaults:
+    event.severity: info
+    event.category: process
+required_fields: [exe, host]
+sample_fixture: parsers/crowdstrike/samples.json#crowdstrike-falcon-edr-telemetry-json
+description: Falcon EDR 遥测（ProcessRollup2：ImageFileName/CommandLine/ParentImageFileName/哈希），默认归 process。

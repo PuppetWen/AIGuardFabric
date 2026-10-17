@@ -1,0 +1,18 @@
+# pnpm workspace declaration for AIGuardFabric.
+#
+# `apps/web` is the only Node package in this repository — the rest of the tree is
+# a Cargo workspace. This file gives pnpm an explicit workspace root.
+packages:
+  - 'apps/web'
+
+# `esbuild` ships its prebuilt binary through the optional `@esbuild/<platform>`
+# package and resolves it at runtime, so the postinstall script is not needed for
+# Vite/Vitest. Recording the decision explicitly stops pnpm from failing the
+# install with ERR_PNPM_IGNORED_BUILDS.
+allowBuilds:
+  esbuild: false
+
+minimumReleaseAgeExclude:
+  - '@tanstack/query-core@5.103.1'
+  - '@tanstack/react-query@5.103.1'
+  - jsdom@30.1.0

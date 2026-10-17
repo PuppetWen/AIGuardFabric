@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "engine_origin": "https://mse-agf-demo.invalid",
+  "region_id": "cn-hangzhou",
+  "instance_id": "inst-demo",
+  "namespace_id": "",
+  "config_group": "AGF",
+  "config_data_id": "agf-policies.json",
+  "config_dialect": "nacos-http-v2-cas",
+  "managed_upsert_confirmed": true,
+  "content": "{}"
+}

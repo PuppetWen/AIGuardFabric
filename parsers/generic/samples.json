@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "note": "通用格式模板正样本与关键字段断言。RFC3164/5424、CEF、LEEF、GELF、KV、CSV、JQ 样本均按各自公开规范重建；未联网抓取，IP 用 RFC 5737 段。",
+  "samples": {
+    "syslog-rfc5424-generic": {
+      "protocol": "syslog",
+      "line": "<165>1 2026-02-21T11:20:00.123456Z web-prod-01 app 2311 ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\"] an application event log entry",
+      "expect": {
+        "syslog.rfc": "rfc5424",
+        "syslog.version": "1",
+        "event.time": "2026-02-21T11:20:00.123Z",
+        "host.name": "web-prod-01",
+        "syslog.app_name": "app",
+        "syslog.proc_id": "2311",
+        "syslog.msg_id": "ID47",
+        "syslog.sd.exampleSDID@32473.iut": "3",
+        "event.severity": "low"
+      }
+    },
+    "syslog-rfc3164-generic": {
+      "protocol": "syslog",
+      "line": "<34>Feb 21 11:21:00 web-prod-01 sshd[2311]: Failed password for root from 203.0.113.215 port 51234 ssh2",
+      "expect": {
+        "syslog.rfc": "rfc3164",
+        "host.name": "web-prod-01",
+        "syslog.app_name": "sshd",
+        "syslog.proc_id": "2311",
+        "event.severity": "critical"
+      }
+    },
+    "cef-generic-syslog": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 11:22:00 cef-device CEF:0|Generic|SecurityAppliance|1.0|100|Generic Event|5|src=203.0.113.216 dst=10.20.30.216 spt=50000 dpt=443 proto=TCP act=deny cat=NetworkActivity msg=generic cef event",
+      "expect": {
+        "observer.vendor": "Generic",
+        "observer.product": "SecurityAppliance",
+        "rule.id": "100",
+        "rule.name": "Generic Event",
+        "source.ip": "203.0.113.216",
+        "destination.ip": "10.20.30.216",
+        "destination.port": "443",
+        "network.transport": "TCP",
+        "event.category_raw": "NetworkActivity",
+        "event.action": "denied",
+        "message": "generic cef event",
+        "host.name": "cef-device",
+        "event.severity": "medium",
+        "event.category": "network"
+      }
+    },
+    "leef-generic-syslog": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 11:23:00 leef-device LEEF:2.0|Generic|Appliance|2.0|1002|^|cat=Authentication^sev=6^src=203.0.113.217^dst=10.20.30.217^usrName=bob^act=login^msg=generic leef event",
+      "expect": {
+        "observer.vendor": "Generic",
+        "observer.product": "Appliance",
+        "rule.id": "1002",
+        "event.category_raw": "Authentication",
+        "source.ip": "203.0.113.217",
+        "destination.ip": "10.20.30.217",
+        "user.name": "bob",
+        "event.action": "login",
+        "message": "generic leef event",
+        "host.name": "leef-device",
+        "event.severity": "medium",
+        "event.category": "authentication"
+      }
+    },
+    "gelf-generic-udp": {
+      "protocol": "syslog",
+      "line": "{\"version\":\"1.1\",\"host\":\"app-prod-01\",\"short_message\":\"disk usage 92%\",\"full_message\":\"disk usage 92% on /data\",\"timestamp\":1771667100.5,\"level\":4,\"_facility\":\"disk\",\"_app\":\"monitor-agent\"}",
+      "expect": {
+        "host.name": "app-prod-01",
+        "message": "disk usage 92%",
+        "event.time": "2026-02-21T09:45:00.500Z",
+        "service.name": "monitor-agent",
+        "log.facility": "disk",
+        "event.severity": "medium",
+        "event.category": "other"
+      }
+    },
+    "kv-generic-app": {
+      "protocol": "file",
+      "line": "ts=2026-02-21T11:25:00Z level=warn app=order-service trace=9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b category=web msg=\"slow query\" duration_ms=1520 user=alice",
+      "expect": {
+        "event.time": "2026-02-21T11:25:00.000Z",
+        "service.name": "order-service",
+        "trace.id": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "message": "slow query",
+        "event.duration": "1520",
+        "user.name": "alice",
+        "event.category_raw": "web",
+        "event.severity": "medium",
+        "event.category": "web"
+      }
+    },
+    "csv-generic-app": {
+      "protocol": "file",
+      "line": "1771667160,error,billing-service,203.0.113.218,deny,auth,login_failed_for_bob",
+      "expect": {
+        "event.time": "2026-02-21T09:46:00.000Z",
+        "service.name": "billing-service",
+        "source.ip": "203.0.113.218",
+        "event.category_raw": "auth",
+        "message": "login_failed_for_bob",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "authentication"
+      }
+    },
+    "jq-generic-normalize": {
+      "protocol": "file",
+      "line": "{\"ts\":\"2026-02-21T11:27:00Z\",\"severity\":\"high\",\"event\":{\"action\":\"block\",\"src\":\"203.0.113.219\"},\"detail\":\"blocked by policy\",\"rule\":\"POLICY-001\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:27:00.000Z",
+        "event.action": "denied",
+        "source.ip": "203.0.113.219",
+        "message": "blocked by policy",
+        "rule.id": "POLICY-001",
+        "event.severity": "high",
+        "event.category": "policy"
+      }
+    }
+  }
+}

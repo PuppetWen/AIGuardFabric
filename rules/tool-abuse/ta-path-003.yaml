@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— 路径穿越（任意文件读取）
+# 安全域: tool-abuse（工具与权限滥用）｜ 检测目标: tool-arguments ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/22.html
+key: TA-PATH-003
+name: 路径穿越（任意文件读取）
+description: 命中 ../ 多级穿越、URL 编码变体与经典敏感路径。
+domain: tool-abuse
+severity: critical
+kind: regex
+target: tool-arguments
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-22
+- path-traversal
+references:
+- https://cwe.mitre.org/data/definitions/22.html
+detection:
+  type: regex
+  pattern: '(\.\./){2,}|\.\.\\|%2e%2e%2f|\.\.%2f|/etc/passwd|/proc/self/environ|\.ssh/id_rsa|/windows/win\.ini'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - '{"tool":"file.read","path":"../../../../etc/passwd"}'
+  - GET /download?file=..%2f..%2f..%2fetc%2fshadow
+  negative:
+  - '{"tool":"file.read","path":"/data/reports/2026-02/monthly.csv"}'
+  - 文档目录结构：docs/../assets 是构建期的相对路径写法，请勿直接暴露到 URL。
+remediation: 文件类工具必须做规范化 + 白名单根目录校验；拒绝对路径中 .. 的任何解析。
+author: agf-rules
+version: 1

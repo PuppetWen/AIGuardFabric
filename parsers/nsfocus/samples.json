@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "note": "绿盟模板正样本与关键字段断言。LEEF 2.0 样本按 LEEF 公开格式重建（`LEEF:2.0|厂商|产品|版本|事件ID|^|k=v^...`）、CEF 按头 7 段 + 扩展段重建；未联网抓取。",
+  "samples": {
+    "nsfocus-ips-leef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:40:00 nsfocus-ips1 LEEF:2.0|NSFOCUS|IPS|6.0.9|1001|^|cat=Attack^sev=8^src=10.20.30.61^dst=203.0.113.10^spt=51001^dpt=80^proto=TCP^act=block^msg=Log4j2 远程代码执行^ruleId=NS-IPS-1001^devTime=Feb 21 2026 10:40:00",
+      "expect": {
+        "observer.vendor": "NSFOCUS",
+        "observer.product": "IPS",
+        "rule.id": "1001",
+        "source.ip": "10.20.30.61",
+        "destination.ip": "203.0.113.10",
+        "destination.port": "80",
+        "network.transport": "TCP",
+        "event.category_raw": "Attack",
+        "message": "Log4j2 远程代码执行",
+        "rule.name": "NS-IPS-1001",
+        "event.time": "2026-02-21T10:40:00.000Z",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "intrusion"
+      }
+    },
+    "nsfocus-waf-cef": {
+      "protocol": "syslog",
+      "fixture": "parsers/nsfocus-waf-cef-1.log",
+      "line": "<134>Feb 21 10:41:00 nsfocus-waf1 CEF:0|NSFOCUS|WAF|5.0|2001|XSS攻击|6|src=203.0.113.62 dst=10.20.30.62 dpt=443 proto=TCP act=block cat=WebAttack msg=反射型XSS cs1=NS-WAF-2001",
+      "expect": {
+        "observer.product": "WAF",
+        "rule.id": "2001",
+        "source.ip": "203.0.113.62",
+        "destination.ip": "10.20.30.62",
+        "destination.port": "443",
+        "event.category_raw": "WebAttack",
+        "event.action": "denied",
+        "message": "反射型XSS",
+        "rule.external_id": "NS-WAF-2001",
+        "event.severity": "medium",
+        "event.category": "web"
+      }
+    },
+    "nsfocus-ids-kv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:42:00 nsfocus-ids1 NSFocus src=10.20.30.63 dst=203.0.113.13 dport=22 proto=TCP event=SSH暴力破解 level=high action=alert count=120",
+      "expect": {
+        "host.name": "nsfocus-ids1",
+        "source.ip": "10.20.30.63",
+        "destination.ip": "203.0.113.13",
+        "destination.port": "22",
+        "network.transport": "TCP",
+        "rule.name": "SSH暴力破解",
+        "event.count": "120",
+        "event.severity": "high",
+        "event.action": "alert",
+        "event.category": "intrusion"
+      }
+    },
+    "nsfocus-sas-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21 10:43:00\",\"dev_name\":\"nsfocus-sas1\",\"src_ip\":\"10.20.30.64\",\"dst_ip\":\"203.0.113.14\",\"user\":\"root\",\"cmd\":\"cat /etc/shadow\",\"level\":\"high\",\"action\":\"alert\",\"rule_id\":\"NS-SAS-3001\",\"msg\":\"敏感文件访问\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:43:00.000Z",
+        "observer.name": "nsfocus-sas1",
+        "source.ip": "10.20.30.64",
+        "destination.ip": "203.0.113.14",
+        "user.name": "root",
+        "process.command_line": "cat /etc/shadow",
+        "rule.id": "NS-SAS-3001",
+        "message": "敏感文件访问",
+        "event.severity": "high",
+        "event.action": "alert",
+        "event.category": "configuration"
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "GetApp": {
+    "Code": 200,
+    "Success": true,
+    "RequestId": "req-owned-scheduler-app",
+    "Data": {
+      "Id": 9007199254740993,
+      "AppName": "app-agf-demo",
+      "Title": "Owned Scheduler observation example",
+      "AppType": 1,
+      "AccessToken": "SYNTHETIC-APP-TOKEN-DO-NOT-EXPOSE"
+    }
+  },
+  "ListJobs": {
+    "Code": 200,
+    "Success": true,
+    "RequestId": "req-owned-scheduler-jobs-1",
+    "Data": {
+      "PageNumber": 1,
+      "PageSize": 100,
+      "Total": 6,
+      "Records": [
+        {
+          "JobId": 9007199254741001,
+          "AppGroupId": 9007199254740993,
+          "AppName": "app-agf-demo",
+          "Name": "demo-http-1",
+          "JobType": "http",
+          "Status": 0,
+          "TimeType": 1,
+          "TimeExpression": "0 0/5 * * * ?",
+          "Timezone": "UTC",
+          "Calendar": null,
+          "RouteStrategy": 8,
+          "MaxAttempt": 1,
+          "AttemptInterval": 30,
+          "Parameters": "{\"Authorization\":\"Bearer SYNTHETIC-CALLBACK-TOKEN\"}",
+          "JobHandler": "opaque-http-handler",
+          "Xattrs": null,
+          "Script": "",
+          "UpdateTime": 1710000000123
+        },
+        {
+          "JobId": 9007199254741002,
+          "AppGroupId": 9007199254740993,
+          "AppName": "app-agf-demo",
+          "Name": "demo-http-2",
+          "JobType": "http",
+          "Status": 1,
+          "TimeType": 1,
+          "TimeExpression": "0 0/10 * * * ?",
+          "TimeZone": "UTC",
+          "Parameters": "",
+          "JobHandler": null
+        },
+        {
+          "JobId": 9007199254741003,
+          "AppName": "app-agf-demo",
+          "Name": "demo-http-3",
+          "JobType": "http",
+          "Status": 0,
+          "Parameters": null
+        },
+        {
+          "JobId": 9007199254741004,
+          "AppName": "app-agf-demo",
+          "Name": "demo-http-4",
+          "JobType": "http",
+          "Status": 0,
+          "Timezone": "Asia/Shanghai"
+        },
+        {
+          "JobId": 9007199254741005,
+          "AppName": "app-agf-demo",
+          "Name": "demo-script-5",
+          "JobType": "script_shell",
+          "Status": 0,
+          "Script": "echo SYNTHETIC-SCRIPT-BODY"
+        },
+        {
+          "JobId": 9007199254741006,
+          "AppName": "app-agf-demo",
+          "Name": "demo-unknown-6"
+        }
+      ]
+    }
+  }
+}

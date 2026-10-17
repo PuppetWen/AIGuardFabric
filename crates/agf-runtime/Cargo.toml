@@ -1,0 +1,50 @@
+[package]
+name = "agf-runtime"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 运行时防御：MCP 代理、策略引擎（Rego/CEL/结构化）、三级配额、黑名单、拦截审计"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+# 说明（§4.3 南北向网关联动）：**不依赖 `agf-aigw`**。
+# 网关侧只通过 `agf_runtime::engine::RuntimeEngine` 的公开入口（`evaluate` / `intercept_*` /
+# `complete_call` / `guard_report`）调用运行时防御，反向依赖会造成 crate 环且与
+# §4.3「拦截点统一策略引擎」的分层相悖。南北向接入适配由 `agf-aigw` 侧实现。
+
+tokio.workspace = true
+tokio-stream.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+regex.workspace = true
+regorus.workspace = true
+cel-interpreter = { workspace = true, features = ["json"] }
+axum.workspace = true
+dashmap.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+hex.workspace = true
+url.workspace = true
+indexmap.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+proptest.workspace = true
+
+[lints]
+workspace = true

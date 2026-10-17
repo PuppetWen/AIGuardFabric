@@ -1,0 +1,49 @@
+# Suricata —— eve.json 告警事件
+# 正样本：parsers/suricata/samples.json 中 key = suricata-eve-alert-json
+key: suricata-eve-alert-json
+name: Suricata eve.json 告警
+vendor: Suricata
+product: eve.json
+protocols: [file, beats, webhook]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  kind=$.event_type
+  src_ip=$.src_ip
+  src_port=$.src_port
+  dest_ip=$.dest_ip
+  dest_port=$.dest_port
+  proto=$.proto
+  flow_id=$.flow_id
+  sig_id=$.alert.signature_id
+  signature=$.alert.signature
+  sig_category=$.alert.category
+  sev=$.alert.severity
+  action=$.alert.action
+  host=$.host
+mapping:
+  map:
+    kind: event.type
+    src_ip: source.ip
+    src_port: source.port
+    dest_ip: destination.ip
+    dest_port: destination.port
+    proto: network.transport
+    flow_id: network.community_id
+    sig_id: rule.id
+    signature: rule.name
+    sig_category: rule.category
+    host: host.name
+  time_field: ts
+  severity_field: sev
+  severity_map:
+    '1': high
+    '2': medium
+    '3': low
+    '4': info
+  action_field: action
+  defaults:
+    event.category: intrusion
+required_fields: [signature, src_ip]
+sample_fixture: parsers/suricata/samples.json#suricata-eve-alert-json
+description: Suricata eve.json alert 事件（alert.severity 1-4 → high/medium/low/info，alert.action=blocked → denied）。

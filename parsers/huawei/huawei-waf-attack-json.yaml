@@ -1,0 +1,51 @@
+# 华为云 WAF —— 攻击日志（JSON 推送 / LTS 拉取）
+# 正样本：parsers/huawei/samples.json 中 key = huawei-waf-attack-json
+key: huawei-waf-attack-json
+name: 华为云 WAF 攻击日志
+vendor: 华为云
+product: Web应用防火墙
+protocols: [webhook, http-pull, kafka, object-storage]
+engine: json-path
+pattern: |
+  ts=$.time
+  host=$.host
+  src_ip=$.client_ip
+  method=$.request_method
+  uri=$.request_uri
+  ua=$.user_agent
+  attack=$.attack_type
+  atk=$.attack_type
+  action=$.action
+  rule_id=$.rule_id
+  status=$.status
+  sev=$.severity
+  region=$.region
+mapping:
+  map:
+    ts: event.time
+    host: host.name
+    src_ip: source.ip
+    method: http.request.method
+    uri: url.path
+    ua: user_agent.original
+    attack: rule.name
+    atk: event.category_raw
+    rule_id: rule.id
+    status: http.response.status_code
+    region: cloud.region
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    SQL注入: web
+    XSS: web
+    RCE: web
+  action_field: action
+  defaults:
+    event.category: web
+required_fields: [rule_id, src_ip]
+sample_fixture: parsers/huawei/samples.json#huawei-waf-attack-json
+description: 华为云 WAF 攻击日志（time/host/client_ip/request_method/request_uri/attack_type/action/rule_id/status/severity 为公开日志字段）。

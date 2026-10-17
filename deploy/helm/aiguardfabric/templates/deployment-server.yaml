@@ -1,0 +1,171 @@
+{{/*
+  agf-server Deployment —— HTTP API / 控制台后端 / 迁移 / 引导管理员
+  事实来源：
+    * docker-compose.yml: agf-server（端口 8080 + 8091 + 9100，healthcheck URL /healthz，stop_grace_period 30s）
+    * deploy/docker/Dockerfile: --target server → ENTRYPOINT /usr/local/bin/agf-server
+    * crates/agf-core/src/config.rs: AGF_SERVER_PORT / AGF_METRICS_PORT
+  安全基线：非 root(10001) + 只读根文件系统 + drop ALL + no privilege escalation + RuntimeDefault seccomp
+*/}}
+{{- if .Values.server.enabled }}
+{{- $root := . -}}
+{{- $svc := .Values.server -}}
+{{- $name := include "agf.componentName" (dict "root" $root "component" "server") -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" $root "component" "server") | nindent 4 }}
+  annotations:
+    # 配置校验和：ConfigMap 变更时同步滚动更新
+    aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+spec:
+  replicas: {{ $svc.replicaCount }}
+  revisionHistoryLimit: 5
+  {{- if not $root.Values.hpa.server.enabled }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" $root "component" "server") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "agf.componentLabels" (dict "root" $root "component" "server") | nindent 8 }}
+        {{- with $svc.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "agf.prometheusAnnotations" $root | nindent 8 }}
+        aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+        {{- with $svc.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "agf.serviceAccountName" $root }}
+      automountServiceAccountToken: {{ $root.Values.serviceAccount.automountServiceAccountToken }}
+      securityContext:
+        {{- include "agf.podSecurityContext" $root | nindent 8 }}
+      {{- include "agf.imagePullSecrets" (dict "Values" $root.Values "componentImagePullSecrets" $svc.imagePullSecrets) | nindent 6 }}
+      terminationGracePeriodSeconds: {{ $svc.terminationGracePeriodSeconds }}
+      {{- with $svc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: agf-server
+          image: {{ include "agf.image" (dict "Chart" $root.Chart "Values" $root.Values "componentImage" $svc.image) }}
+          imagePullPolicy: {{ include "agf.imagePullPolicy" (dict "Values" $root.Values "componentImage" $svc.image) }}
+          {{- with $svc.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml $root.Values.containerSecurityContext | nindent 12 }}
+          ports:
+            - name: api
+              containerPort: {{ $root.Values.ports.api }}
+              protocol: TCP
+            - name: mcp-proxy
+              containerPort: {{ $root.Values.ports.mcpProxy }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ $root.Values.ports.metrics }}
+              protocol: TCP
+          envFrom:
+            # 非敏感配置全量注入
+            - configMapRef:
+                name: {{ include "agf.configMapName" $root }}
+            {{- with $svc.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: AGF_MCP_PROXY_PORT
+              value: {{ $root.Values.ports.mcpProxy | quote }}
+            - name: AGF_SHARED_RATELIMIT_REQUIRED
+              value: "true"
+            {{- include "agf.env" (dict "root" $root "component" "server") | nindent 12 }}
+          {{- if $svc.livenessProbe.enabled }}
+          livenessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.livenessProbe "defaultPort" "api") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.readinessProbe.enabled }}
+          readinessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.readinessProbe "defaultPort" "api") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.startupProbe.enabled }}
+          startupProbe:
+            {{- include "agf.probe" (dict "probe" $svc.startupProbe "defaultPort" "api") | nindent 12 }}
+          {{- end }}
+          {{- include "agf.preStop" (dict "hook" $svc.preStop) | nindent 10 }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          volumeMounts:
+            # 只读根文件系统下必须提供可写临时目录
+            - name: tmp
+              mountPath: /tmp
+            {{- if and $root.Values.volumes.evidence.enabled $svc.evidenceVolume.enabled }}
+            - name: evidence
+              mountPath: /data
+            {{- end }}
+            {{- if $root.Values.volumes.rules.configMapName }}
+            - name: rules
+              mountPath: /app/rules
+              readOnly: true
+            {{- else if $root.Values.volumes.rules.existingClaim }}
+            - name: rules
+              mountPath: /app/rules
+              readOnly: true
+            {{- end }}
+            {{- with $svc.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: {{ $root.Values.volumes.tmp.medium }}
+            sizeLimit: {{ $root.Values.volumes.tmp.sizeLimit }}
+        {{- if and $root.Values.volumes.evidence.enabled $svc.evidenceVolume.enabled }}
+        - name: evidence
+          {{- if $root.Values.volumes.evidence.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ $root.Values.volumes.evidence.existingClaim }}
+          {{- else }}
+          persistentVolumeClaim:
+            claimName: {{ include "agf.evidenceClaimName" $root }}
+          {{- end }}
+        {{- end }}
+        {{- if $root.Values.volumes.rules.configMapName }}
+        - name: rules
+          configMap:
+            name: {{ $root.Values.volumes.rules.configMapName }}
+        {{- else if $root.Values.volumes.rules.existingClaim }}
+        - name: rules
+          persistentVolumeClaim:
+            claimName: {{ $root.Values.volumes.rules.existingClaim }}
+        {{- end }}
+        {{- with $svc.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

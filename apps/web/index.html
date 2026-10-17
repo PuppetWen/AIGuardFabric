@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="description"
+      content="AIGuardFabric 智御矩阵 — AI 资产治理、风险检测、AI 红队与运行时拦截一体化控制台"
+    />
+    <title>AIGuardFabric 智御矩阵</title>
+    <script>
+      // Apply the persisted theme before first paint to avoid a light flash.
+      try {
+        var theme = localStorage.getItem('aigf.theme');
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (error) {
+        /* storage disabled — keep the dark default */
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

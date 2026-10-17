@@ -1,0 +1,162 @@
+{{/*
+  agf-web Deployment —— nginx-unprivileged 托管 React 控制台构建产物，并反代 /api 与 /ws
+  事实来源：
+    * deploy/docker/Dockerfile: --target web → nginxinc/nginx-unprivileged:1.27-alpine，USER 10001，EXPOSE 8080
+    * deploy/docker/nginx.conf: 监听 8080，upstream agf_api → agf-server:8080
+    * docker-compose.yml: agf-web，环境变量 AGF_API_UPSTREAM=http://agf-server:8080，端口 8081:8080
+
+  只读根文件系统说明（重要）：
+    nginx 官方镜像（含 unprivileged 变体）在启动时会写 /etc/nginx/conf.d（entrypoint 的
+    envsubst 模板处理）与 /var/cache/nginx（proxy_temp、client_body_temp 等）。
+    因此本模板在**保留 readOnlyRootFilesystem: true** 的同时，把这两个路径挂为可写卷：
+      * /etc/nginx/conf.d → emptyDir（镜像 entrypoint 首次写入即可，无需持久化）
+      * /var/cache/nginx  → emptyDir（proxy 缓冲，容量受 sizeLimit 约束，避免磁盘打满）
+    若使用自定义只读镜像（构建期完成 envsubst 且内置全部 temp 目录），
+    可将 web.writableNginxPaths 置 false 以收紧到完全只读根。
+*/}}
+{{- if .Values.web.enabled }}
+{{- $root := . -}}
+{{- $svc := .Values.web -}}
+{{- $name := include "agf.componentName" (dict "root" $root "component" "web") -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" $root "component" "web") | nindent 4 }}
+  annotations:
+    aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+spec:
+  replicas: {{ $svc.replicaCount }}
+  revisionHistoryLimit: 5
+  {{- if not $root.Values.hpa.web.enabled }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" $root "component" "web") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "agf.componentLabels" (dict "root" $root "component" "web") | nindent 8 }}
+        {{- with $svc.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+        {{- with $svc.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "agf.serviceAccountName" $root }}
+      automountServiceAccountToken: {{ $root.Values.serviceAccount.automountServiceAccountToken }}
+      securityContext:
+        {{- include "agf.podSecurityContext" $root | nindent 8 }}
+      {{- include "agf.imagePullSecrets" (dict "Values" $root.Values "componentImagePullSecrets" $svc.imagePullSecrets) | nindent 6 }}
+      terminationGracePeriodSeconds: {{ $svc.terminationGracePeriodSeconds }}
+      {{- with $svc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: agf-web
+          image: {{ include "agf.image" (dict "Chart" $root.Chart "Values" $root.Values "componentImage" $svc.image) }}
+          imagePullPolicy: {{ include "agf.imagePullPolicy" (dict "Values" $root.Values "componentImage" $svc.image) }}
+          securityContext:
+            {{- toYaml $root.Values.containerSecurityContext | nindent 12 }}
+          ports:
+            # nginx-unprivileged 监听 8080（容器内）；Service 对外仍可映射 80/443
+            - name: web
+              containerPort: {{ $root.Values.ports.web }}
+              protocol: TCP
+          env:
+            # nginx 反代上游可在运行时注入（与 compose 的 AGF_API_UPSTREAM 同名）
+            - name: AGF_API_UPSTREAM
+              value: {{ $svc.apiUpstream | quote }}
+            {{- range $k, $v := $svc.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+            {{- if $svc.extraEnv }}
+            {{- toYaml $svc.extraEnv | nindent 12 }}
+            {{- end }}
+          {{- with $svc.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if $svc.livenessProbe.enabled }}
+          livenessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.livenessProbe "defaultPort" "web") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.readinessProbe.enabled }}
+          readinessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.readinessProbe "defaultPort" "web") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.startupProbe.enabled }}
+          startupProbe:
+            {{- include "agf.probe" (dict "probe" $svc.startupProbe "defaultPort" "web") | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            {{- if $svc.nginxConfigMap }}
+            # 覆盖默认 server 配置（含 upstream 与安全响应头）
+            - name: nginx-site
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+            {{- end }}
+            {{- with $svc.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: {{ $root.Values.volumes.tmp.medium }}
+            sizeLimit: {{ $root.Values.volumes.tmp.sizeLimit }}
+        # nginx entrypoint 需写 conf.d（envsubst 模板），故用可写卷承载而非持久化
+        - name: nginx-conf
+          emptyDir:
+            sizeLimit: 16Mi
+        - name: nginx-cache
+          emptyDir:
+            sizeLimit: 256Mi
+        {{- if $svc.nginxConfigMap }}
+        - name: nginx-site
+          configMap:
+            name: {{ $svc.nginxConfigMap }}
+            items:
+              - key: default.conf
+                path: default.conf
+        {{- end }}
+        {{- with $svc.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

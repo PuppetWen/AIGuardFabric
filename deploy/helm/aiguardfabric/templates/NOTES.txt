@@ -1,0 +1,93 @@
+{{/*
+  NOTES.txt —— helm install/upgrade 后的提示信息
+  目标：让运维一眼看到访问入口、密钥来源、以及**必须完成的后续动作**。
+*/}}
+{{- $fullname := include "agf.fullname" . -}}
+{{- $ns := .Release.Namespace -}}
+AIGuardFabric（智御矩阵）已部署。
+
+发布信息
+  名称/命名空间 : {{ .Release.Name }} / {{ $ns }}
+  Chart 版本    : {{ .Chart.Version }}（appVersion {{ .Chart.AppVersion }}）
+  运行模式      : AGF_ENV={{ .Values.config.AGF_ENV }}  AGF_MOCK_MODE={{ .Values.config.AGF_MOCK_MODE }}
+
+{{ if .Values.server.enabled -}}
+服务入口（集群内 DNS）
+  API（agf-server）  : http://{{ include "agf.componentName" (dict "root" . "component" "server") }}.{{ $ns }}.svc:{{ .Values.ports.api }}
+  健康检查           : http://{{ include "agf.componentName" (dict "root" . "component" "server") }}.{{ $ns }}.svc:{{ .Values.ports.api }}/healthz
+  指标               : http://{{ include "agf.componentName" (dict "root" . "component" "server") }}.{{ $ns }}.svc:{{ .Values.ports.metrics }}/metrics
+{{- end }}
+{{ if .Values.ingest.enabled }}
+日志接入（agf-ingest）
+  HTTP/Syslog(8090)  : http://{{ include "agf.componentName" (dict "root" . "component" "ingest") }}.{{ $ns }}.svc:{{ .Values.ports.ingestHttp }}
+  MCP 代理           : {{ include "agf.componentName" (dict "root" . "component" "ingest") }}.{{ $ns }}.svc:{{ .Values.ports.mcpProxy }}
+  Syslog             : {{ .Values.ports.syslogTcp }}/tcp 与 {{ .Values.ports.syslogUdp }}/udp
+{{- end }}
+{{ if .Values.web.enabled }}
+控制台（agf-web）
+  Service            : http://{{ include "agf.componentName" (dict "root" . "component" "web") }}.{{ $ns }}.svc:80
+{{- end }}
+
+{{ if .Values.ingress.enabled -}}
+外部访问（Ingress）
+{{- if .Values.ingress.tls.enabled }}
+  https://{{ .Values.ingress.api.host }}/            （控制台；TLS Secret: {{ .Values.ingress.tls.secretName }}）
+  https://{{ .Values.ingress.api.host }}{{ .Values.config.AGF_API_PREFIX }}   （API）
+{{- else }}
+  ⚠ 未启用 TLS。生产环境请设置 ingress.tls.enabled=true 并配置证书。
+  http://{{ .Values.ingress.api.host }}/
+{{- end }}
+{{- else }}
+⚠ 未启用 Ingress。若需外部访问，设置 ingress.enabled=true（或使用私有网络 PrivateLink）。
+{{- end }}
+
+{{ if .Values.privateLink.enabled }}
+PrivateLink（阿里云终端节点）
+  已创建私网 LoadBalancer Service：
+    {{ include "agf.componentName" (dict "root" . "component" "server") }}-privatelink（端口 {{ .Values.privateLink.service.apiPort }}）
+  后续人工步骤（控制台 / Terraform）：
+    1. 用该 LB 创建「终端节点服务」，关闭"自动接受连接"
+    2. 白名单只加入客户 VPC 的终端节点 ID
+    3. 安全组只放行 {{ .Values.privateLink.service.apiPort }} 端口
+{{- end }}
+
+密钥来源
+{{- if .Values.secrets.existingSecret }}
+  使用外部 Secret：{{ .Values.secrets.existingSecret }}
+  必需键：AGF_PG_PASSWORD / AGF_JWT_SECRET / AGF_MASTER_KEY_BASE64 / AGF_S3_SECRET_KEY
+          （另见 values.yaml 的 secrets.existingSecretKeys 说明）
+{{- else }}
+  ⚠ 使用本 Chart 渲染的 Secret：{{ include "agf.secretName" . }}
+    请确认该 Secret 由私密值文件提供，且**未把明文写入版本库**。
+    生产建议改用 secrets.existingSecret（Vault / External Secrets / SealedSecrets）。
+{{- end }}
+
+部署后必做检查
+  1) 数据库迁移（镜像内自带 agfctl，或由 Job 执行）：
+       kubectl -n {{ $ns }} exec deploy/{{ include "agf.componentName" (dict "root" . "component" "server") }} -- agfctl migrate
+     ⚠ 若 agfctl 尚未实现 migrate 子命令，见 docs/pending-verification.deploy.md
+  2) 取引导管理员口令（首启随机生成时）：
+       kubectl -n {{ $ns }} get secret {{ include "agf.secretName" . }} -o jsonpath='{.data.AGF_BOOTSTRAP_ADMIN_PASSWORD}' | base64 -d
+       或查看 {{ .Values.config.AGF_DATA_DIR }}/seed/bootstrap-admin.txt
+  3) 首登强制改密（AGF_FORCE_PASSWORD_CHANGE={{ .Values.config.AGF_FORCE_PASSWORD_CHANGE }}，勿关闭）
+  4) 校验指标抓取：
+       kubectl -n {{ $ns }} port-forward svc/{{ include "agf.componentName" (dict "root" . "component" "server") }} {{ .Values.ports.metrics }}:{{ .Values.ports.metrics }}
+       curl -s http://127.0.0.1:{{ .Values.ports.metrics }}/metrics | head
+
+可观测性
+{{- if .Values.serviceMonitor.enabled }}
+  ServiceMonitor 已启用（需 Prometheus Operator CRD 已安装）
+{{- else }}
+  ServiceMonitor 未启用；已通过 Pod 注解暴露抓取目标（prometheus.io/scrape=true）
+  抓取配置见仓库 deploy/prometheus/prometheus.yml 与 alerts.yml
+{{- end }}
+{{- if .Values.grafana.enabled }}
+  Grafana 已启用（内置演示用）；生产建议独立部署并挂载 deploy/grafana 的预置项
+{{- else }}
+  Grafana 未启用；仪表盘见仓库 deploy/grafana/dashboards/*.json
+{{- end }}
+
+安全基线
+  * 非 root（uid {{ .Values.podSecurityContext.runAsUser }}）+ 只读根文件系统 + drop ALL capabilities + RuntimeDefault seccomp
+  * 已启用 NetworkPolicy 默认拒绝（{{ .Values.networkPolicy.enabled }}）
+  * 禁止把明文密钥写入 values 文件；.helmignore 已排除 values-local.yaml / secrets.yaml

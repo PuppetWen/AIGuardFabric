@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "note": "AWS 模板正样本与关键字段断言。JSON 样本按 CloudTrail/GuardDuty 公开事件结构重建，文本样本按 VPC Flow Logs/ALB/S3 访问日志公开列序重建；未联网抓取，IP 用 RFC 5737 段。",
+  "samples": {
+    "aws-cloudtrail-json": {
+      "protocol": "object-storage",
+      "line": "{\"eventVersion\":\"1.08\",\"userIdentity\":{\"type\":\"IAMUser\",\"principalId\":\"AIDAEXAMPLE\",\"arn\":\"arn:aws:iam::123456789012:user/ops-admin\",\"accountId\":\"123456789012\",\"userName\":\"ops-admin\"},\"eventTime\":\"2026-02-21T10:50:00Z\",\"eventSource\":\"ec2.amazonaws.com\",\"eventName\":\"DeleteSecurityGroup\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"203.0.113.170\",\"userAgent\":\"aws-cli/2.15.0\",\"requestParameters\":{\"groupId\":\"sg-0123456789abcdef0\"},\"responseElements\":null,\"requestID\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"eventID\":\"b1c2d3e4-5f60-7182-93a4-b5c6d7e8f901\",\"readOnly\":false,\"eventType\":\"AwsApiCall\",\"managementEvent\":true,\"recipientAccountId\":\"123456789012\",\"errorCode\":\"\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:50:00.000Z",
+        "event.action_raw": "DeleteSecurityGroup",
+        "event.provider": "ec2.amazonaws.com",
+        "cloud.region": "us-east-1",
+        "cloud.account.id": "123456789012",
+        "user.name": "ops-admin",
+        "user.id": "arn:aws:iam::123456789012:user/ops-admin",
+        "user.type": "IAMUser",
+        "source.ip": "203.0.113.170",
+        "user_agent.original": "aws-cli/2.15.0",
+        "event.reference": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "event.id": "b1c2d3e4-5f60-7182-93a4-b5c6d7e8f901",
+        "event.type": "AwsApiCall",
+        "event.read_only": "false",
+        "event.category": "cloud-control",
+        "event.severity": "info"
+      }
+    },
+    "aws-guardduty-json": {
+      "protocol": "webhook",
+      "line": "{\"version\":\"0\",\"id\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"account\":\"123456789012\",\"region\":\"us-east-1\",\"type\":\"UnauthorizedAccess:EC2/SSHBruteForce\",\"severity\":8,\"createdAt\":\"2026-02-21T10:51:00.000Z\",\"updatedAt\":\"2026-02-21T10:51:30.000Z\",\"title\":\"SSH brute force attempt\",\"description\":\"EC2 instance i-0123456789abcdef0 is being brute forced via SSH\",\"resource\":{\"resourceType\":\"Instance\",\"instanceDetails\":{\"instanceId\":\"i-0123456789abcdef0\",\"instanceType\":\"t3.medium\"}},\"service\":{\"action\":{\"actionType\":\"NETWORK_CONNECTION\",\"networkConnectionAction\":{\"remoteIpDetails\":{\"ipAddressV4\":\"203.0.113.171\"},\"remotePortDetails\":{\"port\":52001},\"localPortDetails\":{\"port\":22}}}},\"partition\":\"aws\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:51:00.000Z",
+        "rule.id": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "cloud.account.id": "123456789012",
+        "cloud.region": "us-east-1",
+        "rule.name": "UnauthorizedAccess:EC2/SSHBruteForce",
+        "rule.description": "SSH brute force attempt",
+        "message": "EC2 instance i-0123456789abcdef0 is being brute forced via SSH",
+        "cloud.resource_type": "Instance",
+        "host.id": "i-0123456789abcdef0",
+        "source.ip": "203.0.113.171",
+        "source.port": "52001",
+        "destination.port": "22",
+        "event.type": "NETWORK_CONNECTION",
+        "event.severity": "high",
+        "event.category": "intrusion"
+      }
+    },
+    "aws-vpc-flow-syslog": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:52:00 vpc-flow 2 123456789012 eni-0123456789abcdef0 10.20.30.180 203.0.113.180 44321 443 6 10 840 1771665120 1771665180 ACCEPT OK",
+      "expect": {
+        "host.name": "vpc-flow",
+        "cloud.account.id": "123456789012",
+        "observer.name": "eni-0123456789abcdef0",
+        "source.ip": "10.20.30.180",
+        "destination.ip": "203.0.113.180",
+        "source.port": "44321",
+        "destination.port": "443",
+        "network.iana_number": "6",
+        "network.packets": "10",
+        "network.bytes": "840",
+        "event.time": "2026-02-21T09:12:00.000Z",
+        "event.end": "1771665180",
+        "event.outcome": "OK",
+        "event.action": "allowed",
+        "event.category": "network"
+      }
+    },
+    "aws-alb-access-log": {
+      "protocol": "file",
+      "line": "http 2026-02-21T10:53:00.123456Z app/my-alb/50dc6c495c0c9188 203.0.113.181:52001 10.20.30.181:80 0.001 0.002 0.000 200 200 512 1024 \"GET http://www.example.com:80/index.html HTTP/1.1\" \"curl/8.5.0\" - - arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-targets/73e2d6bc24d8a067 \"Root=1-58337262-36d228ad5d99923122bbe354\" \"-\" \"-\" 0 2026-02-21T10:53:00.000000Z \"forward\" \"-\" \"-\" \"10.20.30.181:80\" \"200\" \"-\" \"-\"",
+      "expect": {
+        "event.type": "http",
+        "event.time": "2026-02-21T10:53:00.123Z",
+        "observer.name": "app/my-alb/50dc6c495c0c9188",
+        "source.ip": "203.0.113.181",
+        "source.port": "52001",
+        "destination.ip": "10.20.30.181",
+        "destination.port": "80",
+        "event.duration": "0.001",
+        "http.response.status_code": "200",
+        "http.response.status_code_upstream": "200",
+        "source.bytes": "512",
+        "http.response.body.bytes": "1024",
+        "http.request.method": "GET",
+        "url.full": "http://www.example.com:80/index.html",
+        "user_agent.original": "curl/8.5.0",
+        "event.category": "web",
+        "event.severity": "info"
+      }
+    },
+    "aws-s3-access-log": {
+      "protocol": "file",
+      "line": "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be example-bucket [21/Feb/2026:10:54:00 +0000] 203.0.113.182 arn:aws:iam::123456789012:user/ops-admin 9F2C1D4B6A8E0F3C REST.GET.OBJECT index.html \"GET /index.html HTTP/1.1\" 200 - 1024 1024 15 12 \"-\" \"curl/8.5.0\" - 9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b SigV4 ECDHE-RSA-AES128-GCM-SHA256 AuthHeader example-bucket.s3.amazonaws.com TLSv1.2 - -",
+      "expect": {
+        "cloud.account.id": "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be",
+        "cloud.bucket": "example-bucket",
+        "event.time": "2026-02-21T10:54:00.000Z",
+        "source.ip": "203.0.113.182",
+        "user.id": "arn:aws:iam::123456789012:user/ops-admin",
+        "event.id": "9F2C1D4B6A8E0F3C",
+        "event.action_raw": "REST.GET.OBJECT",
+        "file.name": "index.html",
+        "http.request.method": "GET",
+        "url.path": "/index.html",
+        "http.version": "1.1",
+        "http.response.status_code": "200",
+        "error.code": "-",
+        "http.response.body.bytes": "1024",
+        "file.size": "1024",
+        "event.duration": "15",
+        "event.turnaround": "12",
+        "http.request.referrer": "-",
+        "user_agent.original": "curl/8.5.0",
+        "cloud.signature_version": "SigV4",
+        "tls.cipher": "ECDHE-RSA-AES128-GCM-SHA256",
+        "cloud.auth_type": "AuthHeader",
+        "url.domain": "example-bucket.s3.amazonaws.com",
+        "tls.version": "TLSv1.2",
+        "event.action": "read",
+        "event.category": "web",
+        "event.severity": "info"
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# 通用 Syslog —— RFC3164（BSD syslog，无年份时间戳）
+# 正样本：parsers/generic/samples.json 中 key = syslog-rfc3164-generic
+key: syslog-rfc3164-generic
+name: 通用 Syslog（RFC3164）
+vendor: generic
+product: syslog
+protocols: [syslog, file, beats]
+engine: syslog
+pattern: ''
+mapping:
+  map: {}
+required_fields: [host.name]
+sample_fixture: parsers/generic/samples.json#syslog-rfc3164-generic
+description: 通用 RFC3164 模板（PRI/时间戳/主机/TAG[PID]/消息体），无年份时间按接入年份补全；未命中专用模板时的兜底。

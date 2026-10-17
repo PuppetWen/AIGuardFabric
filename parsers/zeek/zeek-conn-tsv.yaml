@@ -1,0 +1,35 @@
+# Zeek —— conn.log 连接日志（TSV）
+# 正样本：parsers/zeek/samples.json 中 key = zeek-conn-tsv
+# 说明：Zeek 日志为 TSV 且自带 `#separator`/`#fields` 头，模板的 pattern 即 `#fields` 声明的列名
+# （公开字段顺序），CSV 引擎按列序对齐；数据行前的 `#` 头会被跳过。
+key: zeek-conn-tsv
+name: Zeek conn.log 连接日志
+vendor: Zeek
+product: conn.log
+protocols: [file, beats]
+engine: csv
+pattern: 'ts,uid,id.orig_h,id.orig_p,id.resp_h,id.resp_p,proto,service,duration,orig_bytes,resp_bytes,conn_state,local_orig,local_resp,missed_bytes,history,orig_pkts,orig_ip_bytes,resp_pkts,resp_ip_bytes'
+mapping:
+  map:
+    uid: event.id
+    id.orig_h: source.ip
+    id.orig_p: source.port
+    id.resp_h: destination.ip
+    id.resp_p: destination.port
+    proto: network.transport
+    service: network.application
+    duration: event.duration
+    orig_bytes: source.bytes
+    resp_bytes: destination.bytes
+    conn_state: network.connection_state
+    history: network.history
+    orig_pkts: source.packets
+    resp_pkts: destination.packets
+  time_field: ts
+  time_format: unix
+  defaults:
+    event.severity: info
+    event.category: network
+required_fields: [uid, id.orig_h]
+sample_fixture: parsers/zeek/samples.json#zeek-conn-tsv
+description: Zeek conn.log（TSV，字段顺序取自官方 #fields 头），双向字节/包数与连接状态用于东-西向基线。

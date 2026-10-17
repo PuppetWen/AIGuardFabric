@@ -1,0 +1,45 @@
+# 华为云 HSS 主机安全 —— 异常进程告警（JSON）
+# 正样本：parsers/huawei/samples.json 中 key = huawei-hss-alert-json
+key: huawei-hss-alert-json
+name: 华为云 HSS 异常进程告警
+vendor: 华为云
+product: 主机安全服务
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.occur_time
+  kind=$.event_type
+  host=$.host_name
+  host_ip=$.host_ip
+  user=$.user
+  pname=$.process_name
+  ppath=$.process_path
+  cmdline=$.cmd_line
+  sev=$.severity
+  action=$.action
+  region=$.region
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    pname: process.name
+    ppath: process.executable
+    cmdline: process.command_line
+    region: cloud.region
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    abnormal_process: process
+    brute_force: authentication
+    reverse_shell: intrusion
+  action_field: action
+required_fields: [pname, host]
+sample_fixture: tests/fixtures/logs/parsers/huawei-hss-alert-1.log
+description: 华为云 HSS 主机安全异常进程告警（occur_time/event_type/host_name/process_name/cmd_line 为公开推送字段）。

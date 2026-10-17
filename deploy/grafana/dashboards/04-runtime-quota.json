@@ -1,0 +1,153 @@
+{
+  "uid": "agf-runtime-defense",
+  "title": "AIGuardFabric · 运行时防护与配额（拦截 / 策略 / 心跳）",
+  "description": "指标名与 crates/agf-api/src/metrics.rs 的实际埋点一致（agf_*）。策略命中与三级配额的细粒度指标需要 agf-runtime 埋点（TODO(runtime-metrics)），本面板先用真实的 HTTP/拦截指标 + 说明性 text 面板，不展示近似值。",
+  "tags": ["aiguardfabric", "runtime", "quota"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "数据源",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "selected": true, "text": "agf-prometheus", "value": "agf-prometheus" },
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "options": []
+      },
+      {
+        "name": "action",
+        "label": "拦截动作",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": { "query": "label_values(agf_interceptions_total, action)", "refId": "agf-action" },
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "拦截与策略命中",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "panels": []
+    },
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "拦截动作速率（allow / deny / audit / quota / redact / throttle / degrade / isolate / approval）",
+      "description": "agf_interceptions_total{action}：与 agf_core::enums::PolicyAction 的动作词表一致。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "fillOpacity": 12, "stacking": { "mode": "normal" } } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum", "max"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (action) (rate(agf_interceptions_total{action=~\"$action\"}[5m]))",
+          "legendFormat": "{{action}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "piechart",
+      "title": "拦截动作占比（近 1h）",
+      "description": "同一指标的分布视图：快速判断是\"多数放行\"还是\"大量拦截\"。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }, "reduceOptions": { "calcs": ["sum"] } },
+      "targets": [
+        { "refId": "A", "expr": "sum by (action) (increase(agf_interceptions_total[1h]))", "legendFormat": "{{action}}" }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "在线路径健康度",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "panels": []
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "策略求值时延 P95 / P99（API 侧观察）",
+      "description": "agf_http_request_duration_seconds：策略求值发生在请求路径上，时延劣化是最直接的信号。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(agf_http_request_duration_seconds_bucket{path=~\"/api/v1/policies.*|/api/v1/alerts.*|/api/v1/cases.*\"}[5m])))",
+          "legendFormat": "p95"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(agf_http_request_duration_seconds_bucket{path=~\"/api/v1/policies.*|/api/v1/alerts.*|/api/v1/cases.*\"}[5m])))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "在途请求",
+      "description": "agf_http_in_flight：请求风暴或下游阻塞时该值会持续抬升。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 50 }, { "color": "red", "value": 200 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area" },
+      "targets": [{ "refId": "A", "expr": "sum(agf_http_in_flight)", "legendFormat": "在途" }]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "服务就绪",
+      "description": "agf_ready：0 表示未就绪（启动中 / 依赖降级到不可用）。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "short", "mappings": [{ "type": "value", "options": { "0": { "text": "未就绪", "color": "red" }, "1": { "text": "就绪", "color": "green" } } }] }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background" },
+      "targets": [{ "refId": "A", "expr": "max(agf_ready)", "legendFormat": "ready" }]
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "待埋点指标（如实说明）",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "text",
+      "title": "策略命中 / 三级配额 / 心跳丢失：需要 agf-runtime 埋点",
+      "description": "说明性占位，不展示任何数字。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 19 },
+      "options": {
+        "mode": "markdown",
+        "content": "### 现状（如实登记）\n\n`agf-runtime` 的运行时防护能力（策略引擎、三级配额、黑名单、审批、防绕过自检、心跳监控）**已实现并有 275 个单测覆盖**，但尚未导出 Prometheus 指标（`RuntimeEngine` 目前只写哈希链审计与日志）：\n\n| 期望指标 | 含义 | 状态 |\n|---|---|---|\n| `agf_policy_eval_seconds{language}` | 策略求值时延（Rego/CEL/Structured） | 待埋点 `TODO(runtime-metrics)` |\n| `agf_policy_hits_total{policy,action}` | 策略命中（含 dry-run 单列） | 待埋点 |\n| `agf_quota_used{scope,dimension}` | 三级配额用量（tenant/agent/session × tokens/requests/concurrency/cost） | 待埋点 |\n| `agf_quota_rejections_total{scope,dimension}` | 配额拒绝 | 待埋点 |\n| `agf_blocklist_hits_total{kind,rule}` | 黑名单命中（command/domain/path/tool/hash） | 待埋点 |\n| `agf_audit_chain_valid` | 哈希链校验结果（0/1） | 待埋点 |\n| `agf_heartbeat_missed{endpoint}` | 心跳丢失次数（防绕过） | 待埋点 |\n\n**可用的替代观测**：`GET /api/v1/audit/verify`（链校验报告）、`GET /api/v1/quotas/snapshot`（配额快照，含 degraded 标记）、`GET /api/v1/integrations/health`（适配器熔断状态）、`agf-runtime` 的 `SelfCheck`（控制台\"运行时防护\"页数据源）。埋点落地后把本面板替换为真实图表。"
+      }
+    }
+  ]
+}

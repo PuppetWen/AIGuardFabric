@@ -1,0 +1,144 @@
+{{/*
+  HPA —— 自动扩缩容（autoscaling/v2，K8s >= 1.23）
+  覆盖服务：agf-server、agf-ingest（必需，≥2 个）；agf-web 可选；agf-scheduler 默认禁用
+  前置条件：集群已安装 metrics-server（CPU/内存指标），或 Prometheus Adapter（自定义指标）
+  注意：启用 HPA 时，Deployment 不再渲染 spec.strategy（HPA 与显式副本数/策略冲突）
+*/}}
+
+{{- if .Values.hpa.server.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "server") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "server") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "agf.componentName" (dict "root" . "component" "server") }}
+  minReplicas: {{ .Values.hpa.server.minReplicas }}
+  maxReplicas: {{ .Values.hpa.server.maxReplicas }}
+  metrics:
+    {{- if .Values.hpa.server.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.server.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.hpa.server.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.server.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- with .Values.hpa.server.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+{{- end }}
+
+{{- if .Values.hpa.ingest.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "ingest") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "ingest") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "agf.componentName" (dict "root" . "component" "ingest") }}
+  minReplicas: {{ .Values.hpa.ingest.minReplicas }}
+  maxReplicas: {{ .Values.hpa.ingest.maxReplicas }}
+  metrics:
+    {{- if .Values.hpa.ingest.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.ingest.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.hpa.ingest.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.ingest.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.hpa.ingest.custom.enabled }}
+    # 按每秒事件数（EPS）扩容：需 Prometheus Adapter 暴露自定义指标
+    # 指标名与实现对齐情况见 docs/pending-verification.deploy.md（PV-DEPLOY-002）
+    - type: Pods
+      pods:
+        metric:
+          name: {{ .Values.hpa.ingest.custom.metricName }}
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.hpa.ingest.custom.targetAverageValue | quote }}
+    {{- end }}
+  {{- with .Values.hpa.ingest.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+{{- end }}
+
+{{- if .Values.hpa.web.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "web") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "web") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "agf.componentName" (dict "root" . "component" "web") }}
+  minReplicas: {{ .Values.hpa.web.minReplicas }}
+  maxReplicas: {{ .Values.hpa.web.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.web.targetCPUUtilizationPercentage }}
+---
+{{- end }}
+
+{{- if .Values.hpa.scheduler.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "scheduler") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "agf.componentName" (dict "root" . "component" "scheduler") }}
+  minReplicas: {{ .Values.hpa.scheduler.minReplicas }}
+  maxReplicas: {{ .Values.hpa.scheduler.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.scheduler.targetCPUUtilizationPercentage }}
+{{- end }}

@@ -1,0 +1,251 @@
+# All paths are relative to --project-directory (the repository root).
+# Native arm64 is not claimed: the current server packer is amd64-only.
+name: aiguardfabric-portable
+
+x-logging: &logging
+  driver: json-file
+  options: {max-size: "10m", max-file: "3"}
+
+x-app: &app
+  platform: linux/amd64
+  restart: unless-stopped
+  user: "10001:10001"
+  read_only: true
+  tmpfs: ["/tmp:size=64m,mode=1777"]
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  networks: [agf]
+  logging: *logging
+
+x-environment: &environment
+  AGF_ENV: ${AGF_ENV:?Portable config needs AGF_ENV}
+  AGF_MOCK_MODE: ${AGF_MOCK_MODE:?Run deploy.sh or deploy.ps1 first}
+  AGF_DEGRADE_ON_MISSING: "1"
+  AGF_ALIYUN_ENABLED: "0"
+  AGF_LOG_LEVEL: ${AGF_LOG_LEVEL:-info}
+  AGF_LOG_FORMAT: json
+  AGF_PROJECT_ROOT: /app
+  AGF_DATA_DIR: /data
+  AGF_SERVER_HOST: 0.0.0.0
+  AGF_SERVER_PORT: "8080"
+  AGF_API_PREFIX: /api/v1
+  AGF_PG_HOST: postgres
+  AGF_PG_PORT: "5432"
+  AGF_PG_DB: aiguardfabric
+  AGF_PG_USER: agf
+  AGF_PG_PASSWORD: ${AGF_PG_PASSWORD:?Missing portable database secret}
+  AGF_PG_POOL_MAX: "20"
+  AGF_REDIS_URL: redis://redis:6379/0
+  AGF_NATS_ENABLED: "1"
+  AGF_NATS_URL: nats://nats:4222
+  AGF_NATS_STREAM: AGF_EVENTS
+  AGF_CLICKHOUSE_ENABLED: "0"
+  AGF_S3_ENDPOINT: http://minio:9000
+  AGF_S3_REGION: us-east-1
+  AGF_S3_BUCKET: agf-evidence
+  AGF_S3_ACCESS_KEY: agfminio
+  AGF_S3_SECRET_KEY: ${AGF_S3_SECRET_KEY:?Missing portable object-store secret}
+  AGF_S3_FORCE_PATH_STYLE: "1"
+  AGF_JWT_SECRET: ${AGF_JWT_SECRET:?Missing portable JWT secret}
+  AGF_JWT_ISSUER: aiguardfabric
+  AGF_MASTER_KEY_BASE64: ${AGF_MASTER_KEY_BASE64:?Missing portable master key}
+  AGF_KMS_BACKEND: local-file
+  AGF_BOOTSTRAP_ADMIN_USER: ${AGF_BOOTSTRAP_ADMIN_USER:?Portable config needs non-default administrator user}
+  AGF_BOOTSTRAP_ADMIN_EMAIL: admin@aiguardfabric.local
+  AGF_BOOTSTRAP_ADMIN_PASSWORD: ${AGF_BOOTSTRAP_ADMIN_PASSWORD:?Missing portable bootstrap password}
+  AGF_FORCE_PASSWORD_CHANGE: "1"
+  AGF_SEED_FIXTURES: "0"
+  AGF_LLM_DEFAULT_PROVIDER: mock
+  AGF_RULES_DIR: /app/rules
+  AGF_REDTEAM_DIR: /app/redteam
+  AGF_PARSERS_DIR: /app/parsers
+  AGF_OTEL_ENABLED: "0"
+  AGF_PROMETHEUS_ENABLED: "1"
+
+services:
+  init-data:
+    image: ${AGF_INIT_IMAGE:-alpine:3.22}
+    platform: linux/amd64
+    restart: "no"
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, FOWNER, DAC_OVERRIDE]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["/bin/sh", "/init.sh"]
+    volumes:
+      - type: bind
+        source: ./data/portable
+        target: /portable-data
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./deploy/portable/init.sh
+        target: /init.sh
+        read_only: true
+        bind: {create_host_path: false}
+    logging: *logging
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-timescale/timescaledb:latest-pg16}
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aiguardfabric
+      POSTGRES_USER: agf
+      POSTGRES_PASSWORD: ${AGF_PG_PASSWORD:?Missing portable database secret}
+      POSTGRES_INITDB_ARGS: "--data-checksums --encoding=UTF8"
+      TZ: UTC
+    command: [postgres, -c, shared_preload_libraries=timescaledb, -c, max_connections=100, -c, password_encryption=scram-sha-256]
+    volumes: ["./data/portable/postgres:/var/lib/postgresql/data"]
+    depends_on: {init-data: {condition: service_completed_successfully}}
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U agf -d aiguardfabric"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    mem_limit: 1g
+    networks: [agf]
+    logging: *logging
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4-alpine}
+    <<: *app
+    command: [redis-server, --appendonly, "yes", --maxmemory, 128mb, --maxmemory-policy, allkeys-lru]
+    volumes: ["./data/portable/redis:/data"]
+    depends_on: {init-data: {condition: service_completed_successfully}}
+    healthcheck: {test: [CMD, redis-cli, ping], interval: 5s, timeout: 3s, retries: 20}
+    mem_limit: 256m
+
+  nats:
+    image: ${NATS_IMAGE:-nats:2.10-alpine}
+    <<: *app
+    command: [-js, -sd, /data, -m, "8222"]
+    volumes: ["./data/portable/nats:/data"]
+    depends_on: {init-data: {condition: service_completed_successfully}}
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O - http://127.0.0.1:8222/healthz >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    mem_limit: 256m
+
+  minio:
+    image: ${MINIO_IMAGE:-quay.io/minio/minio:latest}
+    <<: *app
+    command: [server, /data, --console-address, ":9001"]
+    environment:
+      MINIO_ROOT_USER: agfminio
+      MINIO_ROOT_PASSWORD: ${AGF_S3_SECRET_KEY:?Missing portable object-store secret}
+    volumes: ["./data/portable/minio:/data"]
+    depends_on: {init-data: {condition: service_completed_successfully}}
+    healthcheck:
+      test: [CMD, /usr/bin/curl, -f, -sS, "http://127.0.0.1:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    mem_limit: 512m
+
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-quay.io/minio/mc:latest}
+    <<: *app
+    restart: "no"
+    environment:
+      AGF_S3_SECRET_KEY: ${AGF_S3_SECRET_KEY:?Missing portable object-store secret}
+      MC_CONFIG_DIR: /tmp/mc
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        mc alias set agf http://minio:9000 agfminio "$$AGF_S3_SECRET_KEY" >/dev/null
+        mc mb --ignore-existing agf/agf-evidence >/dev/null
+        mc mb --ignore-existing agf/agf-raw-logs >/dev/null
+        mc mb --ignore-existing agf/agf-reports >/dev/null
+        mc anonymous set none agf/agf-evidence >/dev/null
+    depends_on: {minio: {condition: service_healthy}}
+    mem_limit: 128m
+
+  agf-server:
+    <<: *app
+    image: ${AGF_SERVER_IMAGE:-${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-server:${AGF_IMAGE_TAG:-portable}}
+    build: {context: ., dockerfile: deploy/docker/Dockerfile, target: server}
+    environment: *environment
+    volumes: ["./data/portable/app:/data"]
+    ports:
+      - "${AGF_BIND_ADDRESS:-127.0.0.1}:${AGF_SERVER_PORT:-8080}:8080"
+    depends_on:
+      init-data: {condition: service_completed_successfully}
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      nats: {condition: service_healthy}
+      minio-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, /usr/local/bin/agf-server, healthcheck, --url, "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 30s
+    mem_limit: ${AGF_SERVER_MEMORY:-2g}
+    stop_grace_period: 30s
+
+  agf-ingest:
+    <<: *app
+    image: ${AGF_INGEST_IMAGE:-${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-ingest:${AGF_IMAGE_TAG:-portable}}
+    build: {context: ., dockerfile: deploy/docker/Dockerfile, target: ingest}
+    environment:
+      <<: *environment
+      AGF_INGEST_SQL_SINK: "1"
+      AGF_INGEST_HOST: 0.0.0.0
+      AGF_INGEST_PORT: "8090"
+      AGF_INGEST_TENANT_ID: "00000000-0000-0000-0000-000000000001"
+      AGF_SYSLOG_TCP_PORT: "5514"
+      AGF_SYSLOG_UDP_PORT: "5514"
+    volumes: ["./data/portable/app:/data"]
+    ports:
+      - "${AGF_BIND_ADDRESS:-127.0.0.1}:${AGF_INGEST_PORT:-8090}:8090"
+      - "${AGF_BIND_ADDRESS:-127.0.0.1}:${AGF_SYSLOG_PORT:-5514}:5514/tcp"
+      - "${AGF_BIND_ADDRESS:-127.0.0.1}:${AGF_SYSLOG_PORT:-5514}:5514/udp"
+    depends_on: {postgres: {condition: service_healthy}, nats: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD, /usr/local/bin/agf-ingest, healthcheck, --url, "http://127.0.0.1:8090/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 30s
+    mem_limit: 1g
+
+  agf-scheduler:
+    <<: *app
+    image: ${AGF_SCHEDULER_IMAGE:-${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-scheduler:${AGF_IMAGE_TAG:-portable}}
+    build: {context: ., dockerfile: deploy/docker/Dockerfile, target: scheduler}
+    environment:
+      <<: *environment
+      AGF_SCHEDULER_BACKEND: local-cron
+      AGF_SERVER_URL: http://agf-server:8080
+      AGF_SCHEDULER_PORT: "9101"
+      AGF_REPORT_DIR: /data/reports
+      AGF_SCHEDULER_ARCHIVE_DIR: /data/archive
+    volumes: ["./data/portable/app:/data"]
+    depends_on: {agf-server: {condition: service_healthy}, nats: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD, /usr/local/bin/agf-scheduler, healthcheck, --url, "http://127.0.0.1:9101/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 16
+    mem_limit: 512m
+
+  agf-web:
+    <<: *app
+    image: ${AGF_WEB_IMAGE:-${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-web:${AGF_IMAGE_TAG:-portable}}
+    build: {context: ., dockerfile: deploy/docker/Dockerfile, target: web}
+    entrypoint: [/docker-entrypoint.sh]
+    command: [nginx, -g, "daemon off;"]
+    ports: ["${AGF_BIND_ADDRESS:-127.0.0.1}:${AGF_WEB_PORT:-8081}:8080"]
+    depends_on: {agf-server: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O - http://127.0.0.1:8080/ >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    mem_limit: 128m
+
+networks:
+  agf: {driver: bridge}

@@ -1,0 +1,63 @@
+{
+    "version": 1,
+    "generatedAt": "2026-02-21T10:23:45Z",
+    "generator": "scripts/gen-fixtures.ps1",
+    "seed": 20260221,
+    "note": "AIGuardFabric **合成**样本清单（synthetic=true）。真实/离线核验样本清单在 tests/fixtures/logs/manifest.json。合成样本仅用于离线开发与门禁，接入上线前必须替换为客户真实日志。",
+    "sha256": {
+                   "tests/fixtures/synthetic/suricata-eve-synthetic-1.log": "d3c94fdca2c4e4d6043ef10fed6157afbc2344469050fb53e01b3cc70c5f050e",
+                   "tests/fixtures/synthetic/cloud-waf-webhook-synthetic-1.log": "6651a29c9e77b1b7ff4458716867c4a1d6eb74695e55e3c01ff922046e16f221",
+                   "tests/fixtures/synthetic/cef-ips-synthetic-1.log": "eaebbf53e8135edb3566d0fbed2e50fd54c7b1305fc4bf5e2d23ae71f4e7ae01",
+                   "tests/fixtures/synthetic/auditd-execve-synthetic-1.log": "bd4429198c03634e6f5ae75fb6582c669d27f6dd0fb782de7f6de4692c8d9f2a"
+               },
+    "templates": {
+                      "suricata-eve-synthetic": {
+                                                     "fixture": "suricata-eve-synthetic-1.log",
+                                                     "vendor": "Suricata",
+                                                     "product": "eve.json",
+                                                     "protocol": "file",
+                                                     "synthetic": true,
+                                                     "severity": "critical",
+                                                     "category": "intrusion",
+                                                     "host": "",
+                                                     "ip": "10.20.30.40",
+                                                     "note": "合成：字段集与枚举按 Suricata eve.json 公开格式；数据行为编写示例"
+                                                 },
+                      "cloud-waf-webhook-synthetic": {
+                                                          "fixture": "cloud-waf-webhook-synthetic-1.log",
+                                                          "vendor": "generic-cloud",
+                                                          "product": "WAF webhook",
+                                                          "protocol": "webhook",
+                                                          "synthetic": true,
+                                                          "severity": "high",
+                                                          "category": "web",
+                                                          "host": "app-prod-01",
+                                                          "ip": "10.20.30.77",
+                                                          "note": "合成：云 WAF 告警 webhook JSON 常见字段形态；不含真实云账号信息"
+                                                      },
+                      "cef-ips-synthetic": {
+                                                "fixture": "cef-ips-synthetic-1.log",
+                                                "vendor": "generic",
+                                                "product": "CEF IPS",
+                                                "protocol": "syslog",
+                                                "synthetic": true,
+                                                "severity": "high",
+                                                "category": "intrusion",
+                                                "host": "app-prod-01",
+                                                "ip": "198.51.100.23",
+                                                "note": "合成：CEF:0|Vendor|Product|Version|SigID|Name|Severity|Extension 形态"
+                                            },
+                      "auditd-execve-synthetic": {
+                                                      "fixture": "auditd-execve-synthetic-1.log",
+                                                      "vendor": "Linux",
+                                                      "product": "auditd",
+                                                      "protocol": "syslog",
+                                                      "synthetic": true,
+                                                      "severity": "high",
+                                                      "category": "process",
+                                                      "host": "app-prod-01",
+                                                      "ip": "198.51.100.23",
+                                                      "note": "合成：type=EXECVE msg=audit(\u003cepoch\u003e.\u003cms\u003e:\u003cseq\u003e) 记录形态"
+                                                  }
+                  }
+}

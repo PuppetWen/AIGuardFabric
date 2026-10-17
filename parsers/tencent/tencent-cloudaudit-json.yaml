@@ -1,0 +1,43 @@
+# 腾讯云 云审计 CloudAudit —— 控制面操作事件（JSON）
+# 正样本：parsers/tencent/samples.json 中 key = tencent-cloudaudit-json
+key: tencent-cloudaudit-json
+name: 腾讯云 CloudAudit 云审计
+vendor: 腾讯云
+product: 云审计 CloudAudit
+protocols: [object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.eventTime
+  name=$.eventName
+  source=$.eventSource
+  cat=$.eventType
+  region=$.eventRegion
+  account=$.userIdentity.accountId
+  principal=$.userIdentity.principalId
+  id_type=$.userIdentity.type
+  src_ip=$.sourceIPAddress
+  request_id=$.requestID
+  res_name=$.resourceName
+  code=$.errorCode
+mapping:
+  map:
+    ts: event.time
+    name: event.action_raw
+    source: event.provider
+    cat: event.category_raw
+    region: cloud.region
+    account: cloud.account.id
+    principal: user.id
+    id_type: user.type
+    src_ip: source.ip
+    request_id: event.reference
+    res_name: cloud.resource_name
+    code: error.code
+  category_map:
+    ApiCall: cloud-control
+  defaults:
+    event.category: cloud-control
+    event.severity: info
+required_fields: [name, ts]
+sample_fixture: parsers/tencent/samples.json#tencent-cloudaudit-json
+description: 腾讯云 CloudAudit 云审计事件（eventTime/eventName/eventSource/userIdentity/sourceIPAddress/requestID）。

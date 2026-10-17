@@ -1,0 +1,44 @@
+# AIGuardFabric 检测规则 —— MCP 配置中的明文凭据
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: config ｜ 算子: all ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/, https://cwe.mitre.org/data/definitions/798.html
+key: CL-MCP-009
+name: MCP 配置中的明文凭据
+description: AI 客户端 MCP 配置（mcpServers）里直接写死的 token/AK，是最常见的 Agent 侧泄露。
+domain: credential-leak
+severity: critical
+kind: composite
+target: config
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM02
+- MCP
+- CWE-798
+references:
+- https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: all
+  of:
+  - type: keyword
+    any:
+    - mcpservers
+    - mcp_servers
+    - '"mcp"'
+  - type: regex
+    pattern: '(?i)(token|api[_-]?key|secret|password|authorization)["'']?\s*[:=]\s*["'']?[A-Za-z0-9_\-\.]{12,}'
+    case_insensitive: true
+    min_matches: 1
+samples:
+  positive:
+  - '{"mcpServers":{"jira":{"command":"npx","env":{"JIRA_TOKEN":"ATATT3xFfGF0aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"}}}}'
+  - "mcpServers:\n  github:\n    env:\n      GITHUB_PERSONAL_ACCESS_TOKEN: ghp_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789"
+  negative:
+  - '{"mcpServers":{"jira":{"command":"npx","env":{"JIRA_TOKEN":"${JIRA_TOKEN}"}}}}'
+  - '{"mcpServers":{"filesystem":{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","/data"]}}}'
+remediation: MCP 配置一律使用凭据引用（环境变量/密钥库）；配置入库前强制扫描明文密钥。
+author: agf-rules
+version: 1

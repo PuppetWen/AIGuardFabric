@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "note": "Wazuh 模板正样本与关键字段断言。JSON 结构按 Wazuh alerts.json 公开结构（timestamp/rule/agent/manager/data/syscheck/vulnerability/location/full_log）重建；rule.level 0-15 五级映射与内置模板一致；未联网抓取。",
+  "samples": {
+    "wazuh-alert-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:33:00.000+0000\",\"rule\":{\"level\":10,\"description\":\"sshd: brute force trying to get access to the system\",\"id\":\"5712\",\"firedtimes\":5},\"agent\":{\"id\":\"001\",\"name\":\"web-01\",\"ip\":\"10.20.30.150\"},\"manager\":{\"name\":\"wazuh-manager\"},\"data\":{\"srcip\":\"203.0.113.111\",\"srcuser\":\"root\",\"dstip\":\"10.20.30.150\",\"dstport\":\"22\"},\"location\":\"/var/log/auth.log\",\"full_log\":\"Feb 21 10:33:00 web-01 sshd[1234]: Failed password for root from 203.0.113.111 port 51234 ssh2\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:33:00.000Z",
+        "rule.id": "5712",
+        "rule.description": "sshd: brute force trying to get access to the system",
+        "host.name": "web-01",
+        "host.ip": "10.20.30.150",
+        "observer.name": "wazuh-manager",
+        "source.ip": "203.0.113.111",
+        "user.name": "root",
+        "destination.ip": "10.20.30.150",
+        "destination.port": "22",
+        "log.file.path": "/var/log/auth.log",
+        "message": "Feb 21 10:33:00 web-01 sshd[1234]: Failed password for root from 203.0.113.111 port 51234 ssh2",
+        "event.severity": "high",
+        "event.category": "authentication"
+      }
+    },
+    "wazuh-fim-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:34:00.000+0000\",\"rule\":{\"level\":7,\"description\":\"Integrity checksum changed.\",\"id\":\"550\"},\"agent\":{\"name\":\"web-01\",\"ip\":\"10.20.30.150\"},\"syscheck\":{\"path\":\"/etc/passwd\",\"sha256_after\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c\",\"md5_after\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"uname_after\":\"root\",\"event\":\"modified\"},\"location\":\"syscheck\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:34:00.000Z",
+        "rule.id": "550",
+        "rule.description": "Integrity checksum changed.",
+        "file.path": "/etc/passwd",
+        "file.hash.sha256": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c",
+        "file.hash.md5": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "user.name": "root",
+        "file.operation": "modified",
+        "host.name": "web-01",
+        "host.ip": "10.20.30.150",
+        "log.file.path": "syscheck",
+        "event.severity": "medium",
+        "event.category": "file"
+      }
+    },
+    "wazuh-vulnerability-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:35:00.000+0000\",\"rule\":{\"level\":9,\"description\":\"CVE-2021-44228 affects log4j-core\",\"id\":\"23503\"},\"vulnerability\":{\"cve\":\"CVE-2021-44228\",\"severity\":\"High\",\"package\":{\"name\":\"log4j-core\",\"version\":\"2.14.1\"},\"detection_time\":\"2026-02-21T10:35:00Z\"},\"agent\":{\"name\":\"web-01\",\"ip\":\"10.20.30.150\"}}",
+      "expect": {
+        "event.time": "2026-02-21T10:35:00.000Z",
+        "rule.id": "23503",
+        "vulnerability.id": "CVE-2021-44228",
+        "vulnerability.severity": "High",
+        "package.name": "log4j-core",
+        "package.version": "2.14.1",
+        "host.name": "web-01",
+        "host.ip": "10.20.30.150",
+        "event.severity": "medium",
+        "event.category": "intrusion"
+      }
+    },
+    "wazuh-auth-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:37:00.000+0000\",\"rule\":{\"level\":5,\"description\":\"sshd: authentication success.\",\"id\":\"5715\"},\"data\":{\"srcip\":\"203.0.113.112\",\"srcport\":\"52001\",\"dstuser\":\"root\",\"protocol\":\"sshd\"},\"agent\":{\"name\":\"web-01\",\"ip\":\"10.20.30.150\"},\"full_log\":\"Feb 21 10:37:00 web-01 sshd[2345]: Accepted password for root from 203.0.113.112 port 52001 ssh2\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:37:00.000Z",
+        "rule.id": "5715",
+        "source.ip": "203.0.113.112",
+        "source.port": "52001",
+        "user.name": "root",
+        "network.protocol": "sshd",
+        "host.name": "web-01",
+        "message": "Feb 21 10:37:00 web-01 sshd[2345]: Accepted password for root from 203.0.113.112 port 52001 ssh2",
+        "event.severity": "low",
+        "event.category": "authentication"
+      }
+    }
+  }
+}

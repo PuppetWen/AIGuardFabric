@@ -1,0 +1,36 @@
+# AIGuardFabric 检测规则 —— JWT Bearer Token 明文
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: prompt ｜ 算子: regex ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-JWT-006
+name: JWT Bearer Token 明文
+description: 三段式 base64url 且以 eyJ 开头（{"alg" 的编码），是 JWT 的稳定特征。
+domain: credential-leak
+severity: high
+kind: regex
+target: prompt
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM02
+- CWE-522
+- token
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: regex
+  pattern: '\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{5,}'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dBjftJeZ4CVPmB92K27uhbUJU1p1r'
+  - 这是测试环境的 token：eyJhbGciOiJSUzI1NiJ9.eyJyb2xlIjoiYWRtaW4ifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+  negative:
+  - JWT 由 header.payload.signature 三段 base64url 组成，例如 header.payload.signature。
+  - 请说明 JWT 过期时间（exp）与刷新令牌的配合方式。
+remediation: 把 JWT 视为可复用凭据：命中即脱敏并撤销对应会话；缩短 access token 有效期。
+author: agf-rules
+version: 1

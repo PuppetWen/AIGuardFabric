@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "collector": {
+    "platform_url": "http://127.0.0.1:8080",
+    "source_id": "00000000-0000-4000-8000-000000000001",
+    "binding_id": "00000000-0000-4000-8000-000000000002",
+    "expected_scope": "00000000-0000-4000-8000-000000000003",
+    "expected_mocked": true,
+    "spool_dir": "E:/MyProjects/orders/data/agentteams-outbox",
+    "max_items": 10000,
+    "max_bytes": 16777216,
+    "max_disk_bytes": 67108864,
+    "batch_items": 100,
+    "batch_bytes": 262144,
+    "request_timeout": 5.0
+  },
+  "shutdown_timeout": 6.0,
+  "targets": [
+    {"module": "startup_business.worker", "attribute": "echo", "kind": "task", "worker": {"name": "ACTUAL_WORKER", "team": "ACTUAL_TEAM"}, "operation": "echo"},
+    {"module": "startup_business.worker", "attribute": "asynchronous", "kind": "task", "worker": {"name": "ACTUAL_WORKER", "team": "ACTUAL_TEAM"}, "operation": "async"},
+    {"module": "startup_business.worker", "attribute": "values", "kind": "task", "worker": {"name": "ACTUAL_WORKER", "team": "ACTUAL_TEAM"}, "operation": "values"},
+    {"module": "startup_business.worker", "attribute": "async_values", "kind": "task", "worker": {"name": "ACTUAL_WORKER", "team": "ACTUAL_TEAM"}, "operation": "async_values"}
+  ]
+}

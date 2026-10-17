@@ -1,0 +1,18 @@
+# 绿盟 WAF —— Web 攻击拦截 CEF
+# 正样本：parsers/nsfocus/samples.json 中 key = nsfocus-waf-cef
+key: nsfocus-waf-cef
+name: 绿盟 WAF 告警（CEF）
+vendor: 绿盟
+product: WAF
+protocols: [syslog, webhook]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    cs1: rule.external_id
+  category_map:
+    WebAttack: web
+    Attack: intrusion
+required_fields: [source.ip]
+sample_fixture: tests/fixtures/logs/parsers/nsfocus-waf-cef-1.log
+description: 绿盟 WAF CEF 拦截日志（cat=WebAttack → web，act=block → denied）。

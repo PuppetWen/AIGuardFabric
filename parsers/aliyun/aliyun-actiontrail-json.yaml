@@ -1,0 +1,45 @@
+# 阿里云 ActionTrail（操作审计）—— 控制面 API 调用事件（JSON）
+# 正样本文件：tests/fixtures/logs/aliyun-actiontrail-1.log（manifest.json → parser_library）
+key: aliyun-actiontrail-json
+name: 阿里云 ActionTrail 操作审计
+vendor: 阿里云
+product: ActionTrail
+protocols: [object-storage, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  evt_id=$.eventId
+  ts=$.eventTime
+  name=$.eventName
+  source=$.eventSource
+  kind=$.eventType
+  cat=$.eventType
+  account=$.userIdentity.accountId
+  user_type=$.userIdentity.type
+  user=$.userIdentity.userName
+  src_ip=$.sourceIpAddress
+  ua=$.userAgent
+  request_id=$.requestId
+  error_code=$.errorCode
+mapping:
+  map:
+    evt_id: event.id
+    ts: event.time
+    name: event.action_raw
+    source: event.provider
+    kind: event.type
+    cat: event.category_raw
+    account: cloud.account.id
+    user_type: user.type
+    user: user.name
+    src_ip: source.ip
+    ua: user_agent.original
+    request_id: event.reference
+    error_code: error.code
+  category_map:
+    ApiCall: cloud-control
+  defaults:
+    event.category: cloud-control
+    event.severity: info
+required_fields: [evt_id, name]
+sample_fixture: tests/fixtures/logs/parsers/aliyun-actiontrail-1.log
+description: 阿里云 ActionTrail 控制面审计事件（userIdentity/eventName/eventSource/sourceIpAddress/requestId 为公开 API 字段名），默认归 cloud-control。

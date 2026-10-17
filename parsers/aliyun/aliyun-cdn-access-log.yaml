@@ -1,0 +1,29 @@
+# 阿里云 CDN —— 访问日志（类 common log + 加速域名列）
+# 正样本：parsers/aliyun/samples.json 中 key = aliyun-cdn-access-log
+key: aliyun-cdn-access-log
+name: 阿里云 CDN 访问日志
+vendor: 阿里云
+product: CDN
+protocols: [file, object-storage, beats]
+engine: grok
+pattern: '%{IPORHOST:client_ip} - - \[%{HTTPDATE:ts}\] "%{WORD:method} %{NOTSPACE:uri} HTTP/%{NUMBER:http_version}" %{INT:status} %{INT:bytes} "%{DATA:referer}" "%{DATA:user_agent}" "%{NOTSPACE:domain}"'
+mapping:
+  map:
+    client_ip: source.ip
+    ts: event.time
+    method: http.request.method
+    uri: url.path
+    http_version: http.version
+    status: http.response.status_code
+    bytes: http.response.body.bytes
+    referer: http.request.referrer
+    user_agent: user_agent.original
+    domain: url.domain
+  time_field: ts
+  time_format: '%d/%b/%Y:%H:%M:%S %z'
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [client_ip, domain]
+sample_fixture: parsers/aliyun/samples.json#aliyun-cdn-access-log
+description: 阿里云 CDN 访问日志（RemoteIP/Time/Request-URI/Status/Bytes/Referer/UA/加速域名），入网侧流量基线来源。

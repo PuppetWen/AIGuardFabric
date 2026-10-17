@@ -1,0 +1,44 @@
+# Palo Alto PAN-OS —— 系统日志（HTTP 转发 JSON）
+# 正样本：parsers/paloalto/samples.json 中 key = paloalto-panos-json
+key: paloalto-panos-json
+name: PAN-OS 系统日志（JSON）
+vendor: Palo Alto
+product: PAN-OS
+protocols: [webhook, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.receive_time
+  serial=$.serial
+  kind=$.type
+  subtype=$.subtype
+  sev=$.severity
+  desc=$.description
+  dev=$.device_name
+  module=$.module
+  evt_id=$.event_id
+mapping:
+  map:
+    ts: event.time
+    serial: observer.serial_number
+    kind: event.category_raw
+    subtype: event.type
+    desc: message
+    dev: host.name
+    module: service.name
+    evt_id: event.id
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+    informational: info
+  category_map:
+    SYSTEM: configuration
+    TRAFFIC: network
+    THREAT: intrusion
+    CONFIG: configuration
+  defaults:
+required_fields: [serial, desc]
+sample_fixture: parsers/paloalto/samples.json#paloalto-panos-json
+description: PAN-OS 系统日志 HTTP 转发（type=SYSTEM/subtype/severity/description/device_name/module）。

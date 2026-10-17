@@ -1,0 +1,47 @@
+# 阿里云 云防火墙 —— 流量/ACL 日志（JSON）
+# 正样本：parsers/aliyun/samples.json 中 key = aliyun-cloudfw-flow-json
+key: aliyun-cloudfw-flow-json
+name: 阿里云云防火墙流量日志
+vendor: 阿里云
+product: 云防火墙
+protocols: [webhook, http-pull, kafka, object-storage]
+engine: json-path
+pattern: |
+  ts=$.log_time
+  src_ip=$.src_ip
+  src_port=$.src_port
+  dst_ip=$.dst_ip
+  dst_port=$.dst_port
+  proto=$.protocol
+  action=$.action
+  direction=$.direction
+  bytes=$.bytes
+  packets=$.packets
+  rule_id=$.rule_id
+  app=$.app
+  account=$.account_id
+  region=$.region
+mapping:
+  map:
+    ts: event.time
+    src_ip: source.ip
+    src_port: source.port
+    dst_ip: destination.ip
+    dst_port: destination.port
+    proto: network.transport
+    direction: network.direction
+    bytes: network.bytes_in
+    packets: network.packets_in
+    rule_id: rule.id
+    app: network.application
+    account: cloud.account.id
+    region: cloud.region
+  category_map:
+    deny: network
+  action_field: action
+  defaults:
+    event.severity: low
+    event.category: network
+required_fields: [src_ip, dst_ip]
+sample_fixture: parsers/aliyun/samples.json#aliyun-cloudfw-flow-json
+description: 阿里云云防火墙流量日志（log_time/src_ip/dst_ip/protocol/action/direction/bytes/packets 为公开日志字段），ACL 拒绝归 network。

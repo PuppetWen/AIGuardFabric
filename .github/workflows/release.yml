@@ -1,0 +1,359 @@
+# =============================================================================
+# AIGuardFabric · 发布流水线（tag 触发）
+#
+# 触发条件
+#   * push 形如 v0.1.0 / v1.2.3-rc.1 的 tag（见下方 tags 过滤）
+#   * 手工 workflow_dispatch（可指定 tag/ref，用于重跑单条流水线）
+#
+# 产物
+#   1. 四个运行镜像（复用 deploy/docker/Dockerfile 的 target）推送到容器仓库：
+#        server / ingest / scheduler / web  →  <registry>/agf-<target>:<tag>
+#   2. SBOM（SPDX-JSON，每镜像一份；syft 可用时生成，缺失则跳过并告警）
+#   3. 气隙离线包（agfctl bundle 导出 —— ⚠ 该子命令当前**不存在**，见下方 TODO）
+#   4. GitHub Release（附带镜像清单、SBOM、离线包）
+#
+# -----------------------------------------------------------------------------
+# AGF_OFFLINE 开关（离线自托管 runner）
+# -----------------------------------------------------------------------------
+# 取值来自仓库变量 AGF_OFFLINE（未设置默认 '0'）。AGF_OFFLINE=1 时跳过：
+#   * dtolnay/rust-toolchain 下载、docker buildx 安装、镜像推送、SBOM 生成、
+#     Release 资产上传 —— 即一切需要外网/外部仓库的动作。
+# 注意：发布流水线在离线环境**无法完整执行**（推镜像本身就要外网仓库）。
+#       离线发布应改用气隙离线包路径（agfctl bundle → 人工搬运 → 内网 registry 导入），
+#       该路径目前阻塞，见 docs/pending-verification.deploy.md 的 PV-DEPLOY-004。
+# =============================================================================
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的 tag（例如 v0.1.0）；留空则使用当前 ref"
+        required: false
+        type: string
+      push_images:
+        description: "是否真的推送镜像（false = 仅构建验证）"
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # 创建 Release
+  packages: write   # 推送 GHCR 镜像
+
+env:
+  # 容器仓库前缀：默认 GHCR；可用仓库变量 AGF_REGISTRY 覆盖为内网 Harbor 等
+  AGF_REGISTRY: ${{ vars.AGF_REGISTRY || 'ghcr.io' }}
+  AGF_IMAGE_NAMESPACE: ${{ vars.AGF_IMAGE_NAMESPACE || github.repository_owner }}
+  DOCKERFILE: deploy/docker/Dockerfile
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 0. 发布前置校验：版本号一致性
+  # ---------------------------------------------------------------------------
+  preflight:
+    name: preflight (tag / version consistency)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.tag }}" ]; then
+            ref="${{ inputs.tag }}"
+          else
+            ref="${GITHUB_REF_NAME}"
+          fi
+          version="${ref#v}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "发布版本：${version}"
+
+      - name: Version consistency check
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          echo "--- Cargo.toml workspace.package.version ---"
+          grep -n -A5 '^\[workspace.package\]' Cargo.toml || true
+          echo "--- apps/web/package.json version ---"
+          grep -n '"version"' apps/web/package.json | head -n 1 || true
+          echo "--- deploy/helm/aiguardfabric/Chart.yaml ---"
+          grep -nE '^(version|appVersion):' deploy/helm/aiguardfabric/Chart.yaml || true
+          echo "::notice::以上版本号必须与发布 tag ${version} 一致（当前仅打印，人工核对）"
+
+  # ---------------------------------------------------------------------------
+  # 1. 构建并推送镜像（矩阵：server / ingest / scheduler / web）
+  # ---------------------------------------------------------------------------
+  build-and-push:
+    name: image (${{ matrix.target }})
+    needs: [preflight]
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [server, ingest, scheduler, web]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Buildx
+        if: env.AGF_OFFLINE != '1'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to registry
+        if: env.AGF_OFFLINE != '1' && (github.event_name == 'push' || inputs.push_images)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.AGF_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata
+        id: meta
+        if: env.AGF_OFFLINE != '1'
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.AGF_REGISTRY }}/${{ env.AGF_IMAGE_NAMESPACE }}/agf-${{ matrix.target }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ needs.preflight.outputs.version }}
+            type=raw,value=latest,enable=${{ github.event_name == 'push' }}
+
+      - name: Build and push image (${{ matrix.target }})
+        if: env.AGF_OFFLINE != '1'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          target: ${{ matrix.target }}
+          # 复用 Dockerfile 的构建缓存层（cargo chef 依赖层）
+          cache-from: type=gha,scope=agf-${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=agf-${{ matrix.target }}
+          push: ${{ github.event_name == 'push' || inputs.push_images }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            AGF_BUILD_CACHE_DIR=/app/.cargo
+
+      - name: Offline notice (skip build/push)
+        if: env.AGF_OFFLINE == '1'
+        run: |
+          echo "::warning::AGF_OFFLINE=1 —— 跳过镜像构建与推送（${{ matrix.target }}）。"
+          echo "离线发布请使用气隙离线包流程（当前阻塞，见 docs/pending-verification.deploy.md PV-DEPLOY-004）。"
+
+  # ---------------------------------------------------------------------------
+  # 2. SBOM（SPDX-JSON）
+  #    syft 可用 → 逐镜像生成；不可用 → 跳过并显式告警，不阻断发布
+  # ---------------------------------------------------------------------------
+  sbom:
+    name: sbom (syft, best-effort)
+    needs: [preflight, build-and-push]
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # 从 GitHub Release 拉取 syft 官方二进制（离线 runner 跳过，改用预置 syft）
+      - name: Install syft
+        if: env.AGF_OFFLINE != '1'
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Check syft availability
+        id: syft
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v syft >/dev/null 2>&1; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            syft version || true
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            # syft 缺失是**预期可接受**的情况（离线 runner / 未预置 SBOM 工具）：
+            # 这里只告警不失败，SBOM 作为增强项而非发布硬门禁。
+            echo "::warning::syft 不可用 → 跳过 SBOM 生成（不阻断发布）。"
+            echo "如需 SBOM：联网执行 \`anchore/sbom-action/download-syft\` 或预置 syft 到 runner PATH。"
+          fi
+
+      - name: Generate SBOM per image (SPDX-JSON)
+        if: steps.syft.outputs.available == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p target/sbom
+          version="${{ needs.preflight.outputs.version }}"
+          for target in server ingest scheduler web; do
+            image="${AGF_REGISTRY}/${AGF_IMAGE_NAMESPACE}/agf-${target}:${version}"
+            echo "--- syft ${image} ---"
+            syft "${image}" -o spdx-json="target/sbom/agf-${target}-${version}.spdx.json" \
+              || echo "::warning::syft 生成 ${target} SBOM 失败（镜像可能未推送），已跳过"
+          done
+          ls -l target/sbom || true
+
+      - name: Upload SBOM artifacts
+        if: env.AGF_OFFLINE != '1'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-spdx-json
+          path: target/sbom/
+          if-no-files-found: warn
+          retention-days: 90
+
+  # ---------------------------------------------------------------------------
+  # 3. 气隙离线包（agfctl bundle）
+  #
+  #    ⚠ TODO(release-bundle)：`agfctl bundle` 子命令当前**尚未实现**。
+  #    已核对源码事实（不要凭规格假设）：
+  #      * `crates/agf-cli/src/main.rs` 全文只有 4 行，函数体为
+  #        `println!("agfctl 脚手架：实现见 docs/roadmap.md")`；
+  #      * `crates/agf-cli/src/lib.rs` 只有 5 行，仅导出 `VERSION`；
+  #      * 全仓库 grep `bundle` 在 `*.rs` 下**零命中** → 无 clap 子命令、无 bundle 实现。
+  #    因此本 job **只做探测 + 显式跳过**，绝不伪造产物。
+  #    待 `agfctl bundle` 落地后，把下面 "TODO 实现位" 换成真实导出命令即可：
+  #      agfctl bundle --output target/airgap/agf-<version>-airgap.tar.zst \
+  #                    --include-images --include-models --include-rules \
+  #                    --platform linux/amd64,linux/arm64
+  #    （气隙包合同要求：镜像 tar + 规则包 + 可选模型 + SHA256SUMS + 离线安装说明。）
+  #    登记位置：docs/pending-verification.deploy.md → PV-DEPLOY-004
+  # ---------------------------------------------------------------------------
+  airgap-bundle:
+    name: airgap bundle (agfctl bundle — NOT IMPLEMENTED YET)
+    needs: [preflight]
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Probe agfctl bundle availability
+        id: probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          # TODO(release-bundle)：agfctl 目前是脚手架，build 出来的二进制没有子命令。
+          # 这里保留真实探测逻辑，等 agfctl bundle 落地后自动启用（无需改流水线结构）。
+          if [ -x "tools/bin/agfctl" ]; then
+            bin="tools/bin/agfctl"
+          else
+            bin=""
+          fi
+          if [ -z "${bin}" ] && [ "${AGF_OFFLINE}" != "1" ]; then
+            cargo build --release -p agf-cli 2>/dev/null || true
+            [ -x "target/release/agfctl" ] && bin="target/release/agfctl"
+          fi
+          if [ -n "${bin}" ] && "${bin}" bundle --help >/dev/null 2>&1; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "agfctl bundle 可用：${bin}"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::agfctl bundle 子命令不存在（agf-cli 仍为脚手架）→ 跳过气隙离线包导出。"
+            echo "TODO(release-bundle)：待 crates/agf-cli 实现 bundle 子命令后启用本 job。"
+          fi
+
+      # TODO 实现位：agfctl bundle 落地后由下面这步产出真实离线包
+      - name: Export airgap bundle
+        if: steps.probe.outputs.available == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p target/airgap
+          version="${{ needs.preflight.outputs.version }}"
+          agfctl bundle \
+            --output "target/airgap/agf-${version}-airgap.tar.zst" \
+            --include-images --include-rules --include-migrations \
+            --platform linux/amd64,linux/arm64
+          sha256sum target/airgap/* > "target/airgap/SHA256SUMS"
+
+      - name: Upload airgap bundle
+        if: steps.probe.outputs.available == 'true' && env.AGF_OFFLINE != '1'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: airgap-bundle
+          path: target/airgap/
+          if-no-files-found: warn
+          retention-days: 90
+
+  # ---------------------------------------------------------------------------
+  # 4. GitHub Release
+  # ---------------------------------------------------------------------------
+  github-release:
+    name: github release
+    needs: [preflight, build-and-push, sbom]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Compose release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ needs.preflight.outputs.version }}"
+          {
+            echo "## AIGuardFabric 智御矩阵 ${version}"
+            echo ""
+            echo "### 容器镜像"
+            for target in server ingest scheduler web; do
+              echo "- \`${AGF_REGISTRY}/${AGF_IMAGE_NAMESPACE}/agf-${target}:${version}\`"
+            done
+            echo ""
+            echo "### 离线/气隙部署"
+            echo "- 气隙离线包：**未随本次发布提供** —— \`agfctl bundle\` 子命令尚未实现，"
+            echo "  见 \`docs/pending-verification.deploy.md\` PV-DEPLOY-004。"
+            echo ""
+            echo "### 校验"
+            echo "- SBOM：见本次运行的 artifact \`sbom-spdx-json\`（syft 可用时生成）"
+            echo "- Helm Chart：\`deploy/helm/aiguardfabric\`（安装前须 \`helm lint\`/\`helm template\` 验证）"
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        if: env.AGF_OFFLINE != '1'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true

@@ -1,0 +1,307 @@
+# =============================================================================
+# values-prod.yaml —— 生产覆盖值（外部托管库 + 高可用 + 更严格安全）
+#
+# 用法：
+#   helm upgrade --install agf deploy/helm/aiguardfabric \
+#     -n aiguardfabric --create-namespace \
+#     -f deploy/helm/aiguardfabric/values.yaml \
+#     -f deploy/helm/aiguardfabric/values-prod.yaml \
+#     -f values-local.yaml        # 仅含 secrets.*，不入库（.helmignore 已排除）
+#
+# 关键差异（相对 values.yaml）：
+#   1. 内置 PostgreSQL/Redis/NATS/MinIO/ClickHouse/Grafana 全部关闭 → 指向外部托管实例
+#   2. 副本数提升 + 反亲和 + topologySpread 保证跨节点高可用
+#   3. Ingress 启用 + 强制 TLS
+#   4. PrivateLink 启用（私网接入，不暴露公网）
+#   5. NetworkPolicy 出站收敛到托管库网段（默认拒绝 + 精确放行）
+#   6. 生产模式：AGF_MOCK_MODE=0、AGF_ENV=prod、日志 JSON、OTel 开启
+# =============================================================================
+
+nameOverride: ""
+
+global:
+  imageRegistry: ""
+  productionMode: true
+
+image:
+  repositoryPrefix: aiguardfabric
+  tag: ""            # 留空 = 使用 Chart.AppVersion；发布流水线用 --set image.tag=<git sha>
+  pullPolicy: IfNotPresent
+
+# -----------------------------------------------------------------------------
+# 运行模式：生产不允许 Mock
+# -----------------------------------------------------------------------------
+config:
+  AGF_ENV: prod
+  AGF_MOCK_MODE: "0"
+  AGF_DEGRADE_ON_MISSING: "1"
+  AGF_LOG_LEVEL: info
+  AGF_LOG_FORMAT: json
+
+  # ---- 外部托管 PostgreSQL（阿里云 RDS / PolarDB / Timescale Cloud）----
+  # 用私网 FQDN（Privatelink 终端节点域名或 VPC 内网域名），不要写公网地址
+  AGF_PG_HOST: pg-agf.example.internal
+  AGF_PG_PORT: "5432"
+  AGF_PG_DB: aiguardfabric
+  AGF_PG_USER: agf
+  AGF_PG_POOL_MAX: "100"
+  AGF_PG_POOL_MIN: "10"
+  AGF_PG_CONNECT_TIMEOUT_SECS: "10"
+
+  # ---- 外部托管 Redis（阿里云 Tair / Redis 企业版，开启 TLS 时用 rediss://）----
+  AGF_REDIS_URL: rediss://redis-agf.example.internal:6379/0
+  AGF_REDIS_PREFIX: agf
+
+  # ---- 外部 NATS JetStream 集群 ----
+  AGF_NATS_ENABLED: "1"
+  AGF_NATS_URL: nats://nats-agf.example.internal:4222
+  AGF_NATS_STREAM: AGF_EVENTS
+
+  # ---- 外部 ClickHouse（冷热分层；无则置 0 退回 PG）----
+  AGF_CLICKHOUSE_ENABLED: "1"
+  AGF_CLICKHOUSE_URL: https://clickhouse-agf.example.internal:8443
+  AGF_CLICKHOUSE_DB: agf
+  AGF_CLICKHOUSE_USER: agf
+
+  # ---- 对象存储：阿里云 OSS（S3 兼容端点）----
+  AGF_S3_ENDPOINT: https://oss-cn-hangzhou-internal.aliyuncs.com
+  AGF_S3_REGION: cn-hangzhou
+  AGF_S3_BUCKET: agf-evidence-prod
+  AGF_S3_FORCE_PATH_STYLE: "0"
+
+  # ---- 安全：生产用 KMS 后端 ----
+  AGF_KMS_BACKEND: aliyun-kms
+  AGF_FORCE_PASSWORD_CHANGE: "1"
+  AGF_PASSWORD_MIN_LENGTH: "16"
+  AGF_PASSWORD_REQUIRE_CLASSES: "1"
+  AGF_LOGIN_MAX_FAILURES: "5"
+  AGF_LOGIN_LOCKOUT_SECS: "900"
+
+  # ---- 可观测性 ----
+  AGF_OTEL_ENABLED: "1"
+  AGF_OTEL_ENDPOINT: http://otel-collector.observability.svc:4318
+  AGF_PROMETHEUS_ENABLED: "1"
+
+  # ---- 调度：生产用 SchedulerX3（本地 cron 在多副本下会重复触发）----
+  AGF_SCHEDULER_BACKEND: schedulerx3
+
+  # ---- 阿里云：按需开启；默认走 MockAdapter ----
+  AGF_ALIYUN_ENABLED: "0"
+  AGF_ALIYUN_REGION_ID: cn-hangzhou
+
+# 生产不建议用内置组件
+postgresql:
+  enabled: false
+redis:
+  enabled: false
+nats:
+  enabled: false
+minio:
+  enabled: false
+clickhouse:
+  enabled: false
+grafana:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# 高可用：多副本 + 跨节点分散 + 反亲和
+# -----------------------------------------------------------------------------
+server:
+  enabled: true
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+  terminationGracePeriodSeconds: 60
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: aiguardfabric
+          app.kubernetes.io/component: server
+  affinity:
+    podAntiAffinity:
+      # 尽量把副本摊到不同节点；软约束以免节点不足时无法调度
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: aiguardfabric
+                app.kubernetes.io/component: server
+
+ingest:
+  enabled: true
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 2Gi
+  terminationGracePeriodSeconds: 45
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: aiguardfabric
+          app.kubernetes.io/component: ingest
+
+scheduler:
+  enabled: true
+  # SchedulerX3 后端下可多副本；若切回 local-cron 必须改回 1
+  replicaCount: 2
+
+web:
+  enabled: true
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 256Mi
+
+# 生产：证据卷走 NAS（RWX），server 与 ingest 共享
+volumes:
+  evidence:
+    enabled: true
+    existingClaim: agf-evidence-prod    # 由存储类预创建（NAS/CPFS，ReadWriteMany）
+    size: 500Gi
+    accessModes:
+      - ReadWriteMany
+    keepOnUninstall: true
+  rules:
+    existingClaim: ""                   # 规则由 ConfigMap 或镜像内置提供
+    configMapName: agf-rules
+
+# -----------------------------------------------------------------------------
+# HPA：生产放开上限（需 metrics-server）
+# -----------------------------------------------------------------------------
+hpa:
+  server:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 65
+    targetMemoryUtilizationPercentage: 75
+  ingest:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 24
+    targetCPUUtilizationPercentage: 65
+    targetMemoryUtilizationPercentage: 75
+  web:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+  scheduler:
+    enabled: false
+
+pdb:
+  server:
+    enabled: true
+    minAvailable: 2
+  ingest:
+    enabled: true
+    minAvailable: 2
+  web:
+    enabled: true
+    minAvailable: 1
+  scheduler:
+    enabled: true
+    maxUnavailable: 1
+
+# -----------------------------------------------------------------------------
+# Ingress：强制 TLS + 更严格限流
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/limit-connections: "20"
+    # 生产：开启 HSTS（确认全站 HTTPS 后再开，否则不可回退）
+    nginx.ingress.kubernetes.io/hsts: "true"
+    nginx.ingress.kubernetes.io/hsts-max-age: "31536000"
+    nginx.ingress.kubernetes.io/hsts-include-subdomains: "true"
+  api:
+    host: agf.example.com
+    paths:
+      - path: /api
+        pathType: Prefix
+      - path: /ws
+        pathType: Prefix
+      - path: /healthz
+        pathType: Exact
+  web:
+    host: ""
+  tls:
+    enabled: true
+    secretName: agf-tls-prod
+  certManager:
+    enabled: true
+    clusterIssuer: letsencrypt-prod
+
+# -----------------------------------------------------------------------------
+# PrivateLink：生产启用私网接入
+# -----------------------------------------------------------------------------
+privateLink:
+  enabled: true
+  service:
+    enabled: true
+    apiPort: 8080
+    annotations:
+      service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-flag: "on"
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-connect-port: "8080"
+      service.beta.kubernetes.io/alicloud-loadbalancer-health-check-uri: "/healthz"
+      service.beta.kubernetes.io/alicloud-loadbalancer-persistence-timeout: "300"
+  ingestService:
+    enabled: true
+
+# -----------------------------------------------------------------------------
+# NetworkPolicy：出站收敛到托管库网段（**按实际网段替换**）
+# -----------------------------------------------------------------------------
+networkPolicy:
+  enabled: true
+  defaultDeny: true
+  externalEndpoints:
+    # 例：VPC 内网段 + Privatelink 终端节点所在网段
+    cidrs:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+  allowPublicEgress: false
+  llmGatewayCidrs: []          # 自建推理网关网段（如 10.20.0.0/16）
+
+# -----------------------------------------------------------------------------
+# ServiceMonitor：生产集群通常有 Prometheus Operator
+# -----------------------------------------------------------------------------
+serviceMonitor:
+  enabled: true
+  labels:
+    release: kube-prometheus-stack
+  interval: 30s
+  scrapeTimeout: 10s
+
+serviceAccount:
+  create: true
+  annotations: {}              # 接入云 KMS/RAM Role 时在此注入角色 ARN
+
+# -----------------------------------------------------------------------------
+# 生产密钥：**必须**指向外部 Secret（Vault / External Secrets / SealedSecrets）
+# 不要在此文件写任何明文；secrets.* 一律由私密值文件或外部 Secret 提供。
+# -----------------------------------------------------------------------------
+secrets:
+  existingSecret: agf-prod-secrets

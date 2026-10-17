@@ -1,0 +1,91 @@
+{
+  "owner": "/root/meter_review",
+  "kind": "owned-coherent-local-example-not-real-cloud",
+  "binding": {
+    "httpApiId": "api-agf-demo",
+    "gatewayId": "gw-agf-demo",
+    "environmentId": "env-agf-demo",
+    "policyId": "policy-agf-demo",
+    "attachmentId": "attachment-agf-demo"
+  },
+  "responses": {
+    "GetHttpApi": {
+      "code": "Ok",
+      "requestId": "fixture-get-http-api",
+      "data": {
+        "httpApiId": "api-agf-demo",
+        "type": "LLM",
+        "name": "Owned model API",
+        "basePath": "/v1",
+        "deployConfigs": [
+          {
+            "gatewayId": "gw-agf-demo",
+            "environmentId": "env-agf-demo",
+            "gatewayInfo": {
+              "engineVersion": "2.1.15",
+              "gatewayId": "gw-agf-demo",
+              "gatewayEdition": "Professional"
+            },
+            "policyConfigs": [
+              {
+                "policyReference": {
+                  "policyId": "policy-agf-demo",
+                  "policyAttachmentId": "attachment-agf-demo"
+                },
+                "enable": true,
+                "type": "AiTokenRateLimit"
+              },
+              {
+                "aiSecurityGuardConfig": {
+                  "checkResponse": false,
+                  "checkRequest": false
+                },
+                "enable": false,
+                "type": "AiSecurityGuard"
+              }
+            ],
+            "serviceConfigs": [
+              {
+                "weight": 100,
+                "serviceId": "service-agf-demo",
+                "modelName": "owned-model"
+              }
+            ],
+            "autoDeploy": true
+          }
+        ],
+        "gatewayId": "gw-agf-demo"
+      }
+    },
+    "GetPolicy": {
+      "code": "Ok",
+      "requestId": "fixture-get-policy",
+      "data": {
+        "policyId": "policy-agf-demo",
+        "classId": "class-ai-token-rate-limit",
+        "className": "AiTokenRateLimit",
+        "name": "Owned minute limit",
+        "description": "保留用户说明",
+        "config": "{\"enable\":true,\"rules\":[{\"limitType\":\"Consumer\",\"matchKey\":\"\",\"matchType\":\"All\",\"matchValue\":\"*\",\"limitMode\":\"TokenPerMinute\",\"limitValue\":250}],\"enableGlobalRules\":true,\"globalRules\":[{\"limitType\":\"Global\",\"limitMode\":\"TokenPerMinute\",\"limitValue\":1000},{\"limitType\":\"Global\",\"limitMode\":\"RequestPerMinute\",\"limitValue\":20}],\"futurePreserved\":{\"nested\":{\"second\":2,\"first\":1},\"note\":\"owned fixture; no secret\"}}"
+      }
+    },
+    "GetPolicyAttachment": {
+      "code": "200",
+      "requestId": "fixture-get-attachment",
+      "data": {
+        "policyAttachmentId": "attachment-agf-demo",
+        "policyId": "policy-agf-demo",
+        "attachResourceId": "api-agf-demo",
+        "attachResourceType": "LLMApi",
+        "environmentId": "env-agf-demo",
+        "gatewayId": "gw-agf-demo",
+        "config": ""
+      }
+    },
+    "UpdatePolicy": {
+      "code": "Ok",
+      "requestId": "fixture-update-policy",
+      "message": "success"
+    }
+  }
+}

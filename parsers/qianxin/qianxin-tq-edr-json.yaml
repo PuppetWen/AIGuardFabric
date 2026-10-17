@@ -1,0 +1,45 @@
+# 奇安信 天擎终端安全 —— 病毒查杀/文件告警（JSON）
+# 正样本：parsers/qianxin/samples.json 中 key = qianxin-tq-edr-json
+key: qianxin-tq-edr-json
+name: 奇安信天擎病毒查杀
+vendor: 奇安信
+product: 天擎
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  kind=$.event_type
+  host=$.hostname
+  host_ip=$.host_ip
+  user=$.user
+  fpath=$.file_path
+  md5=$.md5
+  virus=$.virus_name
+  sev=$.severity
+  action=$.action
+  rule_id=$.rule_id
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    fpath: file.path
+    md5: file.hash.md5
+    virus: threat.software.name
+    rule_id: rule.id
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    virus: malware
+    trojan: malware
+    webshell: web
+  action_field: action
+required_fields: [virus, host]
+sample_fixture: parsers/qianxin/samples.json#qianxin-tq-edr-json
+description: 奇安信天擎终端病毒查杀告警（file_path/md5/virus_name/severity/action=quarantine → denied）。

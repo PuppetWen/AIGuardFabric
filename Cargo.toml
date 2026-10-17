@@ -1,0 +1,440 @@
+[workspace]
+resolver = "3"
+exclude = ["vendor/yara-x"]
+members = [
+    "crates/agf-core",
+    "crates/agf-storage",
+    "crates/agf-asset",
+    "crates/agf-scan",
+    "crates/agf-aigw",
+    "crates/agf-ingest",
+    "crates/agf-correlate",
+    "crates/agf-runtime",
+    "crates/agf-adapters",
+    "crates/agf-alicloud",
+    "crates/agf-api",
+    "crates/agf-auth",
+    "crates/agf-agent",
+    "crates/agf-ebpf",
+    "crates/agf-cli",
+    # Rust 动态库插件：宿主侧加载器（版本化 C ABI + ABI 版本门禁）+ 可被真实加载的示例插件（cdylib）。
+    "crates/agf-plugin",
+    "crates/agf-plugin-example",
+    "apps/server",
+    "apps/ingest",
+    "apps/scheduler",
+    # 本地 mTLS 终结器（**仅测试/联调**）：镜像生产入口网关的"校验客户端证书 + 透传身份头"，
+    # 让"采集器 mTLS 上行 → agf-server 接入"能在本机做真实端到端验证（见文件头说明）。
+    "tools/simulators/agf-mtls-terminator",
+]
+default-members = [
+    "crates/agf-core",
+    "crates/agf-storage",
+    "crates/agf-asset",
+    "crates/agf-scan",
+    "crates/agf-aigw",
+    "crates/agf-ingest",
+    "crates/agf-correlate",
+    "crates/agf-runtime",
+    "crates/agf-adapters",
+    "crates/agf-alicloud",
+    "crates/agf-api",
+    "crates/agf-auth",
+    "crates/agf-agent",
+    "crates/agf-ebpf",
+    "crates/agf-cli",
+    "crates/agf-plugin",
+    "crates/agf-plugin-example",
+    "apps/server",
+    "apps/ingest",
+    "apps/scheduler",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "Apache-2.0"
+authors = ["AIGuardFabric Team"]
+repository = "https://example.invalid/aiguardfabric"
+description = "AIGuardFabric (智御矩阵) — AI 安全治理平台"
+keywords = ["ai-security", "mcp", "llm", "guardrails", "redteam"]
+categories = ["security"]
+
+[workspace.dependencies]
+# ---- 内部 crate ----
+agf-core = { path = "crates/agf-core", version = "0.1.0" }
+agf-storage = { path = "crates/agf-storage", version = "0.1.0" }
+agf-asset = { path = "crates/agf-asset", version = "0.1.0" }
+agf-scan = { path = "crates/agf-scan", version = "0.1.0" }
+agf-aigw = { path = "crates/agf-aigw", version = "0.1.0" }
+agf-ingest = { path = "crates/agf-ingest", version = "0.1.0" }
+agf-correlate = { path = "crates/agf-correlate", version = "0.1.0" }
+agf-runtime = { path = "crates/agf-runtime", version = "0.1.0" }
+agf-adapters = { path = "crates/agf-adapters", version = "0.1.0" }
+agf-alicloud = { path = "crates/agf-alicloud", version = "0.1.0" }
+agf-api = { path = "crates/agf-api", version = "0.1.0" }
+agf-auth = { path = "crates/agf-auth", version = "0.1.0" }
+agf-agent = { path = "crates/agf-agent", version = "0.1.0" }
+agf-ebpf = { path = "crates/agf-ebpf", version = "0.1.0" }
+# Rust 动态库插件宿主侧加载器（`libloading` 的版本化 C ABI + ABI 门禁）。
+agf-plugin = { path = "crates/agf-plugin", version = "0.1.0" }
+
+# ---- 异步与运行时 ----
+tokio = { version = "1.48", features = ["full"] }
+tokio-util = { version = "0.7", features = ["io", "codec"] }
+futures = "0.3"
+async-trait = "0.1"
+tokio-stream = { version = "0.1", features = ["sync"] }
+async-stream = "0.3"
+
+# ---- Web / API ----
+axum = { version = "0.8", features = ["macros", "multipart", "ws"] }
+axum-extra = { version = "0.10", features = ["typed-header", "cookie"] }
+tower = { version = "0.5", features = ["util", "timeout", "limit", "load-shed"] }
+tower-http = { version = "0.6", features = ["trace", "cors", "compression-gzip", "limit", "request-id", "timeout", "fs"] }
+hyper = { version = "1", features = ["full"] }
+http = "1"
+http-body-util = "0.1"
+headers = "0.4"
+mime = "0.3"
+async-graphql = { version = "7", features = ["graphiql"] }
+async-graphql-axum = "7"
+utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid", "yaml"] }
+utoipa-swagger-ui = { version = "9", features = ["axum"] }
+
+# ---- 序列化 ----
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "float_roundtrip", "raw_value"] }
+serde_yaml = "0.9"
+toml = "0.9"
+csv = "1"
+quick-xml = { version = "0.41", features = ["serialize"] }
+
+# ---- 数据库 / 存储 ----
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    # MySQL 驱动：`agf-ingest` 的 SQL 拉取按 DSN scheme（mysql:// vs postgres://）自动选驱动。
+    # 特性在同一 crate 内全局统一，因此开在这里（两套驱动共用一套 runtime/TLS 栈）。
+    "mysql",
+    "uuid",
+    "chrono",
+    "json",
+    "macros",
+    "migrate",
+    "bigdecimal",
+] }
+# 冷归档列式格式（Parquet）：SNAPPY + **arrow**（列式回灌用 `RecordBatchReader`）。
+# 写出仍走低层列式 API（parquet::schema / parquet::column / parquet::file），
+# 读回新增 arrow 生态路径（`parquet::arrow::arrow_reader` + `arrow` 数组类型），
+# 两条读回路径并存（见 agf-ingest::coldarchive 的模块文档）。
+parquet = { version = "56", default-features = false, features = ["snap", "arrow"] }
+# arrow 生态（列式数组/RecordBatch）：冷归档 arrow 回灌读回路径用（`arrow-array` 等已由
+# parquet 的 `arrow` 特性引入，这里只补 facade 类型；关默认特性避免拉入 csv/json/ipc 等）。
+arrow = { version = "56", default-features = false }
+redis = { version = "0.32", features = ["tokio-comp", "connection-manager", "script"] }
+aws-sdk-s3 = { version = "1", features = ["behavior-version-latest"] }
+aws-config = { version = "1", features = ["behavior-version-latest"] }
+aws-credential-types = { version = "1", features = ["hardcoded-credentials"] }
+reqwest = { version = "0.12", default-features = false, features = [
+    "json",
+    "rustls-tls",
+    "rustls-tls-native-roots",
+    "stream",
+    "gzip",
+    "brotli",
+    "multipart",
+    "http2",
+] }
+ldap3 = { version = "=0.12.1", default-features = false, features = ["tls-rustls-ring"] }
+saml-rs = { version = "=0.5.0", default-features = false, features = ["crypto-rustcrypto"] }
+
+# ---- 云厂商 ----
+aliyun-sdk-core = "0.1"
+hmac = "0.12"
+sha1 = "0.10"
+sha2 = "0.10"
+md-5 = "0.10"
+percent-encoding = "2"
+
+# ---- 认证 / 密码学 ----
+argon2 = { version = "0.5", features = ["std"] }
+jsonwebtoken = "9"
+aes-gcm = "0.10"
+chacha20poly1305 = "0.10"
+# SNMP v3 authPriv（RFC3414 §8 CBC-DES / RFC3826 CFB128-AES-128）的分组密码原语：
+# 只引入分组密码本身（`aes` 已在 aes-gcm 的依赖树里；`des` 是新引入的小 crate），
+# CBC / CFB128 两种模式按 RFC 在 `agf-ingest::snmp::priv` 里显式实现（模式逻辑极短，且带
+# NIST SP800-38A / FIPS 向量单测），避免为这两种模式再拉 `cbc` / `cfb-mode` 两个 crate。
+aes = "0.8"
+des = "0.8"
+rsa = "0.9"
+ed25519-dalek = { version = "2", features = ["rand_core", "pkcs8"] }
+# rand 0.8：与 sqlx 0.8 的 rand 依赖保持一致，避免 sqlx::PgPool 与 rand::rng() 的兼容问题
+rand = "0.8"
+rand_core = "0.6"
+secrecy = "0.10"
+zeroize = { version = "1", features = ["derive"] }
+base64 = "0.22"
+hex = "0.4"
+subtle = "2"
+uuid = { version = "1", features = ["v4", "v7", "serde", "js"] }
+chrono = { version = "0.4", features = ["serde", "clock"] }
+time = "0.3"
+
+# ---- 策略 / 规则 ----
+regorus = { version = "0.3", default-features = false, features = ["arc", "regex", "base64"] }
+cel-interpreter = { version = "0.10", features = ["json"] }
+regex = "1"
+grok = "2"
+nom = "8"
+pest = "2"
+pest_derive = "2"
+yara-x = { version = "1", default-features = false }
+globset = "0.4"
+jsonpath-rust = "1"
+jaq-core = "2"
+jaq-std = "2"
+jaq-json = { version = "1", features = ["serde_json"] }
+
+# ---- 可观测性 ----
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "time", "fmt"] }
+tracing-opentelemetry = "0.32"
+opentelemetry = "0.31"
+opentelemetry_sdk = { version = "0.31", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.31", features = ["http-proto", "reqwest-client", "tonic"] }
+# OTLP/gRPC(4317) 服务端（`agf-ingest` 的 `otlp_grpc` 模块）：
+# `tonic` 提供 HTTP/2 gRPC 传输与服务端承载，`opentelemetry-proto` 的 `gen-tonic` + `logs`
+# 给出官方 `LogsService/Export` 服务定义；`with-serde` 让同一份生成类型能直接序列化成
+# **OTLP/JSON**，从而逐字段复用既有 OTLP/HTTP 接收器的映射（不另写一套）。
+# 两者本就在依赖树中（`opentelemetry-otlp` 的 `tonic` 特性已启用 `gen-tonic`）。
+# `tls-ring` 只为 OTLP/gRPC 端口**自身**的 TLS/mTLS（`ServerTlsConfig`）开启：
+# 与仓库其余 TLS 路径（syslog/Kafka/MQTT）同用 rustls 的 ring provider，不引入第二套 TLS 栈。
+tonic = { version = "0.14", features = ["gzip", "tls-ring"] }
+opentelemetry-proto = { version = "0.31", default-features = false, features = [
+    "gen-tonic",
+    "logs",
+    "trace",
+    "metrics",
+    "with-serde",
+] }
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.17", default-features = false }
+prometheus = "0.14"
+
+# ---- 消息 / 采集 ----
+async-nats = "0.46"
+rdkafka = { version = "0.38", features = ["cmake-build", "ssl-vendored"] }
+pulsar = "6"
+rumqttc = "0.25"
+# Kafka 纯 Rust 客户端：避免 librdkafka 的 C 工具链依赖（Windows 上 cmake/openssl 极难落地），
+# 由 `agf-ingest` 的 Kafka 接收器使用（offset 显式管理 + 游标持久化，见 crates/agf-ingest/src/kafka.rs）。
+rskafka = "0.5"
+# Kafka **消费者组协议**（ApiVersions/FindCoordinator/JoinGroup/SyncGroup/Heartbeat/OffsetFetch/
+# Fetch/OffsetCommit/LeaveGroup）的 wire 报文编解码。只依赖消息类型 + `Encodable`/`Decodable`，
+# **不含**网络连接与协调器状态机——那部分在 `agf-ingest::kafka::group` 里自行实现。
+# 四个压缩特性全开：Fetch 响应里的 record batch 可能是 gzip/snappy/lz4/zstd（四者均已在依赖树内）。
+kafka-protocol = { version = "0.18", default-features = false, features = [
+    "client",
+    # `impl Request for …`（`Req::KEY` / `Req::Response`）被 kafka-protocol 用
+    # `#[cfg(all(feature = "client", feature = "broker"))]` 门控——只开 `client` 拿不到。
+    "broker",
+    "gzip",
+    "snappy",
+    "lz4",
+    "zstd",
+] }
+# MSSQL（TDS 7.3+）**纯 Rust** 驱动：`SqlDialect::MsSql` 的取数与列解码用；
+# 关掉 default-features（native-tls/winauth）改走 rustls —— 与仓库其余 TLS 路径同一套栈。
+tiberius = { version = "0.12", default-features = false, features = ["rustls", "tds73", "chrono"] }
+# Oracle（OCI/ODPI-C）驱动：`SqlDialect::Oracle` 的取数与列解码用。
+# 与 MSSQL/MySQL 的关键差异（**如实**）：OCI 是 **C 运行库**，本 crate 在**构建期**用 `cc`
+# 编译随包分发的 ODPI-C 单文件 amalgamation（需要 C 编译器；**不需要** Oracle SDK 头文件，
+# ODPI-C 在运行期 `LoadLibrary`/`dlopen` 加载 OCI），**运行期**需要 Oracle Instant Client；
+# 本项目把客户端库放在仓库内 `tools/oracle/instantclient_23_5`，由
+# `AGF_ORACLE_CLIENT_LIB_DIR`（或该默认相对路径）经 `oracle::InitParams::oracle_client_lib_dir`
+# 指给驱动 —— **不写全局 PATH、不污染 D:\Environment**（见 tools/oracle/README.md）。
+# `chrono` 特性提供 `DateTime<Utc>`/`NaiveDateTime` 的 FromSql（时间列归一为 ISO-8601 用它）。
+oracle = { version = "0.6", default-features = false, features = ["chrono"] }
+lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "rustls-tls", "tokio1-rustls-tls"] }
+
+# ---- 工具 ----
+anyhow = "1"
+thiserror = "2"
+clap = { version = "4", features = ["derive", "env", "wrap_help"] }
+config = { version = "0.15", default-features = false, features = ["toml", "yaml", "json"] }
+dotenvy = "0.15"
+dirs = "6"
+totp-rs = { version = "5", features = ["gen_secret", "otpauth"] }
+serde_with = "3"
+humantime = "2"
+humantime-serde = "1"
+bytes = "1"
+byteorder = "1"
+smallvec = "1"
+indexmap = { version = "2", features = ["serde"] }
+once_cell = "1"
+parking_lot = "0.12"
+dashmap = "6"
+arc-swap = "1"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+tokio-rustls = "0.26"
+# 客户端证书 DER 的公共类型（rustls 0.23 的 `pki_types` 就是它的再导出；服务端校验器实现需要直接依赖）
+rustls-pki-types = "1"
+# MQTT over TLS 的 PEM 解析（CA / 客户端证书 / 私钥）：与 rumqttc 0.25 内部同一版本（2.x）
+rustls-pemfile = "2"
+webpki-roots = "1"
+rcgen = { version = "0.14", features = ["pem", "x509-parser"] }
+flate2 = "1"
+tar = "0.4"
+zip = { version = "4", default-features = false, features = ["deflate", "time"] }
+walkdir = "2"
+tempfile = "3"
+which = "8"
+sysinfo = "0.37"
+hostname = "0.4"
+fs2 = "0.4"
+glob = "0.3"
+shell-words = "1"
+nix = { version = "0.30", features = ["fs", "process", "signal", "user"] }
+procfs = "0.18"
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_ProcessStatus", "Win32_System_Diagnostics_ToolHelp"] }
+notify = "8"
+notify-debouncer-mini = "0.7"
+# Rust 动态库插件的运行时装载（`crates/agf-plugin`）：稳定 ABI 由本仓库自己定义，
+# 这里只借它做 dlopen/LoadLibrary 与符号解析。0.9 已在本项目 `.cargo` 缓存内（离线可构建）。
+libloading = "0.9"
+strum = { version = "0.27", features = ["derive"] }
+url = "2"
+ipnet = "2"
+ipnetwork = "0.21"
+cidr = "0.3"
+maxminddb = "0.27"
+
+# ---- 文档 / 报表 ----
+printpdf = "0.8"
+handlebars = "6"
+tera = "1"
+pulldown-cmark = "0.13"
+
+# ---- 国际化 ----
+rust-i18n = "3"
+
+# ---- Pulsar 原生二进制协议（`crates/agf-ingest/src/pulsar`）----
+# `prost`：手写 `PulsarApi.proto` 的最小消息子集（**不用 protoc**，不做代码生成）。
+# 版本与本仓库既有传递依赖一致（`opentelemetry-proto` 带入的 0.14.4），因此**不新增依赖树**。
+prost = "0.14"
+# Pulsar 消息帧的 CRC32C（Castagnoli）校验：`Commands.serializeCommand*WithSize` 用同一算法，
+# 与 Go 客户端 `crc32.MakeTable(crc32.Castagnoli)` 逐比特一致。
+crc32c = "0.6"
+
+# ---- 测试 ----
+proptest = "1"
+pretty_assertions = "1"
+wiremock = "0.6"
+insta = { version = "1", features = ["json", "yaml"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+# 本机 MSVC 链接器输出为中文（"正在创建库 …"），rustc 会把它当成 linker 诊断回显成警告。
+# 这是环境本地化产物，不是链接问题（构建成功），因此在工作区统一关闭该 lint。
+linker_messages = "allow"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "deny"
+print_stdout = "warn"
+print_stderr = "warn"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+cast_possible_wrap = "allow"
+similar_names = "allow"
+option_if_let_else = "allow"
+map_unwrap_or = "allow"
+doc_markdown = "allow"
+literal_string_with_formatting_args = "allow"
+multiple_crate_versions = "allow"
+redundant_pub_crate = "allow"
+future_not_send = "allow"
+significant_drop_tightening = "allow"
+cognitive_complexity = "allow"
+missing_const_for_fn = "allow"
+suboptimal_flops = "allow"
+items_after_statements = "allow"
+unused_async = "allow"
+ref_option = "allow"
+manual_let_else = "allow"
+collapsible_if = "allow"
+if_not_else = "allow"
+needless_pass_by_value = "allow"
+implicit_hasher = "allow"
+wildcard_imports = "allow"
+single_match_else = "allow"
+match_same_arms = "allow"
+assigning_clones = "allow"
+derive_partial_eq_without_eq = "allow"
+float_cmp = "allow"
+case_sensitive_file_extension_comparisons = "allow"
+# ---------------------------------------------------------------------------
+# 以下 pedantic 项在"领域建模"场景下噪音大于收益，集中放行并说明理由。
+# 其余 pedantic 项保持开启（含 -D warnings 门禁），确保真实问题不被淹没。
+# ---------------------------------------------------------------------------
+# 领域结构体/函数的参数天然偏多（如"资产 + 协议 + 端点 + 版本 + 厂商 + 分级 + 生命周期 …"），
+# 强行拆结构体反而降低可读性；关键签名已在文档注释中说明字段语义。
+too_many_arguments = "allow"
+# 元组返回值用于解析器/构造器的临时聚合（如解析出的 MCP 服务器字段），
+# 单独定义类型别名收益有限。
+type_complexity = "allow"
+# 报表/Markdown 渲染统一用 `push_str(&format!(...))`，可读性优于 `write!` 链。
+format_push_string = "allow"
+# `Option::or(expr)` 中的表达式求值开销极小（克隆小结构），保持写法一致。
+or_fun_call = "allow"
+# 测试中的 `clone()` 用于构造对照数据，属可读性取舍。
+redundant_clone = "allow"
+
+[profile.release]
+# 优先优化发布二进制体积，保留 thin LTO；最终镜像体积与性能以实测为准。
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+incremental = false
+
+[profile.dev]
+opt-level = 0
+debug = 1
+incremental = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.test]
+opt-level = 1
+
+[workspace.metadata.deny]
+
+# Registry YARA-X 1.20.0 with the official Wasmtime 48.0.5 dependency upgrade.
+# See vendor/yara-x/AGF-PROVENANCE.md; no upstream Rust source is changed.
+[patch.crates-io]
+yara-x = { path = "vendor/yara-x" }

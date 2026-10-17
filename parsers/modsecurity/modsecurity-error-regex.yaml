@@ -1,0 +1,33 @@
+# ModSecurity v3 —— Apache error 日志中的规则的命中（Regex）
+# 正样本：parsers/modsecurity/samples.json 中 key = modsecurity-error-regex
+key: modsecurity-error-regex
+name: ModSecurity 错误日志规则命中
+vendor: ModSecurity
+product: ModSecurity v3
+protocols: [file, beats, syslog]
+engine: regex
+pattern: '\[(?P<ts>\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2}\.\d{6} \d{4})\] \[security2:error\] \[pid (?P<pid>\d+):tid (?P<tid>\d+)\] \[client (?P<src_ip>[\d.]+)(?::(?P<src_port>\d+))?\] ModSecurity: (?P<level>\w+)\. .*?\[id "(?P<rule_id>\d+)"\] \[msg "(?P<msg>[^"]*)"\] \[severity "(?P<severity>[^"]*)"\] \[hostname "(?P<host>[^"]*)"\] \[uri "(?P<uri>[^"]*)"\]'
+mapping:
+  map:
+    src_ip: source.ip
+    src_port: source.port
+    rule_id: rule.id
+    msg: message
+    host: host.name
+    uri: url.path
+    pid: process.pid
+  time_field: ts
+  time_format: '%a %b %d %H:%M:%S%.f %Y'
+  severity_field: severity
+  severity_map:
+    CRITICAL: critical
+    ERROR: high
+    WARNING: medium
+    NOTICE: low
+    EMERGENCY: critical
+  defaults:
+    event.category: web
+    event.action: detect
+required_fields: [rule_id, src_ip]
+sample_fixture: parsers/modsecurity/samples.json#modsecurity-error-regex
+description: Apache error 日志中的 ModSecurity 规则命中（[id]/[msg]/[severity]/[uri]），无 audit log 权限时的兜底通道。

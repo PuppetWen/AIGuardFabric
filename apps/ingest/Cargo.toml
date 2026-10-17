@@ -1,0 +1,40 @@
+[package]
+name = "agf-ingest-bin"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 统一接入服务进程：Syslog/Webhook/MCP 代理/采集器回传与解析归一"
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "agf-ingest"
+path = "src/main.rs"
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+agf-ingest.workspace = true
+agf-asset.workspace = true
+
+tokio.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+dotenvy.workspace = true
+axum.workspace = true
+reqwest.workspace = true
+tower-http.workspace = true
+futures.workspace = true
+
+[lints]
+workspace = true

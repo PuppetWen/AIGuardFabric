@@ -1,0 +1,38 @@
+# CrowdStrike Falcon —— 登录失败事件（UserLogonFailed2）
+# 正样本：parsers/crowdstrike/samples.json 中 key = crowdstrike-falcon-logon-json
+key: crowdstrike-falcon-logon-json
+name: Falcon 登录失败事件
+vendor: CrowdStrike
+product: Falcon
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.metadata.eventCreationTime
+  kind=$.metadata.eventType
+  host=$.event.ComputerName
+  user=$.event.UserName
+  src_ip=$.event.RemoteAddressIP4
+  logon_type=$.event.LogonType
+  status=$.event.Status
+  substatus=$.event.SubStatus
+mapping:
+  map:
+    kind: event.category_raw
+    host: host.name
+    user: user.name
+    src_ip: source.ip
+    logon_type: log.logon.type
+    status: event.outcome
+    substatus: error.code
+  time_field: ts
+  time_format: unix_millis
+  category_map:
+    UserLogonFailed2: authentication
+    UserLogonFailed: authentication
+    UserLogon: authentication
+  defaults:
+    event.category: authentication
+    event.severity: high
+required_fields: [user, host]
+sample_fixture: parsers/crowdstrike/samples.json#crowdstrike-falcon-logon-json
+description: Falcon 登录失败事件（RemoteAddressIP4/LogonType/Status/SubStatus），归 authentication 并保留 NTSTATUS 失败码。

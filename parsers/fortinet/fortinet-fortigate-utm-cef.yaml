@@ -1,0 +1,19 @@
+# Fortinet FortiGate —— UTM/IPS CEF 告警
+# 正样本：parsers/fortinet/samples.json 中 key = fortinet-fortigate-utm-cef
+key: fortinet-fortigate-utm-cef
+name: FortiGate UTM 告警（CEF）
+vendor: Fortinet
+product: FortiGate
+protocols: [syslog, webhook]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    cs1: rule.external_id
+  category_map:
+    入侵检测: intrusion
+    病毒: malware
+    Web攻击: web
+required_fields: [source.ip]
+sample_fixture: parsers/fortinet/samples.json#fortinet-fortigate-utm-cef
+description: FortiGate UTM/IPS CEF 告警（cat=入侵检测 → intrusion，act=block → denied）。

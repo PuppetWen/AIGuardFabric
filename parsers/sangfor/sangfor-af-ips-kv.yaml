@@ -1,0 +1,33 @@
+# 深信服 AF —— 非 CEF 形态 syslog（key=value 正文）
+# 正样本：parsers/sangfor/samples.json 中 key = sangfor-af-ips-kv
+key: sangfor-af-ips-kv
+name: 深信服 AF syslog（KV）
+vendor: 深信服
+product: AF
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    rule_id: rule.id
+    type: event.category_raw
+    src: source.ip
+    dst: destination.ip
+    dport: destination.port
+    sport: source.port
+    msg: message
+  severity_field: severity
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    ips: intrusion
+    waf: web
+    av: malware
+    ddos: network
+  action_field: action
+required_fields: [src, rule_id]
+sample_fixture: parsers/sangfor/samples.json#sangfor-af-ips-kv
+description: 深信服 AF syslog KV 正文（rule_id/type/src/dst/dport/action/severity/msg），覆盖未走 CEF 的转发形态。

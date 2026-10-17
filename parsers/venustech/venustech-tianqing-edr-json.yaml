@@ -1,0 +1,41 @@
+# 启明星辰 天擎/EDR —— WebShell 文件处置（JSON）
+# 正样本：parsers/venustech/samples.json 中 key = venustech-tianqing-edr-json
+key: venustech-tianqing-edr-json
+name: 启明星辰终端 WebShell 处置
+vendor: 启明星辰
+product: 终端安全 EDR
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  kind=$.event_type
+  host=$.hostname
+  host_ip=$.host_ip
+  user=$.user
+  fpath=$.file_path
+  sev=$.severity
+  action=$.action
+  rule_id=$.rule_id
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    fpath: file.path
+    rule_id: rule.id
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    webshell: web
+    virus: malware
+    file_change: file
+  action_field: action
+required_fields: [fpath, host]
+sample_fixture: parsers/venustech/samples.json#venustech-tianqing-edr-json
+description: 启明星辰终端安全 EDR 事件（event_type=webshell → web，action=delete → deleted）。

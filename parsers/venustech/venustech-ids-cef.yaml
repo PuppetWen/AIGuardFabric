@@ -1,0 +1,18 @@
+# 启明星辰 IDS —— 扫描探测告警 CEF
+# 正样本：parsers/venustech/samples.json 中 key = venustech-ids-cef
+key: venustech-ids-cef
+name: 启明星辰 IDS 告警（CEF）
+vendor: 启明星辰
+product: 天阗 IDS
+protocols: [syslog, webhook]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    cs1: rule.external_id
+  category_map:
+    入侵检测: intrusion
+    Web攻击: web
+required_fields: [source.ip]
+sample_fixture: parsers/venustech/samples.json#venustech-ids-cef
+description: 启明星辰天阗 IDS CEF 告警（cat=入侵检测 → intrusion，act=alert → alert）。

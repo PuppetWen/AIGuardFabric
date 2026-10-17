@@ -1,0 +1,55 @@
+# Microsoft Azure —— 活动日志（Activity Log，控制面操作）
+# 正样本：parsers/azure/samples.json 中 key = azure-activity-json
+key: azure-activity-json
+name: Azure 活动日志
+vendor: Microsoft Azure
+product: Activity Log
+protocols: [object-storage, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.time
+  res=$.resourceId
+  op=$.operationName
+  cat=$.category
+  result=$.resultType
+  level=$.level
+  src_ip=$.callerIpAddress
+  user=$.identity.claims.name
+  role=$.identity.authorization.evidence.role
+  principal=$.identity.authorization.evidence.principalId
+  sub=$.subscriptionId
+  tenant=$.tenantId
+  region=$.location
+  corr=$.correlationId
+mapping:
+  map:
+    ts: event.time
+    res: cloud.resource_id
+    op: event.action_raw
+    cat: event.category_raw
+    result: event.outcome
+    src_ip: source.ip
+    user: user.name
+    role: user.roles
+    principal: user.id
+    sub: cloud.account.id
+    tenant: cloud.tenant_id
+    region: cloud.region
+    corr: trace.id
+  severity_field: level
+  severity_map:
+    Critical: critical
+    Error: high
+    Warning: medium
+    Informational: info
+    Verbose: info
+  category_map:
+    Administrative: configuration
+    Security: intrusion
+    Policy: policy
+    Alert: intrusion
+    ServiceHealth: other
+  defaults:
+required_fields: [op, res]
+sample_fixture: parsers/azure/samples.json#azure-activity-json
+description: Azure 活动日志（resourceId/operationName/category/callerIpAddress/identity.authorization.evidence），控制面审计。

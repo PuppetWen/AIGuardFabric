@@ -1,0 +1,164 @@
+{{/*
+  agf-ingest Deployment —— 统一日志/事件接入（MCP / Syslog / Webhook / Kafka）与解析归一
+  事实来源：
+    * docker-compose.yml: agf-ingest（8090 + 5514/tcp + 5514/udp，healthcheck /healthz:8090）
+      以及 AGF_INGEST_HOST / AGF_INGEST_PORT / AGF_SYSLOG_TCP_PORT / AGF_SYSLOG_UDP_PORT / AGF_MCP_PROXY_PORT
+    * deploy/docker/Dockerfile: --target ingest → ENTRYPOINT /usr/local/bin/agf-ingest
+  注意：Syslog 端口 5514 是非特权端口（<1024 需 CAP_NET_BIND_SERVICE，本 Chart 已 drop ALL）
+*/}}
+{{- if .Values.ingest.enabled }}
+{{- $root := . -}}
+{{- $svc := .Values.ingest -}}
+{{- $name := include "agf.componentName" (dict "root" $root "component" "ingest") -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" $root "component" "ingest") | nindent 4 }}
+  annotations:
+    aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+spec:
+  replicas: {{ $svc.replicaCount }}
+  revisionHistoryLimit: 5
+  {{- if not $root.Values.hpa.ingest.enabled }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" $root "component" "ingest") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "agf.componentLabels" (dict "root" $root "component" "ingest") | nindent 8 }}
+        {{- with $svc.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "agf.prometheusAnnotations" (dict "Values" $root.Values "metricsPort" $root.Values.ports.ingestHttp) | nindent 8 }}
+        aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+        {{- with $svc.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "agf.serviceAccountName" $root }}
+      automountServiceAccountToken: {{ $root.Values.serviceAccount.automountServiceAccountToken }}
+      securityContext:
+        {{- include "agf.podSecurityContext" $root | nindent 8 }}
+      {{- include "agf.imagePullSecrets" (dict "Values" $root.Values "componentImagePullSecrets" $svc.imagePullSecrets) | nindent 6 }}
+      terminationGracePeriodSeconds: {{ $svc.terminationGracePeriodSeconds }}
+      {{- with $svc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: agf-ingest
+          image: {{ include "agf.image" (dict "Chart" $root.Chart "Values" $root.Values "componentImage" $svc.image) }}
+          imagePullPolicy: {{ include "agf.imagePullPolicy" (dict "Values" $root.Values "componentImage" $svc.image) }}
+          {{- with $svc.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml $root.Values.containerSecurityContext | nindent 12 }}
+          ports:
+            - name: ingest-http
+              containerPort: {{ $root.Values.ports.ingestHttp }}
+              protocol: TCP
+            # Syslog 双协议：TCP 可靠投递 + UDP 高吞吐（云 LB 需确认支持 UDP）
+            - name: syslog-tcp
+              containerPort: {{ $root.Values.ports.syslogTcp }}
+              protocol: TCP
+            - name: syslog-udp
+              containerPort: {{ $root.Values.ports.syslogUdp }}
+              protocol: UDP
+          envFrom:
+            - configMapRef:
+                name: {{ include "agf.configMapName" $root }}
+            {{- with $svc.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: AGF_INGEST_SQL_SINK
+              value: "1"
+            - name: AGF_INGEST_PORT
+              value: {{ $root.Values.ports.ingestHttp | quote }}
+            {{- include "agf.env" (dict "root" $root "component" "ingest") | nindent 12 }}
+          {{- if $svc.livenessProbe.enabled }}
+          livenessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.livenessProbe "defaultPort" "ingest-http") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.readinessProbe.enabled }}
+          readinessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.readinessProbe "defaultPort" "ingest-http") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.startupProbe.enabled }}
+          startupProbe:
+            {{- include "agf.probe" (dict "probe" $svc.startupProbe "defaultPort" "ingest-http") | nindent 12 }}
+          {{- end }}
+          {{- include "agf.preStop" (dict "hook" $svc.preStop) | nindent 10 }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if and $root.Values.volumes.evidence.enabled $svc.evidenceVolume.enabled }}
+            - name: evidence
+              mountPath: /data
+            {{- end }}
+            {{- if $root.Values.volumes.rules.configMapName }}
+            - name: rules
+              mountPath: /app/rules
+              readOnly: true
+            {{- else if $root.Values.volumes.rules.existingClaim }}
+            - name: rules
+              mountPath: /app/rules
+              readOnly: true
+            {{- end }}
+            {{- with $svc.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: {{ $root.Values.volumes.tmp.medium }}
+            sizeLimit: {{ $root.Values.volumes.tmp.sizeLimit }}
+        {{- if and $root.Values.volumes.evidence.enabled $svc.evidenceVolume.enabled }}
+        - name: evidence
+          persistentVolumeClaim:
+            claimName: {{ include "agf.evidenceClaimName" $root }}
+        {{- end }}
+        {{- if $root.Values.volumes.rules.configMapName }}
+        - name: rules
+          configMap:
+            name: {{ $root.Values.volumes.rules.configMapName }}
+        {{- else if $root.Values.volumes.rules.existingClaim }}
+        - name: rules
+          persistentVolumeClaim:
+            claimName: {{ $root.Values.volumes.rules.existingClaim }}
+        {{- end }}
+        {{- with $svc.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

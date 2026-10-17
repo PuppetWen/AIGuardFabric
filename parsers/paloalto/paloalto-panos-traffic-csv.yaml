@@ -1,0 +1,48 @@
+# Palo Alto PAN-OS —— TRAFFIC 流量日志（syslog 信封 + CSV）
+# 正样本：parsers/paloalto/samples.json 中 key = paloalto-panos-traffic-csv
+# 说明：PAN-OS syslog 的 CSV 无表头行，列名由模板按公开字段顺序声明（FUTURE_USE, Receive Time,
+# Serial Number, Type, Subtype, Config Version, Generate Time, Source/Destination Address, Rule,
+# Source/Destination User, Application, Virtual System, Zones, Interfaces, Log Action, Session ID,
+# Ports, Flags, Protocol, Action, Bytes*, Packets, Start Time, Elapsed Time, Category）。
+key: paloalto-panos-traffic-csv
+name: PAN-OS 流量日志（CSV）
+vendor: Palo Alto
+product: PAN-OS
+protocols: [syslog, beats, file]
+engine: csv
+pattern: 'future_use,receive_time,serial,type,subtype,config_version,generate_time,src_ip,dst_ip,nat_src_ip,nat_dst_ip,rule,src_user,dst_user,app,vsys,from_zone,to_zone,inbound_if,outbound_if,log_action,time_logged,session_id,repeat_count,src_port,dst_port,nat_src_port,nat_dst_port,flags,protocol,action,bytes,bytes_sent,bytes_received,packets,start_time,elapsed_time,category'
+mapping:
+  map:
+    receive_time: event.time
+    serial: observer.serial_number
+    type: event.category_raw
+    subtype: event.type
+    src_ip: source.ip
+    dst_ip: destination.ip
+    rule: rule.name
+    src_user: user.name
+    dst_user: destination.user.name
+    app: network.application
+    from_zone: source.zone
+    to_zone: destination.zone
+    session_id: network.session_id
+    src_port: source.port
+    dst_port: destination.port
+    protocol: network.iana_number
+    bytes_sent: source.bytes
+    bytes_received: destination.bytes
+    bytes: network.bytes
+    packets: network.packets
+    elapsed_time: event.duration
+    category: rule.category
+  time_field: receive_time
+  time_format: '%Y/%m/%d %H:%M:%S'
+  category_map:
+    TRAFFIC: network
+    THREAT: intrusion
+    URL: web
+    SYSTEM: configuration
+  action_field: action
+required_fields: [serial, src_ip]
+sample_fixture: parsers/paloalto/samples.json#paloalto-panos-traffic-csv
+description: PAN-OS TRAFFIC 日志（CSV 38 列，公开字段顺序；type=TRAFFIC → network，action=allow → allowed）。

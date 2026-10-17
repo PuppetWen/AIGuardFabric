@@ -1,0 +1,1 @@
+<134>Feb 21 10:28:00 qax-tianyan1 CEF:0|QiAnXin|TianYan|3.0.6|3001|命令注入攻击|8|src=203.0.113.60 dst=10.20.30.120 spt=51234 dpt=8080 proto=TCP act=block cat=Web攻击 suser=admin request=/api/v1/exec?cmd=id cs1=QAX-TY-3001

@@ -1,0 +1,26 @@
+# 深信服 AC 上网行为管理 —— 上网审计日志（syslog KV）
+# 正样本：parsers/sangfor/samples.json 中 key = sangfor-ac-kv
+key: sangfor-ac-kv
+name: 深信服 AC 上网行为审计
+vendor: 深信服
+product: AC
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    user: user.name
+    src_ip: source.ip
+    dst_ip: destination.ip
+    dst_port: destination.port
+    domain: url.domain
+    category: rule.category
+    bytes: network.bytes_out
+    app: network.application
+  action_field: action
+  defaults:
+    event.severity: low
+    event.category: web
+required_fields: [user, src_ip]
+sample_fixture: parsers/sangfor/samples.json#sangfor-ac-kv
+description: 深信服 AC 上网行为管理审计日志（user/src_ip/domain/category/action/bytes），URL 分类落 rule.category。

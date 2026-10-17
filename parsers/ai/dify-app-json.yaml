@@ -1,0 +1,41 @@
+# Dify —— 工作流运行日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = dify-app-json
+key: dify-app-json
+name: Dify 工作流运行日志
+vendor: Dify
+product: LLM 应用平台
+protocols: [webhook, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.created_at
+  finish=$.finished_at
+  run_id=$.id
+  app_id=$.app_id
+  workflow_run=$.workflow_run_id
+  conversation=$.conversation_id
+  status=$.status
+  elapsed=$.elapsed_time
+  tokens=$.total_tokens
+  user=$.user
+  query=$.message
+  answer=$.answer
+mapping:
+  map:
+    ts: event.time
+    finish: event.end
+    run_id: event.id
+    app_id: service.name
+    workflow_run: ai.session_id
+    conversation: ai.conversation_id
+    status: event.outcome
+    elapsed: event.duration
+    tokens: ai.total_tokens
+    user: user.name
+    query: message
+    answer: ai.answer
+  defaults:
+    event.category: ai-model
+    event.severity: info
+required_fields: [app_id, workflow_run]
+sample_fixture: parsers/ai/samples.json#dify-app-json
+description: Dify 工作流运行日志（workflow_run_id/status/elapsed_time/total_tokens/created_at），LLM 应用调用审计与成本归集。

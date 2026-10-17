@@ -1,0 +1,50 @@
+# Wazuh —— 认证事件（登录成功/失败）
+# 正样本：parsers/wazuh/samples.json 中 key = wazuh-auth-json
+key: wazuh-auth-json
+name: Wazuh 认证事件
+vendor: Wazuh
+product: Wazuh Manager
+protocols: [file, beats, webhook]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  level=$.rule.level
+  rule_id=$.rule.id
+  rule_desc=$.rule.description
+  src_ip=$.data.srcip
+  src_port=$.data.srcport
+  user=$.data.dstuser
+  proto=$.data.protocol
+  agent_name=$.agent.name
+  agent_ip=$.agent.ip
+  full_log=$.full_log
+mapping:
+  map:
+    rule_id: rule.id
+    rule_desc: rule.description
+    src_ip: source.ip
+    src_port: source.port
+    user: user.name
+    proto: network.protocol
+    agent_name: host.name
+    agent_ip: host.ip
+    full_log: message
+  time_field: ts
+  severity_field: level
+  severity_map:
+    '0': info
+    '3': info
+    '5': low
+    '7': medium
+    '9': medium
+    '10': high
+    '12': high
+    '15': critical
+  category_map:
+    '5715': authentication
+    '5716': authentication
+  defaults:
+    event.category: authentication
+required_fields: [rule_id, user]
+sample_fixture: parsers/wazuh/samples.json#wazuh-auth-json
+description: Wazuh 认证类告警（data.srcip/srcport/dstuser/protocol），登录成功与失败统一归 authentication。

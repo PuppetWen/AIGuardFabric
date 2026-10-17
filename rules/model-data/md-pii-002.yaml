@@ -1,0 +1,36 @@
+# AIGuardFabric 检测规则 —— 敏感信息回显：手机号
+# 安全域: model-data（模型与数据安全）｜ 检测目标: model-output ｜ 算子: regex ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/llm-top-10/
+key: MD-PII-002
+name: 敏感信息回显：手机号
+description: 模型输出/事件载荷中直接回显 11 位手机号（用 \b 边界避免命中长数字串）。
+domain: model-data
+severity: high
+kind: regex
+target: model-output
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM02
+- PII
+- CWE-359
+references:
+- https://genai.owasp.org/llm-top-10/
+detection:
+  type: regex
+  pattern: '\b1[3-9]\d{9}\b'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - 客户手机号：13800138000，联系人：张先生。
+  - '{"user":{"phone":"15912345678"}}'
+  negative:
+  - 订单号 20260221102345 已生成，请核对收货地址。
+  - 客服热线 400-800-1234 工作日 9:00-18:00。
+remediation: 输出侧启用 PII 脱敏（保留前 3 后 4）；模型侧禁止把原始用户数据写进提示词。
+author: agf-rules
+version: 1

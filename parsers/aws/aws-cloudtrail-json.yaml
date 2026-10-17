@@ -1,0 +1,51 @@
+# AWS CloudTrail —— 控制面审计事件（JSON）
+# 正样本：parsers/aws/samples.json 中 key = aws-cloudtrail-json
+key: aws-cloudtrail-json
+name: AWS CloudTrail 审计事件
+vendor: AWS
+product: CloudTrail
+protocols: [object-storage, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.eventTime
+  name=$.eventName
+  source=$.eventSource
+  region=$.awsRegion
+  account=$.userIdentity.accountId
+  user=$.userIdentity.userName
+  arn=$.userIdentity.arn
+  id_type=$.userIdentity.type
+  src_ip=$.sourceIPAddress
+  ua=$.userAgent
+  request_id=$.requestID
+  evt_id=$.eventID
+  kind=$.eventType
+  cat=$.eventType
+  read_only=$.readOnly
+  error_code=$.errorCode
+mapping:
+  map:
+    ts: event.time
+    name: event.action_raw
+    source: event.provider
+    region: cloud.region
+    account: cloud.account.id
+    user: user.name
+    arn: user.id
+    id_type: user.type
+    src_ip: source.ip
+    ua: user_agent.original
+    request_id: event.reference
+    evt_id: event.id
+    kind: event.type
+    cat: event.category_raw
+    read_only: event.read_only
+    error_code: error.code
+  category_map:
+    AwsApiCall: cloud-control
+    AwsConsoleSignIn: authentication
+  defaults:
+    event.severity: info
+required_fields: [name, evt_id]
+sample_fixture: parsers/aws/samples.json#aws-cloudtrail-json
+description: AWS CloudTrail 事件（userIdentity/eventSource/sourceIPAddress/requestParameters 省略），控制面操作归 cloud-control。

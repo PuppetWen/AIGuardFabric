@@ -1,0 +1,36 @@
+# AIGuardFabric 检测规则 —— Agent 身份越权声明（管理员 Agent）
+# 安全域: model-data（模型与数据安全）｜ 检测目标: mcp-request ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+key: MD-LAT-005
+name: Agent 身份越权声明（管理员 Agent）
+description: MCP/Agent 请求中把 agent/worker 身份声明为 admin/root/orchestrator，属横向移动前置。
+domain: model-data
+severity: critical
+kind: regex
+target: mcp-request
+action: isolate
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM06
+- lateral-movement
+- agent-identity
+references:
+- https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+detection:
+  type: regex
+  pattern: '(?i)["'']?(agent|assistant|worker)[_-]?(id|name|key)["'']?\s*[:=]\s*["'']?(admin|root|system|orchestrator|supervisor|\*|all)'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - '{"agent_id":"admin","action":"delegate","target":"all_tenants"}'
+  - '{"caller":{"worker_name":"system"},"callee":"other_agent"}'
+  negative:
+  - '{"agent_id":"agent_7","action":"delegate","target":"tenant_a1b2"}'
+  - '{"caller":{"worker_name":"worker_3"},"callee":"agent_7"}'
+remediation: Agent 身份由平台签发并在服务端校验；禁止请求体自述身份，跨 Agent 调用需显式授权。
+author: agf-rules
+version: 1

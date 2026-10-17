@@ -1,0 +1,56 @@
+{
+  "name": "@aiguardfabric/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AIGuardFabric (智御矩阵) 前端安全治理控制台 / AI security governance console",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:only": "vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "@antv/g6": "^5.1.1",
+    "@tanstack/react-query": "^5.103.1",
+    "antd": "^5.29.3",
+    "dayjs": "^1.11.23",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.6",
+    "i18next": "^24.2.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-i18next": "^15.7.4",
+    "react-router-dom": "^7.18.4",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.20.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "jsdom": "^30.1.0",
+    "typescript": "~5.7.3",
+    "typescript-eslint": "^8.70.0",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.7"
+  }
+}

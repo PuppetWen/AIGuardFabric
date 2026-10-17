@@ -1,0 +1,83 @@
+[package]
+name = "agf-ebpf"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 固定 eBPF 进程观察探针，unsafe 仅隔离于 Linux 内核 ABI"
+
+# 项目规约仅允许 eBPF 适配层使用有安全说明的 unsafe；不放宽其它工作区 crate。
+[lints.rust]
+unsafe_code = "allow"
+missing_debug_implementations = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "deny"
+print_stdout = "warn"
+print_stderr = "warn"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+cast_possible_wrap = "allow"
+similar_names = "allow"
+option_if_let_else = "allow"
+map_unwrap_or = "allow"
+doc_markdown = "allow"
+literal_string_with_formatting_args = "allow"
+multiple_crate_versions = "allow"
+redundant_pub_crate = "allow"
+future_not_send = "allow"
+significant_drop_tightening = "allow"
+cognitive_complexity = "allow"
+missing_const_for_fn = "allow"
+suboptimal_flops = "allow"
+items_after_statements = "allow"
+unused_async = "allow"
+ref_option = "allow"
+manual_let_else = "allow"
+collapsible_if = "allow"
+if_not_else = "allow"
+needless_pass_by_value = "allow"
+implicit_hasher = "allow"
+wildcard_imports = "allow"
+single_match_else = "allow"
+match_same_arms = "allow"
+assigning_clones = "allow"
+derive_partial_eq_without_eq = "allow"
+float_cmp = "allow"
+case_sensitive_file_extension_comparisons = "allow"
+# ---------------------------------------------------------------------------
+# 以下 pedantic 项在"领域建模"场景下噪音大于收益，集中放行并说明理由。
+# 其余 pedantic 项保持开启（含 -D warnings 门禁），确保真实问题不被淹没。
+# ---------------------------------------------------------------------------
+# 领域结构体/函数的参数天然偏多（如"资产 + 协议 + 端点 + 版本 + 厂商 + 分级 + 生命周期 …"），
+# 强行拆结构体反而降低可读性；关键签名已在文档注释中说明字段语义。
+too_many_arguments = "allow"
+# 元组返回值用于解析器/构造器的临时聚合（如解析出的 MCP 服务器字段），
+# 单独定义类型别名收益有限。
+type_complexity = "allow"
+# 报表/Markdown 渲染统一用 `push_str(&format!(...))`，可读性优于 `write!` 链。
+format_push_string = "allow"
+# `Option::or(expr)` 中的表达式求值开销极小（克隆小结构），保持写法一致。
+or_fun_call = "allow"
+# 测试中的 `clone()` 用于构造对照数据，属可读性取舍。
+redundant_clone = "allow"
+

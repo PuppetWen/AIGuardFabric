@@ -1,0 +1,1 @@
+<134>Feb 21 10:23:45 app-prod-01 qingteng-hive[2311]: 2026-02-21 10:23:45 [ALERT] host=10.20.30.40 hostname=app-prod-01 user=root rule_id=QT-1001 risk=high action=block msg="检测到 WebShell 文件写入" path=/var/www/html/upload/x.php

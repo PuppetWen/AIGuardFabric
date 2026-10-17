@@ -1,0 +1,70 @@
+# =============================================================================
+# Grafana 数据源预置（provisioning/datasources）
+# 对应 docker-compose.yml 的挂载：./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+#
+# 设计要点：
+#   * Prometheus 为默认数据源，uid 固定为 agf-prometheus —— 仪表盘 JSON 里
+#     硬编码该 uid，保证导入后无需手工选数据源
+#   * ClickHouse 插件为可选：GRAFANA_CLICKHOUSE_URL 未设置时整段不生效
+#     （Grafana 会记录一条 datasource 错误日志，但不影响 Prometheus 面板）
+#   * 所有连接串与凭据均从环境变量读取，禁止硬编码（铁律 4）
+# =============================================================================
+
+apiVersion: 1
+
+# 已存在同名 uid 的数据源时执行更新而非报错（幂等）
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+  # ---------------------------------------------------------------------------
+  # Prometheus —— 平台指标主数据源（agf-server / agf-ingest / agf-scheduler 的 /metrics）
+  # ---------------------------------------------------------------------------
+  - name: Prometheus
+    uid: agf-prometheus
+    type: prometheus
+    access: proxy
+    # 部署方式自适应：
+    #   * 通过 Helm 部署 Grafana 到 K8s：默认值指向同命名空间的 prometheus Service
+    #   * 通过 compose 部署 Grafana：compose 里把 GRAFANA_PROMETHEUS_URL 设为
+    #     http://prometheus:9090（或宿主机可达地址）
+    url: ${GRAFANA_PROMETHEUS_URL}
+    isDefault: true
+    editable: false
+    jsonData:
+      # Prometheus 与 Grafana 时间轴对齐，避免图表右侧留空
+      timeInterval: 30s
+      httpMethod: POST
+      # 抓取目标未就绪时不报错（离线演练友好）
+      manageAlerts: false
+      prometheusType: Prometheus
+      # 允许在查询里用 $__rate_interval 自动适配抓取间隔
+      incrementalQuerying: false
+      # 只在集群内网 TLS 场景开启（自签证书需同时配 tlsSkipVerify）
+      tlsSkipVerify: false
+    secureJsonData:
+      # 留空即匿名/内网直连；若 Prometheus 开了 basic auth，用环境变量注入
+      basicAuthPassword: ${GRAFANA_PROMETHEUS_PASSWORD}
+
+  # ---------------------------------------------------------------------------
+  # ClickHouse —— 可选（冷热分层事件明细与原始日志下钻）
+  # 前置：安装 Grafana ClickHouse 数据源插件（vertamedia-clickhouse-datasource 或
+  #       官方 grafana-clickhouse-datasource）。compose 的 GF_INSTALL_PLUGINS 默认为空，
+  #       故默认**不启用**；需要时在 .env 里设置 GF_INSTALL_PLUGINS 并取消下面注释。
+  # ---------------------------------------------------------------------------
+  # - name: ClickHouse
+  #   uid: agf-clickhouse
+  #   type: grafana-clickhouse-datasource
+  #   access: proxy
+  #   url: ${GRAFANA_CLICKHOUSE_URL}
+  #   isDefault: false
+  #   editable: false
+  #   jsonData:
+  #     # 与 config.rs 的 AGF_CLICKHOUSE_DB / AGF_CLICKHOUSE_USER 对应
+  #     defaultDatabase: ${GRAFANA_CLICKHOUSE_DB}
+  #     username: ${GRAFANA_CLICKHOUSE_USER}
+  #     protocol: http
+  #     port: 8123
+  #   secureJsonData:
+  #     password: ${GRAFANA_CLICKHOUSE_PASSWORD}

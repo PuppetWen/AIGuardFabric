@@ -1,0 +1,351 @@
+[
+{"action": "ListVpcEndpoints", "version": "2020-04-15", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "minimum": "0", "maximum": "1000", "format": "int32"}},
+  {"name": "EndpointId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ServiceName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "VpcId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndpointName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndpointType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndpointStatus", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ConnectionStatus", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Tag", "location": "query", "style": "flat", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Key": {"type": "string", "required": false}, "Value": {"type": "string", "required": false}}}}},
+  {"name": "ResourceGroupId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AddressIpVersion", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ServiceRegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "GetVpcEndpointAttribute", "version": "2020-04-15", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "EndpointId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}}
+ ]},
+{"action": "ListVpcEndpointSecurityGroups", "version": "2020-04-15", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "minimum": "0", "maximum": "50", "format": "int32"}},
+  {"name": "EndpointId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}}
+ ]},
+{"action": "ListVpcEndpointZones", "version": "2020-04-15", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "NextToken", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "MaxResults", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "minimum": "0", "maximum": "1000", "format": "int32"}},
+  {"name": "EndpointId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}}
+ ]}
+,
+{
+ "action": "CreateVpcEndpoint",
+ "version": "2020-04-15",
+ "method": "POST",
+ "path": "/",
+ "style": "RPC",
+ "read_only": false,
+ "parameters": [
+  {
+   "name": "RegionId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": true
+   }
+  },
+  {
+   "name": "ClientToken",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "DryRun",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "boolean",
+    "required": false
+   }
+  },
+  {
+   "name": "EndpointName",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "EndpointType",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "ZonePrivateIpAddressCount",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "integer",
+    "format": "int64",
+    "required": false
+   }
+  },
+  {
+   "name": "EndpointDescription",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "VpcId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": true
+   }
+  },
+  {
+   "name": "ServiceId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "ServiceName",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "Zone",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "properties": {
+      "VSwitchId": {
+       "type": "string",
+       "required": false
+      },
+      "ZoneId": {
+       "type": "string",
+       "required": false
+      },
+      "ip": {
+       "type": "string",
+       "required": false
+      },
+      "Ipv6Address": {
+       "type": "string",
+       "required": false
+      }
+     },
+     "required": false
+    },
+    "required": false,
+    "maxItems": 10
+   }
+  },
+  {
+   "name": "SecurityGroupId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "array",
+    "items": {
+     "type": "string",
+     "required": false
+    },
+    "required": false,
+    "maxItems": 10
+   }
+  },
+  {
+   "name": "ProtectedEnabled",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "boolean",
+    "required": false
+   }
+  },
+  {
+   "name": "Tag",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "properties": {
+      "Key": {
+       "type": "string",
+       "required": false
+      },
+      "Value": {
+       "type": "string",
+       "required": false
+      }
+     },
+     "required": false
+    },
+    "required": false,
+    "maxItems": 21
+   }
+  },
+  {
+   "name": "ResourceGroupId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "PolicyDocument",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "AddressIpVersion",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false,
+    "enumValueTitles": {}
+   }
+  },
+  {
+   "name": "ZoneAffinityEnabled",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "boolean",
+    "required": false
+   }
+  },
+  {
+   "name": "ServiceRegionId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "CrossRegionBandwidth",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "integer",
+    "format": "int32",
+    "required": false
+   }
+  }
+ ]
+},
+{
+ "action": "EnableVpcEndpointConnection",
+ "version": "2020-04-15",
+ "method": "POST",
+ "path": "/",
+ "style": "RPC",
+ "read_only": false,
+ "parameters": [
+  {
+   "name": "RegionId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": true
+   }
+  },
+  {
+   "name": "ClientToken",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  },
+  {
+   "name": "DryRun",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "boolean",
+    "required": false
+   }
+  },
+  {
+   "name": "ServiceId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": true
+   }
+  },
+  {
+   "name": "EndpointId",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": true
+   }
+  },
+  {
+   "name": "Bandwidth",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "integer",
+    "format": "int32",
+    "required": false,
+    "maximum": "2147483647",
+    "minimum": "0"
+   }
+  },
+  {
+   "name": "TrafficControlMode",
+   "location": "query",
+   "style": "repeatList",
+   "schema": {
+    "type": "string",
+    "required": false
+   }
+  }
+ ]
+}
+]

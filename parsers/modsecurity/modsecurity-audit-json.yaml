@@ -1,0 +1,50 @@
+# ModSecurity v3 —— JSON 审计日志（SecAuditLogFormat JSON）
+# 正样本：parsers/modsecurity/samples.json 中 key = modsecurity-audit-json
+# 说明：transaction.messages 是数组，取首条命中规则（[0]），其余仍保留在原始载荷中。
+key: modsecurity-audit-json
+name: ModSecurity JSON 审计日志
+vendor: ModSecurity
+product: ModSecurity v3
+protocols: [file, beats, kafka]
+engine: json-path
+pattern: |
+  ts=$.transaction.time_stamp
+  src_ip=$.transaction.client_ip
+  method=$.transaction.request.method
+  uri=$.transaction.request.uri
+  host=$.transaction.request.headers.Host
+  status=$.transaction.response.http_code
+  interrupted=$.transaction.is_interrupted
+  msg=$.transaction.messages[0].message
+  rule_id=$.transaction.messages[0].details.ruleId
+  sev=$.transaction.messages[0].details.severity
+  verdict=$.transaction.messages[0].details.verdict
+  producer=$.transaction.producer.connector
+  action=$.audit_data.action.action
+mapping:
+  map:
+    src_ip: source.ip
+    method: http.request.method
+    uri: url.path
+    host: host.name
+    status: http.response.status_code
+    interrupted: event.is_interrupted
+    msg: message
+    rule_id: rule.id
+    verdict: rule.verdict
+    producer: observer.product
+    action: event.action
+  time_field: ts
+  time_format: '%a %b %d %H:%M:%S %Y'
+  severity_field: sev
+  severity_map:
+    CRITICAL: critical
+    ERROR: high
+    WARNING: medium
+    NOTICE: low
+    EMERGENCY: critical
+  defaults:
+    event.category: web
+required_fields: [rule_id, src_ip]
+sample_fixture: parsers/modsecurity/samples.json#modsecurity-audit-json
+description: ModSecurity v3 JSON 审计日志（transaction.client_ip/request/messages[0].details.ruleId/severity），CRS 规则命中归 web。

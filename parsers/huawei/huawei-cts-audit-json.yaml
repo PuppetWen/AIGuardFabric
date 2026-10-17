@@ -1,0 +1,46 @@
+# 华为云 云审计服务 CTS —— 控制面操作事件（JSON）
+# 正样本：parsers/huawei/samples.json 中 key = huawei-cts-audit-json
+key: huawei-cts-audit-json
+name: 华为云 CTS 云审计事件
+vendor: 华为云
+product: 云审计服务 CTS
+protocols: [object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  name=$.trace_name
+  kind=$.trace_type
+  cat=$.trace_type
+  rating=$.trace_rating
+  service=$.service_type
+  res_type=$.resource_type
+  res_name=$.resource_name
+  src_ip=$.source_ip
+  user=$.user.name
+  domain=$.user.domain.name
+  trace_id=$.trace_id
+  code=$.code
+mapping:
+  map:
+    ts: event.time
+    name: event.action_raw
+    kind: event.type
+    cat: event.category_raw
+    rating: event.outcome
+    service: event.provider
+    res_type: cloud.resource_type
+    res_name: cloud.resource_name
+    src_ip: source.ip
+    user: user.name
+    domain: user.domain
+    trace_id: trace.id
+    code: http.response.status_code
+  category_map:
+    ConsoleOperation: configuration
+    ApiCall: cloud-control
+    SystemAction: cloud-control
+  defaults:
+    event.severity: info
+required_fields: [name, ts]
+sample_fixture: parsers/huawei/samples.json#huawei-cts-audit-json
+description: 华为云 CTS 云审计事件（trace_name/trace_type/trace_rating/service_type/resource_type/source_ip/user 为公开文档字段）。

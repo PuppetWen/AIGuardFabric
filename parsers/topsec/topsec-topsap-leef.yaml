@@ -1,0 +1,20 @@
+# 天融信 安全审计系统 TopSAP —— LEEF 1.0（制表符分隔扩展段）
+# 正样本：parsers/topsec/samples.json 中 key = topsec-topsap-leef
+key: topsec-topsap-leef
+name: 天融信 TopSAP 审计（LEEF 1.0）
+vendor: 天融信
+product: TopSAP
+protocols: [syslog, file, beats]
+engine: leef
+pattern: 'LEEF:1.0'
+mapping:
+  map: {}
+  time_field: event.time_raw
+  time_format: '%Y-%m-%d %H:%M:%S'
+  category_map:
+    Authentication: authentication
+    Network: network
+    Configuration: configuration
+required_fields: [user.name]
+sample_fixture: parsers/topsec/samples.json#topsec-topsap-leef
+description: 天融信 TopSAP 审计日志 LEEF 1.0（制表符扩展段，cat=Authentication → authentication，suser → user.name）。

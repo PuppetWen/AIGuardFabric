@@ -1,0 +1,37 @@
+# AIGuardFabric 检测规则 —— OpenAI API Key 明文
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: prompt ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html, https://genai.owasp.org/llm-top-10/
+key: CL-API-001
+name: OpenAI API Key 明文
+description: 命中 sk-/sk-proj-/sk-svcacct- 前缀且长度足够的密钥字面量。
+domain: credential-leak
+severity: critical
+kind: regex
+target: prompt
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM02
+- CWE-798
+- secret
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+- https://genai.owasp.org/llm-top-10/
+detection:
+  type: regex
+  pattern: '\bsk-(?:proj-|svcacct-|admin-)?[A-Za-z0-9_\-]{20,}\b'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - OPENAI_API_KEY=sk-proj-AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
+  - 请检查这行配置：api_key = sk-abcDEFghiJKLmnoPQRstuVWXyz0123456 是否可用。
+  negative:
+  - 文档里用 sk-xxxx 作为占位符，请替换成真实 Key 后再上线。
+  - 我想了解如何在生产环境安全地轮换 API Key 的流程与注意事项。
+remediation: 立即吊销并轮换该 Key；接入侧启用密钥脱敏（只保留前后 4 位）后再落库。
+author: agf-rules
+version: 1

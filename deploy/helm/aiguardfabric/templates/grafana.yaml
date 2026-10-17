@@ -1,0 +1,174 @@
+{{/*
+  内置 Grafana —— 可选组件，默认关闭
+  事实来源：docker-compose.yml 的 grafana（profile=grafana，11.4.0，挂载 provisioning 与 dashboards）
+  ★ 生产建议独立部署 Grafana 或使用云托管观测服务，置 grafana.enabled=false。
+
+  预置项挂载策略：
+    本 Chart **不内联**仪表盘 JSON（体积大、易与仓库副本漂移）。
+    请用仓库的 deploy/grafana/** 生成 ConfigMap 后由 values 指定：
+      kubectl create configmap agf-grafana-provisioning \
+        --from-file=deploy/grafana/provisioning --dry-run=client -o yaml | kubectl apply -f -
+      kubectl create configmap agf-grafana-dashboards \
+        --from-file=deploy/grafana/dashboards --dry-run=client -o yaml | kubectl apply -f -
+    仪表盘数据源用 ${DS_PROMETHEUS} 变量，导入后需选择 Prometheus 数据源。
+*/}}
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agf.fullname" . }}-grafana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+spec:
+  type: {{ .Values.grafana.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.grafana.service.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "agf.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agf.fullname" . }}-grafana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "agf.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: grafana
+  template:
+    metadata:
+      labels:
+        {{- include "agf.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: grafana
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 472        # grafana 镜像内置 grafana 用户
+        runAsGroup: 472
+        fsGroup: 472
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: grafana
+          image: "{{ if .Values.global.imageRegistry }}{{ trimSuffix "/" .Values.global.imageRegistry }}/{{ end }}{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
+          imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "agf.secretName" . }}
+                  key: {{ include "agf.secretKey" (dict "root" . "key" "AGF_GRAFANA_ADMIN_PASSWORD") }}
+                  optional: true
+            - name: TZ
+              value: UTC
+            {{- range $k, $v := .Values.grafana.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.grafana.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/grafana
+            {{- if .Values.grafana.provisioning.existingConfigMap }}
+            # 数据源与 dashboard provider 配置（deploy/grafana/provisioning）
+            - name: provisioning
+              mountPath: /etc/grafana/provisioning
+              readOnly: true
+            {{- end }}
+            {{- if .Values.grafana.provisioning.dashboardsExistingConfigMap }}
+            # 仪表盘 JSON（deploy/grafana/dashboards）
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards
+              readOnly: true
+            {{- end }}
+            # 只读根文件系统下的可写临时目录
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+        {{- if .Values.grafana.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "agf.fullname" . }}-grafana
+        {{- else }}
+        - name: data
+          emptyDir:
+            sizeLimit: 1Gi
+        {{- end }}
+        {{- if .Values.grafana.provisioning.existingConfigMap }}
+        - name: provisioning
+          configMap:
+            name: {{ .Values.grafana.provisioning.existingConfigMap }}
+        {{- end }}
+        {{- if .Values.grafana.provisioning.dashboardsExistingConfigMap }}
+        - name: dashboards
+          configMap:
+            name: {{ .Values.grafana.provisioning.dashboardsExistingConfigMap }}
+        {{- end }}
+---
+{{- if .Values.grafana.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "agf.fullname" . }}-grafana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    {{- toYaml .Values.grafana.persistence.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.grafana.persistence.size }}
+  {{- if .Values.grafana.persistence.storageClass }}
+  storageClassName: {{ .Values.grafana.persistence.storageClass | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}

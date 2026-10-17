@@ -1,0 +1,29 @@
+# 绿盟 IDS —— syslog 键值对告警
+# 正样本：parsers/nsfocus/samples.json 中 key = nsfocus-ids-kv
+key: nsfocus-ids-kv
+name: 绿盟 IDS 告警（KV）
+vendor: 绿盟
+product: IDS
+protocols: [syslog, file]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    src: source.ip
+    dst: destination.ip
+    dport: destination.port
+    proto: network.transport
+    event: rule.name
+    count: event.count
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  action_field: action
+  defaults:
+    event.category: intrusion
+required_fields: [src, event]
+sample_fixture: parsers/nsfocus/samples.json#nsfocus-ids-kv
+description: 绿盟 IDS syslog KV 告警（src/dst/dport/proto/event/level/action/count）。

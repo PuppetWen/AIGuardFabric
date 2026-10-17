@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "note": "AI 网关/Agent 模板正样本与关键字段断言。样本按 OpenAI/Anthropic 兼容网关、MCP 代理、Dify/Coze/LangGraph 公开日志字段结构重建；未联网抓取，IP 用 RFC 5737 段。",
+  "samples": {
+    "openai-chat-gateway-json": {
+      "protocol": "webhook",
+      "line": "{\"timestamp\":\"2026-02-21T11:30:00.123Z\",\"request_id\":\"req-9f2c1d4b\",\"provider\":\"openai\",\"model\":\"gpt-4o-mini\",\"endpoint\":\"/v1/chat/completions\",\"status\":200,\"latency_ms\":1280,\"prompt_tokens\":812,\"completion_tokens\":240,\"total_tokens\":1052,\"cost_micro\":1500,\"user\":\"alice\",\"tenant\":\"tenant-001\",\"api_key_id\":\"key-0001\",\"client_ip\":\"10.20.30.230\",\"prompt_hash\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"stream\":true}",
+      "expect": {
+        "event.time": "2026-02-21T11:30:00.123Z",
+        "event.id": "req-9f2c1d4b",
+        "ai.provider": "openai",
+        "ai.model": "gpt-4o-mini",
+        "url.path": "/v1/chat/completions",
+        "http.response.status_code": "200",
+        "event.duration": "1280",
+        "ai.prompt_tokens": "812",
+        "ai.completion_tokens": "240",
+        "ai.total_tokens": "1052",
+        "ai.cost_micro": "1500",
+        "user.name": "alice",
+        "ai.api_key_id": "key-0001",
+        "source.ip": "10.20.30.230",
+        "ai.prompt_hash": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "event.category": "ai-model",
+        "event.severity": "info"
+      }
+    },
+    "anthropic-messages-gateway-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21T11:31:00.456Z\",\"trace_id\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"provider\":\"anthropic\",\"model\":\"claude-3-5-sonnet-20241022\",\"path\":\"/v1/messages\",\"http_status\":200,\"input_tokens\":1024,\"output_tokens\":512,\"cost_micro\":3200,\"user_id\":\"alice\",\"source_ip\":\"10.20.30.231\",\"stop_reason\":\"end_turn\",\"cache_read_input_tokens\":256}",
+      "expect": {
+        "event.time": "2026-02-21T11:31:00.456Z",
+        "trace.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "ai.provider": "anthropic",
+        "ai.model": "claude-3-5-sonnet-20241022",
+        "url.path": "/v1/messages",
+        "http.response.status_code": "200",
+        "ai.prompt_tokens": "1024",
+        "ai.completion_tokens": "512",
+        "ai.cache_read_tokens": "256",
+        "ai.cost_micro": "3200",
+        "user.name": "alice",
+        "source.ip": "10.20.30.231",
+        "ai.stop_reason": "end_turn",
+        "event.category": "ai-model",
+        "event.severity": "info"
+      }
+    },
+    "llm-gateway-generic-json": {
+      "protocol": "webhook",
+      "line": "{\"ts\":\"2026-02-21T11:32:00Z\",\"gw_request_id\":\"gw-0001\",\"provider\":\"aliyun-bailian\",\"upstream\":\"qwen-max\",\"route\":\"default\",\"status\":\"success\",\"elapsed_ms\":860,\"tokens_in\":400,\"tokens_out\":120,\"fee_micro\":900,\"app_id\":\"app-001\",\"session_id\":\"sess-0001\",\"client_ip\":\"203.0.113.240\",\"policy_hit\":\"prompt-injection\",\"action\":\"block\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:32:00.000Z",
+        "event.id": "gw-0001",
+        "ai.provider": "aliyun-bailian",
+        "ai.model": "qwen-max",
+        "ai.route": "default",
+        "event.outcome": "success",
+        "event.duration": "860",
+        "ai.prompt_tokens": "400",
+        "ai.completion_tokens": "120",
+        "ai.cost_micro": "900",
+        "service.name": "app-001",
+        "ai.session_id": "sess-0001",
+        "source.ip": "203.0.113.240",
+        "ai.rule_keys": "prompt-injection",
+        "event.action": "denied",
+        "event.category": "ai-model",
+        "event.severity": "medium"
+      }
+    },
+    "mcp-proxy-tool-call-json": {
+      "protocol": "mcp",
+      "line": "{\"time\":\"2026-02-21T11:33:00.789Z\",\"mcp_server_id\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"agent_id\":\"b1c2d3e4-5f60-7182-93a4-b5c6d7e8f901\",\"session_id\":\"sess-0002\",\"tool\":\"shell_exec\",\"method\":\"tools/call\",\"action\":\"blocked\",\"rule_keys\":[\"mcp.dangerous_tool\",\"prompt-injection\"],\"client_ip\":\"10.20.30.232\",\"jsonrpc_id\":42,\"duration_ms\":15}",
+      "expect": {
+        "event.time": "2026-02-21T11:33:00.789Z",
+        "ai.mcp_server_id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "ai.agent_id": "b1c2d3e4-5f60-7182-93a4-b5c6d7e8f901",
+        "ai.session_id": "sess-0002",
+        "ai.tool_name": "shell_exec",
+        "rpc.method": "tools/call",
+        "ai.rule_keys": "mcp.dangerous_tool",
+        "source.ip": "10.20.30.232",
+        "rpc.id": "42",
+        "event.duration": "15",
+        "event.action": "denied",
+        "event.category": "ai-tool-call",
+        "event.severity": "medium"
+      }
+    },
+    "mcp-proxy-jq": {
+      "protocol": "mcp",
+      "line": "{\"timestamp\":\"2026-02-21T11:34:00Z\",\"server\":{\"id\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"name\":\"filesystem\"},\"session\":\"sess-0003\",\"tool_name\":\"read_file\",\"decision\":\"allow\",\"latency_ms\":8,\"agent\":{\"id\":\"b1c2d3e4-5f60-7182-93a4-b5c6d7e8f901\",\"flavor\":\"langgraph\"},\"ip\":\"10.20.30.233\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:34:00.000Z",
+        "ai.mcp_server_id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "service.name": "filesystem",
+        "ai.session_id": "sess-0003",
+        "ai.tool_name": "read_file",
+        "event.duration": "8",
+        "ai.agent_id": "b1c2d3e4-5f60-7182-93a4-b5c6d7e8f901",
+        "ai.agent_flavor": "langgraph",
+        "source.ip": "10.20.30.233",
+        "event.action": "allowed",
+        "event.category": "ai-tool-call",
+        "event.severity": "info"
+      }
+    },
+    "dify-app-json": {
+      "protocol": "webhook",
+      "line": "{\"id\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"app_id\":\"app-dify-001\",\"workflow_run_id\":\"run-0001\",\"conversation_id\":\"conv-0001\",\"status\":\"succeeded\",\"elapsed_time\":1.23,\"total_tokens\":350,\"created_at\":1771667640,\"finished_at\":1771667641,\"user\":\"alice\",\"message\":\"总结这份合同的风险点\",\"answer\":\"合同存在三处风险\"}",
+      "expect": {
+        "event.time": "2026-02-21T09:54:00.000Z",
+        "event.end": "1771667641",
+        "event.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "service.name": "app-dify-001",
+        "ai.session_id": "run-0001",
+        "ai.conversation_id": "conv-0001",
+        "event.outcome": "succeeded",
+        "event.duration": "1.23",
+        "ai.total_tokens": "350",
+        "user.name": "alice",
+        "message": "总结这份合同的风险点",
+        "ai.answer": "合同存在三处风险",
+        "event.category": "ai-model",
+        "event.severity": "info"
+      }
+    },
+    "coze-bot-json": {
+      "protocol": "webhook",
+      "line": "{\"log_id\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"bot_id\":\"bot-0001\",\"space_id\":\"space-0001\",\"conversation_id\":\"conv-0002\",\"user_id\":\"user-0001\",\"msg_type\":\"tool_call\",\"tool_name\":\"http_request\",\"status\":\"failed\",\"error_code\":\"40001\",\"latency_ms\":320,\"created_at\":1771667700,\"content\":\"请求外部接口被拒绝\"}",
+      "expect": {
+        "event.time": "2026-02-21T09:55:00.000Z",
+        "event.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "ai.bot_id": "bot-0001",
+        "ai.space_id": "space-0001",
+        "ai.session_id": "conv-0002",
+        "user.id": "user-0001",
+        "event.category_raw": "tool_call",
+        "ai.tool_name": "http_request",
+        "event.outcome": "failed",
+        "error.code": "40001",
+        "event.duration": "320",
+        "message": "请求外部接口被拒绝",
+        "event.category": "ai-tool-call",
+        "event.severity": "info"
+      }
+    },
+    "langgraph-agent-json": {
+      "protocol": "webhook",
+      "line": "{\"ts\":\"2026-02-21T11:36:00.000Z\",\"run_id\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"thread_id\":\"thread-0001\",\"graph\":\"refund-agent\",\"node\":\"call_tool\",\"tool\":\"refund_order\",\"action\":\"deny\",\"duration_ms\":45,\"input_tokens\":210,\"output_tokens\":35,\"model\":\"qwen-max\",\"provider\":\"aliyun-bailian\",\"error_msg\":\"金额超过审批阈值\"}",
+      "expect": {
+        "event.time": "2026-02-21T11:36:00.000Z",
+        "ai.session_id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "ai.thread_id": "thread-0001",
+        "ai.agent_flavor": "refund-agent",
+        "ai.node": "call_tool",
+        "ai.tool_name": "refund_order",
+        "event.duration": "45",
+        "ai.prompt_tokens": "210",
+        "ai.completion_tokens": "35",
+        "ai.model": "qwen-max",
+        "ai.provider": "aliyun-bailian",
+        "message": "金额超过审批阈值",
+        "event.action": "denied",
+        "event.category": "ai-tool-call",
+        "event.severity": "medium"
+      }
+    }
+  }
+}

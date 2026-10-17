@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "note": "启明星辰模板正样本与关键字段断言。CEF/LEEF 样本按公开事件格式重建，JSON/KV 样本按安管/终端告警常见字段形态重建；未联网抓取。",
+  "samples": {
+    "venustech-ids-cef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:47:00 venustech-ids1 CEF:0|Venustech|IDS|3.0|1001|扫描探测|5|src=203.0.113.17 dst=10.20.30.74 spt=49876 dpt=22 proto=TCP act=alert cat=入侵检测 msg=SSH端口扫描 cs1=VS-IDS-1001",
+      "expect": {
+        "observer.vendor": "Venustech",
+        "rule.id": "1001",
+        "observer.product": "IDS",
+        "source.ip": "203.0.113.17",
+        "destination.ip": "10.20.30.74",
+        "source.port": "49876",
+        "destination.port": "22",
+        "event.category_raw": "入侵检测",
+        "event.action": "alert",
+        "message": "SSH端口扫描",
+        "rule.external_id": "VS-IDS-1001",
+        "event.severity": "medium",
+        "event.category": "intrusion"
+      }
+    },
+    "venustech-tianqing-edr-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21T10:48:00+08:00\",\"event_type\":\"webshell\",\"hostname\":\"SRV-WEB-01\",\"host_ip\":\"10.20.30.75\",\"user\":\"iis_user\",\"file_path\":\"C:\\\\inetpub\\\\wwwroot\\\\shell.aspx\",\"severity\":\"critical\",\"action\":\"delete\",\"rule_id\":\"VS-TQ-2001\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:48:00.000Z",
+        "host.name": "SRV-WEB-01",
+        "host.ip": "10.20.30.75",
+        "user.name": "iis_user",
+        "file.path": "C:\\inetpub\\wwwroot\\shell.aspx",
+        "rule.id": "VS-TQ-2001",
+        "event.severity": "critical",
+        "event.action": "deleted",
+        "event.category": "web"
+      }
+    },
+    "venustech-waf-kv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:49:00 venustech-waf1 WAF src=203.0.113.18 dst=10.20.30.76 method=POST uri=/admin/login attack=SQL注入 action=block level=high rule_id=VS-WAF-3001",
+      "expect": {
+        "host.name": "venustech-waf1",
+        "source.ip": "203.0.113.18",
+        "destination.ip": "10.20.30.76",
+        "http.request.method": "POST",
+        "url.path": "/admin/login",
+        "rule.name": "SQL注入",
+        "rule.id": "VS-WAF-3001",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "web"
+      }
+    },
+    "venustech-soc-leef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:50:00 venustech-soc1 LEEF:2.0|Venustech|SOC|2.5|9001|^|cat=Intrusion^sev=9^src=10.20.30.77^dst=203.0.113.19^usrName=analyst^act=alert^msg=关联分析命中：多源暴力破解^devTime=Feb 21 2026 10:50:00",
+      "expect": {
+        "observer.vendor": "Venustech",
+        "observer.product": "SOC",
+        "rule.id": "9001",
+        "event.category_raw": "Intrusion",
+        "source.ip": "10.20.30.77",
+        "destination.ip": "203.0.113.19",
+        "user.name": "analyst",
+        "message": "关联分析命中：多源暴力破解",
+        "event.time": "2026-02-21T10:50:00.000Z",
+        "event.severity": "critical",
+        "event.action": "alert",
+        "event.category": "intrusion"
+      }
+    }
+  }
+}

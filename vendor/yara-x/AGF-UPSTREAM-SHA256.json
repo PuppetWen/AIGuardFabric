@@ -1,0 +1,3552 @@
+[
+    {
+        "Path":  ".cargo_vcs_info.json",
+        "Sha256":  "3949389BD709C97AD619081440320B2A0A7A5C8FEB762D6337725FA76F7C38D1",
+        "Bytes":  97
+    },
+    {
+        "Path":  "build.rs",
+        "Sha256":  "93CB9777D6D0DF81E63F265388AE8747A15A0249DC03FCEAF88EE40F3E83CDE0",
+        "Bytes":  14703
+    },
+    {
+        "Path":  "Cargo.lock",
+        "Sha256":  "8D234CA1F1F7E5ED9BD65AC45C9C674722A9EC50D0D7A5C3DCFD6CE816D07A7B",
+        "Bytes":  86877
+    },
+    {
+        "Path":  "Cargo.toml",
+        "Sha256":  "D9C38F78D332FC4E90E4C08054AEF981D51C3DEBFF142AA98D8A01015A0E351A",
+        "Bytes":  8260
+    },
+    {
+        "Path":  "Cargo.toml.orig",
+        "Sha256":  "66ED29CBB33155EDE1FAF013CF33340E33FDF7CBFA7558A95E7BC06D2B24B2D5",
+        "Bytes":  14212
+    },
+    {
+        "Path":  "README.md",
+        "Sha256":  "FE5C6F9FDE50171D930617D0D21DAEC6CE089DD9B02853662F5A41DD614EE109",
+        "Bytes":  3142
+    },
+    {
+        "Path":  "benches/dex.rs",
+        "Sha256":  "23BA92A0CE742D0F436CE6B8442BFBF03456047957B768044D8A7C035B6F4AC4",
+        "Bytes":  674
+    },
+    {
+        "Path":  "benches/pe.rs",
+        "Sha256":  "13FD527CB4F2B20B7C556B192975F728A3F10D63690754A2971389A6E0D862B0",
+        "Bytes":  669
+    },
+    {
+        "Path":  "benches/commons/mod.rs",
+        "Sha256":  "F43064BDF8B61C2276F06B061DDC5F64DBF69617E3924ACCD9E33643EA88353F",
+        "Bytes":  1253
+    },
+    {
+        "Path":  "src/lib.rs",
+        "Sha256":  "96F27CA24C53AF87B14969E5629CC3708336123219A5B7A489A732227DC9B6F3",
+        "Bytes":  6169
+    },
+    {
+        "Path":  "src/models.rs",
+        "Sha256":  "D6D9E162D55CEB3206A783C9CD4724063B1A13AAA89FFCD96529C99C6253A0FE",
+        "Bytes":  14027
+    },
+    {
+        "Path":  "src/string_pool.rs",
+        "Sha256":  "6A740381066D1BD6603A79B30008503FC2201A3C12D1C63CA5DBDC1A2FEAB706",
+        "Bytes":  8118
+    },
+    {
+        "Path":  "src/variables.rs",
+        "Sha256":  "FD090981CE9342106928E058E7E4ED177AE393CADA77EFAA80424C42B81CC4D4",
+        "Bytes":  12972
+    },
+    {
+        "Path":  "src/compiler/base64.rs",
+        "Sha256":  "97514BC848DC4DF65DAC9701DB62D28FAEBF22FBD8106E8BA60B70838A17C50D",
+        "Bytes":  7567
+    },
+    {
+        "Path":  "src/compiler/context.rs",
+        "Sha256":  "50E75481CE83E49881EFACF4826B99F4BE517DFBBD2403852A74BB10247C0709",
+        "Bytes":  11305
+    },
+    {
+        "Path":  "src/compiler/emit.rs",
+        "Sha256":  "85E31A15EDE83A5FB6AFBED20FBD7CC8D9C9FB6945F660A269245021BC00CF00",
+        "Bytes":  104535
+    },
+    {
+        "Path":  "src/compiler/errors.rs",
+        "Sha256":  "DB95D22716847AF24ABA48B174767A4F4832516950F11B2DCD3ACF79338D5B8E",
+        "Bytes":  28705
+    },
+    {
+        "Path":  "src/compiler/linters.rs",
+        "Sha256":  "D1153E2EDC437BFFF840C782C9916A0FC519EA8A3A43CE06ACDCC40CA04943CF",
+        "Bytes":  14786
+    },
+    {
+        "Path":  "src/compiler/mod.rs",
+        "Sha256":  "22C33CEFE6F358AE4054418E33BBCAC94C043D7881627A810996DF1AFDEAA6DD",
+        "Bytes":  120885
+    },
+    {
+        "Path":  "src/compiler/report.rs",
+        "Sha256":  "4E750592BC0B67DCC815BCAE03CAF94805F89E20FF72F7BFBB75144380093AA3",
+        "Bytes":  23895
+    },
+    {
+        "Path":  "src/compiler/rules.rs",
+        "Sha256":  "9A01C840910BA9E8663FEC051C1EE46A6F027D8054954654DBD064C67C8AEDD7",
+        "Bytes":  35210
+    },
+    {
+        "Path":  "src/compiler/warnings.rs",
+        "Sha256":  "7F0D897A44B2D5F2AB9AD31EB1046360A90930865B09248C55D9C682B5762B35",
+        "Bytes":  23761
+    },
+    {
+        "Path":  "src/compiler/wsh.rs",
+        "Sha256":  "D9C90B479D07A616B79C9CD78024A27A66A42DE6E8C9D204B012A1FDF2EA6830",
+        "Bytes":  7296
+    },
+    {
+        "Path":  "src/compiler/atoms/mask.rs",
+        "Sha256":  "EAB4B07680CAE7B4EE2C8A77AD6463E545DC2F735B9B4D92126DFA3BA05EA252",
+        "Bytes":  3343
+    },
+    {
+        "Path":  "src/compiler/atoms/mod.rs",
+        "Sha256":  "BD7AAAD132640966F6242627C2220647EA10B2060ED53945239AFBA8770A7E5B",
+        "Bytes":  15850
+    },
+    {
+        "Path":  "src/compiler/atoms/quality.rs",
+        "Sha256":  "31A1FF481376431A0E81032014EEE2B18E773A7918F770DCBC0684F650F41790",
+        "Bytes":  28820
+    },
+    {
+        "Path":  "src/compiler/atoms/tests/mod.rs",
+        "Sha256":  "195423825D9F14D1C8F0987DD2C7359D80055414D4D9E5C3A0B825AD7AA38EC5",
+        "Bytes":  7587
+    },
+    {
+        "Path":  "src/compiler/ir/ast2ir.rs",
+        "Sha256":  "4A8CF82BA7E661EEFEC62E2D3546C3F9A9FE7FE08914D42F6C93BE0D3D0E731A",
+        "Bytes":  120015
+    },
+    {
+        "Path":  "src/compiler/ir/dfs.rs",
+        "Sha256":  "D1F0DF17BD104E6CE3AD21DC80D2D6425A3B2740BBD6D4C368A4A8934D0EA981",
+        "Bytes":  21667
+    },
+    {
+        "Path":  "src/compiler/ir/hex2hir.rs",
+        "Sha256":  "C45C8C1A442FF35BE658E9F3365801144CCA2D0AB223A87F13E822622CDCB34A",
+        "Bytes":  15251
+    },
+    {
+        "Path":  "src/compiler/ir/mod.rs",
+        "Sha256":  "32E474365D270701BCC39E4AA79E1020C49998EDB11B4C98F119F3264B0183F0",
+        "Bytes":  123752
+    },
+    {
+        "Path":  "src/compiler/ir/tests/mod.rs",
+        "Sha256":  "86BCD8FFC8D4597510A7AC7E6B82D4DD07AB3C5257A7668B9F5881464F8C6AEB",
+        "Bytes":  15124
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/1.cse.ir",
+        "Sha256":  "C36467DFCFFD20B1300FD9F08033CB4E22733627E8DEB6DC64EFBF58DF641BEE",
+        "Bytes":  2763
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/1.hoisting.ir",
+        "Sha256":  "C36467DFCFFD20B1300FD9F08033CB4E22733627E8DEB6DC64EFBF58DF641BEE",
+        "Bytes":  2763
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/1.in",
+        "Sha256":  "280FEFBFA90325553F20D5E80CAB11C3ACED6C578236C9799C87659A42696B94",
+        "Bytes":  722
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/1.ir",
+        "Sha256":  "C36467DFCFFD20B1300FD9F08033CB4E22733627E8DEB6DC64EFBF58DF641BEE",
+        "Bytes":  2763
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/1.no-folding.ir",
+        "Sha256":  "7605CAFED2240D49A59675CC5D311978439E1124D4104A4884CCC4B2C0A3AD74",
+        "Bytes":  3623
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/10.cse.ir",
+        "Sha256":  "9CBB43E6755B78DA3A7E078976984B3095965879E989D741014C43DC7E56A514",
+        "Bytes":  1130
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/10.hoisting.ir",
+        "Sha256":  "9CBB43E6755B78DA3A7E078976984B3095965879E989D741014C43DC7E56A514",
+        "Bytes":  1130
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/10.in",
+        "Sha256":  "D3974A0DFEECE2B78CF96447076662490A20CB194C27218FFE283426D4C2E937",
+        "Bytes":  221
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/10.ir",
+        "Sha256":  "9CBB43E6755B78DA3A7E078976984B3095965879E989D741014C43DC7E56A514",
+        "Bytes":  1130
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/10.no-folding.ir",
+        "Sha256":  "389D3551F00738E41DE294404AC83B9CEA83C57D8F0A48C156AC3FC7C80A1B88",
+        "Bytes":  1130
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/11.cse.ir",
+        "Sha256":  "4B8D8E8622D8A2823FEBD09BF08A616094948E28D7EA3A453603AAA6BA16E597",
+        "Bytes":  1940
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/11.hoisting.ir",
+        "Sha256":  "4B8D8E8622D8A2823FEBD09BF08A616094948E28D7EA3A453603AAA6BA16E597",
+        "Bytes":  1940
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/11.in",
+        "Sha256":  "EC2C253227964C0EE5B08CF26504B42C5A2156C4F7A1185F7A1406DD58EB57FB",
+        "Bytes":  517
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/11.ir",
+        "Sha256":  "4B8D8E8622D8A2823FEBD09BF08A616094948E28D7EA3A453603AAA6BA16E597",
+        "Bytes":  1940
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/11.no-folding.ir",
+        "Sha256":  "4B8D8E8622D8A2823FEBD09BF08A616094948E28D7EA3A453603AAA6BA16E597",
+        "Bytes":  1940
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/12.cse.ir",
+        "Sha256":  "363C8FFDEBEC3F2F445D858F34235A5EF3BAEB5C5640E61028B3D59B1A394114",
+        "Bytes":  5545
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/12.hoisting.ir",
+        "Sha256":  "29C97E0BF0933981A92FF1AE723E2DDCBB0942E524A395FB186D25935DE5825F",
+        "Bytes":  7190
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/12.in",
+        "Sha256":  "B654E7A8F223D849A9D85FF5951E1A7E1B732232A0BD3FCCA4E90FF926F18B11",
+        "Bytes":  628
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/12.ir",
+        "Sha256":  "363C8FFDEBEC3F2F445D858F34235A5EF3BAEB5C5640E61028B3D59B1A394114",
+        "Bytes":  5545
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/12.no-folding.ir",
+        "Sha256":  "2E991912A59B6AFE3FE3A6ACEDE7AE9257506DF4F183A380F6759BCBFD3C2DC6",
+        "Bytes":  5608
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/13.cse.ir",
+        "Sha256":  "9FAF473B3DE2291E07049255BBCC51ECB06E0CC9012218C9267393D980E135CE",
+        "Bytes":  2579
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/13.hoisting.ir",
+        "Sha256":  "9FAF473B3DE2291E07049255BBCC51ECB06E0CC9012218C9267393D980E135CE",
+        "Bytes":  2579
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/13.in",
+        "Sha256":  "0B2636A164C851DEEF7C5821CD31F3C317747F4CF54F3150DFD3AF3EF5694584",
+        "Bytes":  620
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/13.ir",
+        "Sha256":  "9FAF473B3DE2291E07049255BBCC51ECB06E0CC9012218C9267393D980E135CE",
+        "Bytes":  2579
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/14.cse.ir",
+        "Sha256":  "32B0FA3854A5866D6B55C9808B277F41CA187FB3FBE4FB1D665D556B713FFB6F",
+        "Bytes":  33869
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/14.hoisting.ir",
+        "Sha256":  "EBF8C43213392EC7DDF400E229741EE8917F7F9AB98C9D706A6E9A8A26528307",
+        "Bytes":  35133
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/14.in",
+        "Sha256":  "5ED23A1247DA52FBC9B84ACAF3BC5D6AFD43AF8180BE5615FE76BE95D7B7FAF9",
+        "Bytes":  4186
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/14.ir",
+        "Sha256":  "32B0FA3854A5866D6B55C9808B277F41CA187FB3FBE4FB1D665D556B713FFB6F",
+        "Bytes":  33869
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/15.cse.ir",
+        "Sha256":  "7600D70132083F7C2041161C4003335C8FB60FB7BA667EB83A62C4E310841F23",
+        "Bytes":  9642
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/15.hoisting.ir",
+        "Sha256":  "7600D70132083F7C2041161C4003335C8FB60FB7BA667EB83A62C4E310841F23",
+        "Bytes":  9642
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/15.in",
+        "Sha256":  "217E1CD09BA3726BE4074331C09743B60F802A68E0C47A980771F584C077E928",
+        "Bytes":  1212
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/15.ir",
+        "Sha256":  "7600D70132083F7C2041161C4003335C8FB60FB7BA667EB83A62C4E310841F23",
+        "Bytes":  9642
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/16.cse.ir",
+        "Sha256":  "9BAE3BF45B39340D20DBC655F3DF1ABD5DBA531C234E4D3D9ACA95EAD14A8B8A",
+        "Bytes":  6274
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/16.hoisting.ir",
+        "Sha256":  "22405B74FC33D7D948E389541D3A939C652671C0AC99B9EFF9190442503205E8",
+        "Bytes":  7595
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/16.in",
+        "Sha256":  "D2614134F302D039A41A341F1837F954BEEFBA095B77881EF196E71A403578D1",
+        "Bytes":  926
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/16.ir",
+        "Sha256":  "9BAE3BF45B39340D20DBC655F3DF1ABD5DBA531C234E4D3D9ACA95EAD14A8B8A",
+        "Bytes":  6274
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/2.cse.ir",
+        "Sha256":  "8FCFC516D10954A3C78AE79BC51D03EAC720209B5A9983DB7D10770F68F469BB",
+        "Bytes":  4295
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/2.hoisting.ir",
+        "Sha256":  "DD4F281562F19DAC0302CD145DEA7EE31DA2F9C57DCF5C78234DD69728DD3F8E",
+        "Bytes":  5743
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/2.in",
+        "Sha256":  "C5F1C603DE8D8049AB3B2EB336EA43E3BE4CE0ABA68F0E86F3E8FCF431828661",
+        "Bytes":  466
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/2.ir",
+        "Sha256":  "8FCFC516D10954A3C78AE79BC51D03EAC720209B5A9983DB7D10770F68F469BB",
+        "Bytes":  4295
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/2.no-folding.ir",
+        "Sha256":  "20E34EB36AD193B1F7A0E88CB32EDCC294BBBBEEDC7522E728BEDA019796A0F7",
+        "Bytes":  4296
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/3.cse.ir",
+        "Sha256":  "8BF7DFB381B5CA278FD70C29EB3576570868386B4319511067E4602EB8EC9E35",
+        "Bytes":  496
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/3.hoisting.ir",
+        "Sha256":  "8BF7DFB381B5CA278FD70C29EB3576570868386B4319511067E4602EB8EC9E35",
+        "Bytes":  496
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/3.in",
+        "Sha256":  "1285F000937678C4F5AE2FEAFCD23EFA5F308999A210EAECEEBCC4DECB3747CD",
+        "Bytes":  167
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/3.ir",
+        "Sha256":  "8BF7DFB381B5CA278FD70C29EB3576570868386B4319511067E4602EB8EC9E35",
+        "Bytes":  496
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/3.no-folding.ir",
+        "Sha256":  "613D1E17B10B23FCD90D3F995B64B70694362591EED19C71AF079006D8404AB8",
+        "Bytes":  496
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/4.cse.ir",
+        "Sha256":  "0E675D2C5F54145EFC7642F8597362CAF9E995CB2EB74D74C9F5F4783B3CB591",
+        "Bytes":  3824
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/4.hoisting.ir",
+        "Sha256":  "430B91084D9A051756E376139D2C5CE05FDF0ACD4BEB6AA039D19AA32747528C",
+        "Bytes":  6492
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/4.in",
+        "Sha256":  "5363ED1075944E05F7C4DA0FE695D6241BDB4664DB893FC91D678C63AC58CE49",
+        "Bytes":  418
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/4.ir",
+        "Sha256":  "0E675D2C5F54145EFC7642F8597362CAF9E995CB2EB74D74C9F5F4783B3CB591",
+        "Bytes":  3824
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/4.no-folding.ir",
+        "Sha256":  "EF0EB2BF2BB71710FB276EC9C88BB14903C24CD07A1790AC5AFBBAE6E853F91C",
+        "Bytes":  3826
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/5.cse.ir",
+        "Sha256":  "1CD3C5E15205F4A84D04189CEC2EF187F8E7C917B34F87F582619AF3010EBD46",
+        "Bytes":  6926
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/5.hoisting.ir",
+        "Sha256":  "1CD3C5E15205F4A84D04189CEC2EF187F8E7C917B34F87F582619AF3010EBD46",
+        "Bytes":  6926
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/5.in",
+        "Sha256":  "8629E6B79BCECD732C08CBA8562DF83CFA3812043975902E5FA9FE4C11945D93",
+        "Bytes":  726
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/5.ir",
+        "Sha256":  "1CD3C5E15205F4A84D04189CEC2EF187F8E7C917B34F87F582619AF3010EBD46",
+        "Bytes":  6926
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/5.no-folding.ir",
+        "Sha256":  "03FB0B2E3C109A29F445AFF1A7FB26AD41E30D8F2CD340ED3FF9C9EB96553518",
+        "Bytes":  6926
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/6.cse.ir",
+        "Sha256":  "914F9122D9724A2A07E9B8E59BC2CC6E7005600A874B30174844FB431E7250B3",
+        "Bytes":  938
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/6.hoisting.ir",
+        "Sha256":  "914F9122D9724A2A07E9B8E59BC2CC6E7005600A874B30174844FB431E7250B3",
+        "Bytes":  938
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/6.in",
+        "Sha256":  "AA0B2C937AB2B4BBE49640413B45677CDB8CA5CB005D8DF5BC317CCEDBD21A4E",
+        "Bytes":  155
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/6.ir",
+        "Sha256":  "914F9122D9724A2A07E9B8E59BC2CC6E7005600A874B30174844FB431E7250B3",
+        "Bytes":  938
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/6.no-folding.ir",
+        "Sha256":  "2F8842683FFCCF1B1D99DCBAC04FCF9BD470A481F2328F8B99D222B18883AB81",
+        "Bytes":  938
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/7.cse.ir",
+        "Sha256":  "53490FC588446F5E5788353427D8474F702FE911EEFF29AB3A1D8896757816F9",
+        "Bytes":  3152
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/7.hoisting.ir",
+        "Sha256":  "8D1A58D5C21EDE56F41A1064EF6D440E6790D96E7A6A96B293D925D878C4EC1C",
+        "Bytes":  3628
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/7.in",
+        "Sha256":  "7AAE0034D04051834944FF929FB1A16A8D1F8048F86B4BFF1C495120A1DA9243",
+        "Bytes":  473
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/7.ir",
+        "Sha256":  "53490FC588446F5E5788353427D8474F702FE911EEFF29AB3A1D8896757816F9",
+        "Bytes":  3152
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/7.no-folding.ir",
+        "Sha256":  "2DE5EF7413228A791B8EABA1FC5BE9688E22F8EB99FC91168594678F5829DF3C",
+        "Bytes":  3152
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/8.cse.ir",
+        "Sha256":  "73D5AFE0287DB52420D2B3734A91387462D8DBCE49EBBF4A37CF7B39A34D3529",
+        "Bytes":  2458
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/8.hoisting.ir",
+        "Sha256":  "D1FB8A0FF6DFD6C1F066B3772BE517C1967A41E69E93B60E4EF0512A72D08BA8",
+        "Bytes":  2621
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/8.in",
+        "Sha256":  "052A02654475D145072B44E18B4CB35341A0575A343A44E2CBAA1C6292D873D4",
+        "Bytes":  272
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/8.ir",
+        "Sha256":  "73D5AFE0287DB52420D2B3734A91387462D8DBCE49EBBF4A37CF7B39A34D3529",
+        "Bytes":  2458
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/8.no-folding.ir",
+        "Sha256":  "01412454A7BA286CAD8841B9F34C23738B36930A90B2E16E4FB45ABA7C163628",
+        "Bytes":  2458
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/9.cse.ir",
+        "Sha256":  "FF0948202705776E91A30FE2E24ACB8C7E328682E30C4786FC9436230FEF5F85",
+        "Bytes":  1223
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/9.hoisting.ir",
+        "Sha256":  "FF0948202705776E91A30FE2E24ACB8C7E328682E30C4786FC9436230FEF5F85",
+        "Bytes":  1223
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/9.in",
+        "Sha256":  "408E2EB42FC2E1D9BBFFAC6C705853B02378B8191B0A64B1103E93D66A2A9DA3",
+        "Bytes":  280
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/9.ir",
+        "Sha256":  "FF0948202705776E91A30FE2E24ACB8C7E328682E30C4786FC9436230FEF5F85",
+        "Bytes":  1223
+    },
+    {
+        "Path":  "src/compiler/ir/tests/testdata/9.no-folding.ir",
+        "Sha256":  "633C68D973D0A071E2A561DF5E624C26C9C4A71E5404FAF850C44C374C06CF90",
+        "Bytes":  1224
+    },
+    {
+        "Path":  "src/compiler/tests/mod.rs",
+        "Sha256":  "E9359DCA9041AAD7BD5D00456816D19916E3CF9A467552B53BA7A0423BC71937",
+        "Bytes":  46274
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/1.in",
+        "Sha256":  "0A7358C93C4ADA8BCB135E9FCD25560802A4BDF47C73F5D32C651E68EBFFEB38",
+        "Bytes":  67
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/1.out",
+        "Sha256":  "72E3E8D25DA24A1E32220F59BE82E46E9E0885A0EC7CD5F7C8A3CF855854974A",
+        "Bytes":  188
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/10.in",
+        "Sha256":  "4F0453622DADB301088C37B182BB9EDC9E8279FD14E2CE28241927A47A61225E",
+        "Bytes":  45
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/10.out",
+        "Sha256":  "56E2C90CC0DB4C8FE84DB01BEE29825378FBFBB8C120DD17667CA665B2188DAE",
+        "Bytes":  148
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/100.in",
+        "Sha256":  "FA9B5DD7F32A6074BC4A1748E72DD414104CA6C9BA791CDC9F2B25C2F7FB25D1",
+        "Bytes":  48
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/100.out",
+        "Sha256":  "E8B806DDD878D50D36F280A5D26357C2264A5F3B04896F1D8D88DF3547E3FC6C",
+        "Bytes":  208
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/101.in",
+        "Sha256":  "2653367464A69B8C3F8A02F252A6EFFD33BD97C75EA4FC66464A029E5B9E79FC",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/101.out",
+        "Sha256":  "201DAD3820B4E4BC95D5B2240C0A305991A385586CA6B8ACC185CACED5D658A8",
+        "Bytes":  172
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/102.in",
+        "Sha256":  "AA56C9C2B30328659E389FA7B9390B812E47ACD2D482758849E65ADC92ABE2CD",
+        "Bytes":  74
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/102.out",
+        "Sha256":  "987EBD6E8A9177641AD0BF5986EB093EBAC4839877A7E28B1C07817D242E6580",
+        "Bytes":  126
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/103.in",
+        "Sha256":  "EA0AD54B54C589F832315D0011478970424B1392E8A9F4D16B5C22665BC1F602",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/103.out",
+        "Sha256":  "68B53F5B0EF619095CFD00421B067E49A3AB64CA80FD93A9670D565BC833AD63",
+        "Bytes":  153
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/104.in",
+        "Sha256":  "B27AEEBA841AABA5801CF035D661F0E04C218795EBAE8A47FEBE1700EAD9E48A",
+        "Bytes":  76
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/104.out",
+        "Sha256":  "EDF2FBF87A18F4E0368C8B08AAF6182FB2E1FEA73E62D8151C70C60A2503C7CD",
+        "Bytes":  234
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/105.in",
+        "Sha256":  "8A0732A326A4BCB5D2EF450814D5076AD8701CC292511921CFAB89E17B5C5A9B",
+        "Bytes":  60
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/105.out",
+        "Sha256":  "F3BF3BD57B79F03A73C7192390C15E809A2DE702E97A5A284F66B0C9E5A29FD9",
+        "Bytes":  138
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/106.in",
+        "Sha256":  "CFF462CF0B8693638178AB9EDA63468D431760ACDF81660819581521AEC670AD",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/106.out",
+        "Sha256":  "692E8F2F27DA791EB97527B1F2481CA18E6C0AE91E45F247D9C1454B1394EF92",
+        "Bytes":  135
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/107.in",
+        "Sha256":  "29E29D0988B49BDE020E07E453D0098A5020DCE7751E047E387A54C4C373C51C",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/107.out",
+        "Sha256":  "54FA70FF1AB0906720FF5E269FE5DFE29FEC4C584C4483B116AE6E9F3F97A22D",
+        "Bytes":  142
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/108.in",
+        "Sha256":  "C2B48F81B900312483F3F402550A0D13F6CF5A170186A0BA1BCD06F9C1FAEA34",
+        "Bytes":  43
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/108.out",
+        "Sha256":  "0A4DBFFA5C72F6A3532697F1E67F1FF5DD83E8908630F82D99C59697912A10A8",
+        "Bytes":  146
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/109.in",
+        "Sha256":  "BBC70D54945B45375FCBE5DF2E61D590B05009F0E30EDE0CD9E64D4C29B34E4F",
+        "Bytes":  44
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/109.out",
+        "Sha256":  "664B1AF62C577E6DAC08FDA2EDBBAF95359513FB085CB382226C45936DFA7523",
+        "Bytes":  141
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/11.in",
+        "Sha256":  "53760D187E8FE3067E6C8377895332FF9456ADF076E84DD82417C0E7C42BBA66",
+        "Bytes":  53
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/11.out",
+        "Sha256":  "30AA7D1DF369D3ACEA0284A464000128C0A7BB2513D5003A5FE898B0DEB18261",
+        "Bytes":  167
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/110.in",
+        "Sha256":  "BBDD97070B67E327140A92A770F806BEEF77F747D227E31B4231C82ECBD9D87D",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/110.out",
+        "Sha256":  "27BA0664E31FE6B62139547FE422C17CE06F5B16208D4B12B073158563F7A2C0",
+        "Bytes":  150
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/111.in",
+        "Sha256":  "156918A25418ED3D2220F2F9F2FB303BC9AC807272FB7DCEE8FF199DE62B9F71",
+        "Bytes":  76
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/111.out",
+        "Sha256":  "70398A3728D4E48ECFB4548000B8EF2564D55D4DB50253A869B84D06518BC954",
+        "Bytes":  147
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/112.in",
+        "Sha256":  "BEB335C282943B9B122F384415ED79A6E7112C960B11FA87D15776F59AC9EC47",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/112.out",
+        "Sha256":  "BF6DEC18BA390B9F1258CC8EA594EE69900E875EB0D576D42C504D9E978A8AD4",
+        "Bytes":  149
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/113.in",
+        "Sha256":  "4C953DA57F723DD86C91E4D4B94A82F6AE8D22B3DEA78064583505621FEB9775",
+        "Bytes":  71
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/113.out",
+        "Sha256":  "D8D62F2232E825DA5F6C3CEC8B888DFFEF75FCC157DFC10EAAA3F24206825D8F",
+        "Bytes":  286
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/114.in",
+        "Sha256":  "8770E33769D86FB26C87CDCB3A9E6788A1511627018F14BC62A978D9CC40B2D4",
+        "Bytes":  84
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/114.out",
+        "Sha256":  "F46C95DD8E31821ACC38A90A0A0724FC2C7584A40138611892E3288E1B0AD976",
+        "Bytes":  326
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/115.in",
+        "Sha256":  "D2216489E32A59705A634E5DF01AB05AB03E647E2B5B3D582ADC27B7FABF59B3",
+        "Bytes":  71
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/115.out",
+        "Sha256":  "26B8A2ADB2F740DFFE64EE468DF70255CCA5B58F2735B4F7352DEED5F5FAF0FC",
+        "Bytes":  164
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/116.in",
+        "Sha256":  "E4754E0CDD2E370EA18AE1A072F440B4BD52A6AB9C9A826C118FD458C4CD7EB2",
+        "Bytes":  16
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/116.out",
+        "Sha256":  "EFD933B720CDF185AFCF36D29763354572F8108C3CF892CDECDD0ED38F3ED697",
+        "Bytes":  147
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/117.in",
+        "Sha256":  "7931A1A7C5203BEE9D78F180C7443DF21D39E2116B8E7DC0DC99A47C1536B661",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/117.out",
+        "Sha256":  "68D17426487050EB309DFE94EC562CCFCEBF5857BA64C197816C5E27C8E81D0D",
+        "Bytes":  179
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/118.in",
+        "Sha256":  "EB289941E18B7083728833D392BEB8E18D68D015ACE8061006C6E9ADC47CD33D",
+        "Bytes":  73
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/118.out",
+        "Sha256":  "D89CF3471371D50C9B840F20705A81A14AF6A1F6043EE5ED28EF4E4A39AF90CE",
+        "Bytes":  152
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/119.in",
+        "Sha256":  "3D7E98CBD5B69A2095215DDDE15C271964BF95E9A923DF0E94D3E88FEBC41CD9",
+        "Bytes":  66
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/119.out",
+        "Sha256":  "BB8D96FEDF72A6C3DFE1CF9A60B89DD9BD9EC1153F349CDF891FF6DCD8381084",
+        "Bytes":  191
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/12.in",
+        "Sha256":  "F4EF87301DC83F14AD53A2FCFBCEA46CF86AC75AB9E8048C3FC3554FCA593336",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/12.out",
+        "Sha256":  "860261AC8C8F98014D3DBCE300E948A4BCC53F65FB9746D464C269731C4DF2C4",
+        "Bytes":  145
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/120.in",
+        "Sha256":  "41B2FB7DDABF5053340132D64576438485695EA6F4A4271407A7109550593496",
+        "Bytes":  57
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/120.out",
+        "Sha256":  "474333D3053F7E8BD4BBD33B44D9D318C132E3B7C5B27F1206636B57AAE8A545",
+        "Bytes":  110
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/121.in",
+        "Sha256":  "060E02807FFF78EF860D67F46DD991F1E66FE282DB41756FC0A65B09E941C58A",
+        "Bytes":  51
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/121.out",
+        "Sha256":  "15F24CF2684EE43BD4603C6A7F693BBB3CE7194786DF459A3CE6D9A4D553EC34",
+        "Bytes":  134
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/122.in",
+        "Sha256":  "68EC983CE12D86612806BA798EBB1C8A50977F5FDE41AE897E09124F26663CBF",
+        "Bytes":  59
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/122.out",
+        "Sha256":  "152979258420725F551DC4766C894B2D697E61B0BAA5E018930BEEA5C93451F2",
+        "Bytes":  173
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/123.in",
+        "Sha256":  "9B20FF68D7D9727E5205DA002391C3DC2F5E03AE9B643F278A97E6C8F2258B32",
+        "Bytes":  65
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/123.out",
+        "Sha256":  "50FA9BB7284DB9EAC9F37CB6B32C47934786E4EF3523F5326D9236FABDDF8BAD",
+        "Bytes":  187
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/124.in",
+        "Sha256":  "D31B1575756AA6571BA50290485F34CBD25D6C14BE66CD33A7F2E810344A5AF8",
+        "Bytes":  33
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/124.out",
+        "Sha256":  "17819978C794A9DC22E769599C502CBE944EF4ED05537539E2F964EA3D5B58A4",
+        "Bytes":  122
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/125.in",
+        "Sha256":  "583712BE89AACAC435315DE6CC5BA2B327BF13FA2BE8D8E044B211437530568D",
+        "Bytes":  33
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/125.out",
+        "Sha256":  "FCB18F6EAD6079B3A48FA7AF85DB6FCF5767A10C61CB77D7FEC7DBDB625D2202",
+        "Bytes":  122
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/126.in",
+        "Sha256":  "F2655F875F5F2AC922A413BBEC1DAFB1156E256C47CD3AA8025C0CC8AE78B11D",
+        "Bytes":  33
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/126.out",
+        "Sha256":  "FDFE1407EC5CC95DC074D1649EAC0DA321D99AFE4EB2E6CD8FD110DD9BA570AF",
+        "Bytes":  122
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/127.in",
+        "Sha256":  "EE98B71E5DEAD2F06AF9455CC4DA18CED6019D364127EB8F11C0FE16BD9E0633",
+        "Bytes":  33
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/127.out",
+        "Sha256":  "023224A90ECB60A3BD16F0DDC9EA2C4B3BD4EF0577086BEE4D9E9ACF0EE4A28C",
+        "Bytes":  122
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/128.in",
+        "Sha256":  "1075EC77404DF32C5C52379574D41BC490540C1E45DB92C3CC2ADC5D059EDDD5",
+        "Bytes":  34
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/128.out",
+        "Sha256":  "820C8A67EEF579D948DD4E83658F11E99DAC237F5C1897030D48928646455511",
+        "Bytes":  177
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/129.in",
+        "Sha256":  "3A22D075FD13DB7EBD97549E3AD0B657D5C4EF3583947D703C0B9B5F1FA4930F",
+        "Bytes":  154
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/129.out",
+        "Sha256":  "A91D40A02376BF2F108E31DB070D15E4908AB242DFA41132032DCE84BE336D9E",
+        "Bytes":  158
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/13.in",
+        "Sha256":  "C5E31B49198FFD9A80E3563212BB3B6203B4A3B56F563297297BD7CCA3BB0AA9",
+        "Bytes":  99
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/13.out",
+        "Sha256":  "3D00461144BD54440B9376026C1423C6355064027CC54FB51EEB53E0EA502F1D",
+        "Bytes":  130
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/131.in",
+        "Sha256":  "6A41012D53820D345A60389E02199A221AF7D86E0E4B35FD90817DB063ACE431",
+        "Bytes":  53
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/131.out",
+        "Sha256":  "532F716266325E540304866F9F58EB1DE0FD7322C40758102EDD2477150FFB46",
+        "Bytes":  99
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/132.in",
+        "Sha256":  "309F775005D8FA600C03590CE13B0B3BE363804A313A02155C147D3983170BCC",
+        "Bytes":  40
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/132.out",
+        "Sha256":  "8A7F55128CA9F39F07BF0BAF2A7DC83D304A18C2294A4F7DA90EF42ED2EFD70E",
+        "Bytes":  123
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/133.in",
+        "Sha256":  "22A8948A295C4552A1209E736A403D72DA769C08AFC875E4E897B97BE3C803F6",
+        "Bytes":  48
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/133.out",
+        "Sha256":  "5FCBF0253DE7EAFEA5941FA031A11649C92FE2E7FD8BA6D77685FCF1E0F70D27",
+        "Bytes":  126
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/134.in",
+        "Sha256":  "AF92474C44E642F664CAE1EBEDFA707008086709CD7918AB9DC855EB842BC560",
+        "Bytes":  34
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/134.out",
+        "Sha256":  "8688D34D667E79F94D6217C596858BCAF05427502435AD4A4C0B8234EDEFE673",
+        "Bytes":  115
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/135.in",
+        "Sha256":  "3AF1370C8FB93ADD558DECE408D10D4423474059AA6EF189A60F46883878167F",
+        "Bytes":  56
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/135.out",
+        "Sha256":  "481FC67525D213D4C361DB9D11DE0CB479B792D1324172B07A1ECD217D6360D6",
+        "Bytes":  162
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/136.in",
+        "Sha256":  "D87A073354FB84AB0EE7B3970F415404C775D281E93DFCF28A7F1CFCA2F1CCFE",
+        "Bytes":  89
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/136.out",
+        "Sha256":  "0BCFF9413D638EAD86FBFF311E595483B78B8B8A3F7F54EAEAD1721D7563D7B6",
+        "Bytes":  141
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/137.in",
+        "Sha256":  "3860D068230C028EE5A8C41FF5B9EE294D61C30B0B56B62452A78E14F431DB98",
+        "Bytes":  47
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/137.out",
+        "Sha256":  "FD410E10571B059144AA64BD64C540BFF803BB5AC4E6E60EFAD902DF532FDDA4",
+        "Bytes":  138
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/138.in",
+        "Sha256":  "14F21E77A8CA23CBFFDFB929ADE67788A6B34C389CB508AFE28927A7B59274BD",
+        "Bytes":  79
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/138.out",
+        "Sha256":  "0CCB508D6948E2372ED1CAEFA77E9126618CAF7600E21215C9BAC94D71F34F8A",
+        "Bytes":  163
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/139.in",
+        "Sha256":  "97BF3B636D4768350B5BC6B7B574FBD6B59E48DE33BBD383EB40F28C1DFA3EC0",
+        "Bytes":  147
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/139.out",
+        "Sha256":  "D5968F53F68F7189C13C5521A3EDFD52A0FFB174CBF203053050E1AE0F5453F3",
+        "Bytes":  226
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/14.in",
+        "Sha256":  "3A5808460C0265CFEFB7E166621EC2AC2D0884B176F4769C27AC0FA3DD412440",
+        "Bytes":  99
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/14.out",
+        "Sha256":  "E9684527FDE9475CDB44C8C97C11AB4BBD89C22AB0F59C200D4F664D350DD8E2",
+        "Bytes":  133
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/140.in",
+        "Sha256":  "C4EA7EE6C2EBA24FAFFEE860FD55911801E060A91C32A9ACA3AC0C9CF3BC9FAE",
+        "Bytes":  83
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/140.out",
+        "Sha256":  "B18E569E4821A734C11B16C1AA8CF6349EA3C7E79F01AAD50753E1E2028C1A13",
+        "Bytes":  157
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/141.in",
+        "Sha256":  "1F9FBF4F324FCAA30704ECC69881BB2C462E8B8305CFC2A20B7BC14D31C8B209",
+        "Bytes":  148
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/141.out",
+        "Sha256":  "EF5F4747FF8D801462570FFE959D196894B94B956700131CC2690965B2E01F99",
+        "Bytes":  143
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/142.in",
+        "Sha256":  "E31A0E2CEB13A365C1C93EA1D08CDE2B046845CFD5FE5F59BAE204CE6D2B0E13",
+        "Bytes":  55
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/142.out",
+        "Sha256":  "D50F0FB261407AF6E356CD918CEA56FEC01A8B2248425027E9052E1E8DF8D77F",
+        "Bytes":  151
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/143.in",
+        "Sha256":  "A143ADDB83A633D32F389366D97D874D441135CFDC4B6CFC9B0189662AAC0103",
+        "Bytes":  103
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/143.out",
+        "Sha256":  "0350FA6A92600EB012CB9641E36A28EA5993E56BD1AA2E5954973EF4CCE44928",
+        "Bytes":  177
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/144.in",
+        "Sha256":  "60B7A23211213792EB71E789DD1CDAE956A896CD7FB3CE60578A60763E8440CE",
+        "Bytes":  118
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/144.out",
+        "Sha256":  "25DA4019B613F251C14688B07D2846775EE2D8CF75545358DF8F16FCB7D403BF",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/145.in",
+        "Sha256":  "16BFAB918004A1C5E0EBB91058D620F337C9BCFDE78A28D4ABCFC7C8B5204494",
+        "Bytes":  489
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/145.out",
+        "Sha256":  "958AC8C500CB3E85D560106F5F4029C88F2C2E83A949A57F5ED4A1DC27BF37A4",
+        "Bytes":  309
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/146.in",
+        "Sha256":  "6C91E08132F5CF7AF9E7A79524680450EF2FC24DD17CB5774E6BD9CE7FFC698F",
+        "Bytes":  63
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/146.out",
+        "Sha256":  "305C4FD64ACE1A09D5477809030C686EEA7D5E62F458E1E5A9E3BE089ED57871",
+        "Bytes":  164
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/147.in",
+        "Sha256":  "BFC4170D89915DA65520E01A4BF3A6BEAF251C12CD6B9959C89B76F36A4A6855",
+        "Bytes":  67
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/147.out",
+        "Sha256":  "EAD3D8F63CAC0A18A798B2BD521C2441572B66F228CD0A6B0E078FB38B46E034",
+        "Bytes":  174
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/148.in",
+        "Sha256":  "F442C2D306268CE446EF5641F87214C2B8E974C9B76DCB779AD03154AAA48AE6",
+        "Bytes":  66
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/148.out",
+        "Sha256":  "5F10AA10265BAF62B9EB4AF0FF7B1EC773EAE9EC2864E851BD883BA5D1A64BFA",
+        "Bytes":  171
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/149.in",
+        "Sha256":  "65877C861C10EDB204B49F1B8390081F6BCC29F8A53FD68B8AD7D98C810FFB57",
+        "Bytes":  65
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/149.out",
+        "Sha256":  "A97FC8E9248334B7CD892F607D396D4B53B975C184E28F97AB4DAACD4DD47D31",
+        "Bytes":  158
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/15.in",
+        "Sha256":  "B13F7E91E10C7C8A36CA5CAFCCFE18CBA6E74567A4A7D44DC5B893DBF9BAA562",
+        "Bytes":  70
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/15.out",
+        "Sha256":  "3F5A10306FBB9708B2A3B001261E00A6092E4649E3B9527102308C844C016C44",
+        "Bytes":  135
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/150.in",
+        "Sha256":  "EF625F893634CB8D2C6CF07A8055467E4FC9BB303E3570B7AE9B35729BA0041E",
+        "Bytes":  87
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/150.out",
+        "Sha256":  "A459D9BE7C583CDAE2F877749170B79967622C94BFBE3BFCA83E22B36331E6CD",
+        "Bytes":  156
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/151.in",
+        "Sha256":  "1479C7DE782F9119700ED5AC855EEFB18E0F536B4B16F02D41DEDA2D838A964F",
+        "Bytes":  87
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/151.out",
+        "Sha256":  "7DB08A4181CB938A098BAD905EBC03535E493A72A7629B18F8AAB10E4E6636F5",
+        "Bytes":  163
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/152.in",
+        "Sha256":  "497A96DCB1D24D356F24FBE23B8071A3B10F56DD0C241D984F48E6A2013250F0",
+        "Bytes":  46
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/152.out",
+        "Sha256":  "159D4A7C0B9FC329755AC4018384016192C151FD2D41F240CBB1E75B308ED61C",
+        "Bytes":  124
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/153.in",
+        "Sha256":  "A53C78F5E2522558EDD11868A683CBF9B7967D470EFF96A3AC1AB44B6F144606",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/153.out",
+        "Sha256":  "A1ADF8DD565343FDFE11213A5C8989CA0D9B60F8437526CC3E0594BD847514F2",
+        "Bytes":  137
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/154.in",
+        "Sha256":  "3406190CD97BAA148993908509521A71105D6B3471D4312D2481604CF14D2CEF",
+        "Bytes":  90
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/154.out",
+        "Sha256":  "94F8E3C3C8A2EBD1662F3400AB32D3EC1BC31E55F72CFAB939B42731777EDFAE",
+        "Bytes":  331
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/155.in",
+        "Sha256":  "72BE30B24162FFCDA4CE85407DE94460BB2A06504F896677270B8EE732E76A18",
+        "Bytes":  36
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/155.out",
+        "Sha256":  "31BF27E8E6BF48132DDF97806D50692250DF8842EAA62393808AC7A2FDF7CD6D",
+        "Bytes":  215
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/156.in",
+        "Sha256":  "0AECB76D04A52A285BB2B719317FAF0C06865AFF58827D4246E93D6ADF2AD67D",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/156.out",
+        "Sha256":  "C04CE59C8A22FD6EB39EF31016408A038AB5583835819ADA18FCF464C111DBBC",
+        "Bytes":  169
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/157.in",
+        "Sha256":  "0C56BC1655F8C47DA1FE55408E5F9FA1625E67D2BCF8E57FB8C011598A47D9F7",
+        "Bytes":  29686
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/157.out",
+        "Sha256":  "36A727271CC72B5B49078AAC6F2B54A2F5160CAE3A98214DF64E67B2088188A4",
+        "Bytes":  254
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/158.in",
+        "Sha256":  "0C46CA41093A13337086288696716FDB97576CCA744A0CEDA9284C255E38E0AB",
+        "Bytes":  17398
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/158.out",
+        "Sha256":  "D30634322828B973725385741F2AA26A92FA51C8960C612CA333AB24FA95D7A0",
+        "Bytes":  148
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/159.in",
+        "Sha256":  "B9BBBAFA76EED1A92AA25C49024EE66C31AC285793F96D18D0ECFF56D211CC4E",
+        "Bytes":  17377
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/159.out",
+        "Sha256":  "7474F2B713B86E1ABC048E1B6FA65C6B7260F5E9D9E503404788B181A878A482",
+        "Bytes":  158
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/16.in",
+        "Sha256":  "BA70A75C579B3883E1212E90005890173F9501AE9B3956AB5233F31755CC3E2C",
+        "Bytes":  67
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/16.out",
+        "Sha256":  "5459B5339766FB68F0987309CD133E8F25B39C05E9BD89B575B3DDAFA4A584E9",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/160.in",
+        "Sha256":  "607B46C494FFB5F85BB838AD983D4443388C980113DC9F579A2B334CE077305D",
+        "Bytes":  17381
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/160.out",
+        "Sha256":  "1FC52F97B709F0FB94689A94FFAF8979F21620F0244C92C5F2B057E52A32C068",
+        "Bytes":  113
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/17.in",
+        "Sha256":  "55A44BE63414EF85A52187F9A4CF10D9583A250DDE1D7EF8A548F24A93BEB6F3",
+        "Bytes":  74
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/17.out",
+        "Sha256":  "945910D5F95988CA5E64A731E6DC2E0B835BD54750B5AC2FF1FC5F9FDC1B7567",
+        "Bytes":  132
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/18.in",
+        "Sha256":  "49D8EEEEE926312663836157C4FA9B9C2C8984B34EF26E8D4D508E0AC8935F43",
+        "Bytes":  63
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/18.out",
+        "Sha256":  "ABA1F0F23FAB3E43D5539BE2CB98686EB42A38CAA7626C1526636A6575D7A2E9",
+        "Bytes":  141
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/19.in",
+        "Sha256":  "86DD37E6471F5603827F6F6730B17F613B2B6AEFCD4FAC8AE1ED5E54EF8AFA4F",
+        "Bytes":  92
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/19.out",
+        "Sha256":  "52372A132EED3F555815AAC76FDABC6B91A0BB2115B441AC2976A5CF2A364DF4",
+        "Bytes":  143
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/2.in",
+        "Sha256":  "7B235A3EBE54F62051FD47E18804099D464C66E2EE339CEBCBDCCAC80BFA12C5",
+        "Bytes":  41
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/2.out",
+        "Sha256":  "9020B73E274271BE47183D3331F374B2DAF9278E959710DA39FC272B9BBB4594",
+        "Bytes":  157
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/20.in",
+        "Sha256":  "C32F65A0ABBE4238F3E1DB8EC325AD22C24765713C33038B43AF3EFC74C23E01",
+        "Bytes":  73
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/20.out",
+        "Sha256":  "DDE46AC48C72245256B045F951FAD1DD1134C5B3F3CC1AD79A733985EDA6F9A0",
+        "Bytes":  140
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/21.in",
+        "Sha256":  "146673A0C3F593350BAD4D87D06D45579E556A3B6F5A93E2997745A149E5C438",
+        "Bytes":  81
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/21.out",
+        "Sha256":  "75F28EFF78393EF8F682E3A2C6723DB22175E49CBF4995E133AD4F00BC10BC78",
+        "Bytes":  153
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/22.in",
+        "Sha256":  "11AFF74D443A66BD8CAAAEC01BDF090B5C34FC49C1B5843AD7529E6BBD6C5BC8",
+        "Bytes":  76
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/22.out",
+        "Sha256":  "524F674D6C030708E1231E0761E2F53DDAEC713669C8EC796B29708E3DA3D994",
+        "Bytes":  149
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/23.in",
+        "Sha256":  "18F71F350D9BF886797C25466EF3BF811C8F3233BE97409D5EA9E28A56FE4377",
+        "Bytes":  94
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/23.out",
+        "Sha256":  "FE723DD5C4FE6275BB7CB6103D036B317824FCDD655D1A8FCB17FFB29D445AC4",
+        "Bytes":  124
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/24.in",
+        "Sha256":  "A4558897F7CB4CB2BDB4BA176B8A1C678CD6FA2E264F0CDF9063F62F7A411358",
+        "Bytes":  68
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/24.out",
+        "Sha256":  "2AD1F498EF8C9507CF0A336BC6E700365D0F8A77C1C0966EB1A37F1A7A00B2D3",
+        "Bytes":  124
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/25.in",
+        "Sha256":  "B002D65842F008CB3243835E46A5503E59904263A2C45BF45669E2148C90D1B4",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/25.out",
+        "Sha256":  "BE4C327BEF7D3C4A16116106EEFBFBFE99453B78071EEA42FA62C02E9EFFF70A",
+        "Bytes":  131
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/26.in",
+        "Sha256":  "2BC940B40D4D61DF58E0DBD857666ABE3429EAC72F15D5EBBB9221D1C77D7B38",
+        "Bytes":  64
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/26.out",
+        "Sha256":  "78539E06642AB7C956324C5F8BABDAB90316EC90DC7DA3A6A9B804D3A86624C0",
+        "Bytes":  151
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/28.in",
+        "Sha256":  "8CBDBB309E1C5357C5845805FF5E47BCE4A5090B92684CA8990018D05C78417D",
+        "Bytes":  47
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/28.out",
+        "Sha256":  "E0863D2043C00552CF7682084D1EC5168FE7A77B3D8115FB64DB29DD9933CEDA",
+        "Bytes":  156
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/29.in",
+        "Sha256":  "BEBAC19955CCDC3CD5B385D9F085439546D13CCBDF0E5D0681C18B819CD2C1BE",
+        "Bytes":  67
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/29.out",
+        "Sha256":  "674F639820219EC85D03CD96BFF3529AD0FFA127650F20BDB9F6B87C83B45446",
+        "Bytes":  144
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/3.in",
+        "Sha256":  "348B2ACA2715D2DC5DC95CFCFB8C7DC6597B1E55A846310FFF33C636362938DD",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/3.out",
+        "Sha256":  "530DF08FB3ED51509876546BF11F99601CE9FDC60D175E7450219E5B743FCB85",
+        "Bytes":  159
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/30.in",
+        "Sha256":  "F357D23B766787039F592E0AF677419F6CB7347E06A31C0D1013242A968562B0",
+        "Bytes":  12
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/30.out",
+        "Sha256":  "F833757AFFEAFBF6D378715BDD4B029AA9BEEAFB60B8E6E78C07EABCB06C501D",
+        "Bytes":  108
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/31.in",
+        "Sha256":  "C19A6185F7954C43CEBAFB638C6000789D2A0E976EE38BAF32AD5069A6B0C99B",
+        "Bytes":  76
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/31.out",
+        "Sha256":  "2276C5D1F01E1CBB2FF70F2F6D21C921EC5611784B3D53181206606806F69621",
+        "Bytes":  219
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/32.in",
+        "Sha256":  "979417382D3F41F6FCDE2F51AB120384253DFDCAABEF06694B63B08AAC2736F1",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/32.out",
+        "Sha256":  "D469BE9E1F156DDF569B25964C40A6CF32B9BD051F949BF99B685C30021D4A3E",
+        "Bytes":  165
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/33.in",
+        "Sha256":  "56D376175315F648F3BAD44D0AACE671901ED3B9BDAA324325E1C6A9514E400A",
+        "Bytes":  64
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/33.out",
+        "Sha256":  "597B8D0649C7ABFE2F9B7BF7978E05B0F15F0A64E3E18A2A8095DF6D91743D21",
+        "Bytes":  207
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/34.in",
+        "Sha256":  "95863649CF8EAE69EF31EBB1ED7A0BDE4435B14425D51FAC2C57A6E8837DE164",
+        "Bytes":  66
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/34.out",
+        "Sha256":  "88D6098D0E486E1F7B4A18D7FE467CBB6CF447656019E2DF42AC49AD17569CA6",
+        "Bytes":  210
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/35.in",
+        "Sha256":  "2900BBCB62257D8EF1386947A9FCD3168679D6EACE16180824FB533190A90F91",
+        "Bytes":  137
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/35.out",
+        "Sha256":  "C33EB594B2821CFFFA77CA76425A69EFE8BF4C83D5A33FC02DFC7AC9163E7E15",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/37.in",
+        "Sha256":  "C44522E2E1E896B01D84EBE77D78E9A0FE77ADB220F3A48BB6CE693408E5C1DC",
+        "Bytes":  63
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/37.out",
+        "Sha256":  "E023C13BEF8CE490FF4F366D634CF31F321DC8793A4339D53E80233950A826E8",
+        "Bytes":  125
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/38.in",
+        "Sha256":  "7A17B9F475A32AA84E4BC4B9BEF9207EDD8426D29EEB94A0678BCEC016DAAC55",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/38.out",
+        "Sha256":  "A8BB781144F48D486F06844A327A3322CDA9CFD49492A275D1265C8842974A42",
+        "Bytes":  202
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/39.in",
+        "Sha256":  "22570B25AF86F17EC657C9CD93AF1C989605F304C2B65E652E01C70FB3DA85E5",
+        "Bytes":  64
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/39.out",
+        "Sha256":  "E76AC0A64E6900E01DAD26C627CF7A7D5CB022E5453B812F0B017FAC0057129F",
+        "Bytes":  164
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/4.in",
+        "Sha256":  "727E05194D725BD0AC19EABC2A410571C71F80D66D06C59DA97E24EEA1E1B1C0",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/4.out",
+        "Sha256":  "8444BF5FC078B8877565878EFB340AA698DCABFC26BB59CF80A937B47ADA3ACC",
+        "Bytes":  143
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/40.in",
+        "Sha256":  "A5AD586052A18CC75A3B8D21091C15AEBD0A0F3C9264A8D1FFADB46572E6AC73",
+        "Bytes":  60
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/40.out",
+        "Sha256":  "9ECE35A59ACEE7CDFCE6A2EB578D30238BC053D3C21161B82F63DC9A9B49B559",
+        "Bytes":  109
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/41.in",
+        "Sha256":  "7133D4CE44E165F5A6917D809EDB8E15BA4AA5F417F71F5CAB52DB6019A42D02",
+        "Bytes":  60
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/41.out",
+        "Sha256":  "C92EDFD96C6988818554CC26FA1CBEA7960419D6A9FB50F9861080275DA622E0",
+        "Bytes":  121
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/42.in",
+        "Sha256":  "12CAC864C77E4DCFEBD107E5903F402E9A7780121C452B500BF7293C52ACFB6A",
+        "Bytes":  64
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/42.out",
+        "Sha256":  "D3115D8A26E4F9EBE1620D57BC423F5E24CA0126CB02031D0D77A12BDC67CC99",
+        "Bytes":  206
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/43.in",
+        "Sha256":  "097B7B33A0D5897291AE28835F5F4AB4A4137D7394794846B9322F0B83DC711F",
+        "Bytes":  62
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/43.out",
+        "Sha256":  "EE7CC86AA2852E8B563B5ADF513F5B17892F6D04C01A650A1A1AD60ED5EC7668",
+        "Bytes":  137
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/44.in",
+        "Sha256":  "D75679B6FD79FF9835D803D2518AE614C1D4907684863E698E8B873EFEDA233A",
+        "Bytes":  43
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/44.out",
+        "Sha256":  "2221DC4154AD708989598002D6ED23202B9068448FD186A57DFECCE743E6CA41",
+        "Bytes":  181
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/45.in",
+        "Sha256":  "D3E2002556CC8B863BBD3DDDE3BEB614181D8769EFA7DD6F0CC180413A1629C0",
+        "Bytes":  42
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/45.out",
+        "Sha256":  "C489511011B8F743121F731D2BDE458D679CF71BF423D0A14FC3D334B637848A",
+        "Bytes":  175
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/46.in",
+        "Sha256":  "6DE1BA182AD54756A619CFE6739EE5F20EB051B39C20766EA8E21574937DE0E5",
+        "Bytes":  51
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/46.out",
+        "Sha256":  "7CFED2EA3FFC50BCE7F2FB0A9054876C275D183320781EEF428AF818F6E4BF42",
+        "Bytes":  298
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/47.in",
+        "Sha256":  "DDC202A3C62EBBCADA3E79D289309B775EC1690E09F52CA9B0E9A17E13BC3812",
+        "Bytes":  101
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/47.out",
+        "Sha256":  "6D7944AD263CAB539A59B89D2C1D4F7A406A462E8EDF288F55707CBA67E8D5A8",
+        "Bytes":  239
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/48.in",
+        "Sha256":  "BE7053941F7205E367BDB1E8D35C6C37F757705B8FE38CA88DFC48F2BCC26854",
+        "Bytes":  104
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/48.out",
+        "Sha256":  "068D3A7235BC4BA630C9030B07928D4CAE31EB142CC4587DE40B5A32EA2D94E1",
+        "Bytes":  245
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/49.in",
+        "Sha256":  "5947C0C132163C22ADCF361F44DAE73097178385EB46502664D4E697D8CB2EED",
+        "Bytes":  98
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/49.out",
+        "Sha256":  "B161E532EED3F10FF34F5D05F8941537C1CED251E9FA4361C89C16E128AD300B",
+        "Bytes":  200
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/5.in",
+        "Sha256":  "30130569A52E726E9F71747069BF56617FE5F9F6161EC2F24F46A8EC3F4A232D",
+        "Bytes":  40
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/5.out",
+        "Sha256":  "7C64F1FCCAB578DBB2CDBE5A0B0F9959AF757A0CAF87A4AE8F445DAADD00CE6F",
+        "Bytes":  161
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/50.in",
+        "Sha256":  "E588421D081712CD6F392F609FF1D344FB2E2EA05BF983ECAC962FABCADFDAB8",
+        "Bytes":  110
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/50.out",
+        "Sha256":  "76985BDE3BC59322F24F8A521D5A5A54700B0020A63AED1DB098FD7575B36137",
+        "Bytes":  352
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/51.in",
+        "Sha256":  "A83163FC957311D5BEFABD004C45A7D1BA614F798EDA1B6DB05296B1526A1709",
+        "Bytes":  108
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/51.out",
+        "Sha256":  "F26366CCD5924EA78E397122841A62CC4D6CE9E2996E47D00DC2A25801694618",
+        "Bytes":  348
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/52.in",
+        "Sha256":  "6EDE61A9D937C6D4AA33A892E80B51D2DF4B6D1D9DF98A4B00A57D2B95F56B0E",
+        "Bytes":  145
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/52.out",
+        "Sha256":  "7885677D6AF2C95260A535EC48C922FAC598D0C5D2774FD1D096F2F8E916E92E",
+        "Bytes":  216
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/53.in",
+        "Sha256":  "0FC19946205C35AC3BC1CAE5F27058239A33B94C17CFE65C4BCDE6FC2E50AEFE",
+        "Bytes":  77
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/53.out",
+        "Sha256":  "4F1004D1A147E1C7E0561345EB2A2D0FEC0507FF72E181E2F5638692791E54BB",
+        "Bytes":  165
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/54.in",
+        "Sha256":  "4362C096230DC1B2A9A198B92FB74E5A81DDAC0188086C912BD9E28334AFF722",
+        "Bytes":  82
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/54.out",
+        "Sha256":  "91534D29B48216600245F1AF52E4F4E2B107F7CA63D6B20933A1266DAC073429",
+        "Bytes":  170
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/55.in",
+        "Sha256":  "60540B7643908BF493994E0EFDAF76EAD99D5D65E6181BED643FAC13A07F5FFE",
+        "Bytes":  83
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/55.out",
+        "Sha256":  "603D4EEFCDD5DCFD013EF4253E838EBD85E947B45A8C8121E54D173520921D87",
+        "Bytes":  172
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/56.in",
+        "Sha256":  "AC264A1857D8D953C0F0F7BD325992B46DC9A1F89A4F6DDC9041066613429F7F",
+        "Bytes":  66
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/56.out",
+        "Sha256":  "4B6409152DDBD17953012E7AF2CDBF0B25372A8CCDB6022EB4196E194794E4A7",
+        "Bytes":  136
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/57.in",
+        "Sha256":  "622C83A237B78D2AB33B6FB8FF3ECE4ED1E5C8E2C09E731310CE814EE0F280EB",
+        "Bytes":  71
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/57.out",
+        "Sha256":  "2B36E0E8E79441C398298787848964CDB9A659F37F8E1AB813A90981D372C410",
+        "Bytes":  156
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/58.in",
+        "Sha256":  "616B3213C0A7CE5021C3DE8D18B8022CCE24F639897FCBD04139C4F1B7884F31",
+        "Bytes":  80
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/58.out",
+        "Sha256":  "8B4B6BE808D052F3258BE1224DF5C2BB8A5FC09436FF5D52FA9BF27DFFA746A6",
+        "Bytes":  256
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/59.in",
+        "Sha256":  "FDB0E99441B702494C25573F6266DA37CB6B368879C1372C278936C6A4F22B45",
+        "Bytes":  79
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/59.out",
+        "Sha256":  "8AD4A8733660E9914473092E6BD848031F12539ABAD95640B88154BDF217C572",
+        "Bytes":  216
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/6.in",
+        "Sha256":  "657449B56C94C01FA7E83E896E700F6008C8D0A270DDD9B1D0A36E03BA2206A1",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/6.out",
+        "Sha256":  "B08FFC4F8F4D8AF9787881F11F009040589E460B73CEB1BE35E1AAE23EEE45A1",
+        "Bytes":  152
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/60.in",
+        "Sha256":  "85322B2821C427FA3B41F4086A3C67F78E36ADF162C07BA55603CEBA6C0F4860",
+        "Bytes":  98
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/60.out",
+        "Sha256":  "3614D15AB3EFC28B074A7E118F61E4A87462D846BD92E1CE295FAC04BE947F32",
+        "Bytes":  193
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/61.in",
+        "Sha256":  "AD0BB4748E22B38C837D53215B77FF5EBAC1236AA9CC13140C13B0324E447090",
+        "Bytes":  41
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/61.out",
+        "Sha256":  "BAAE9DF502E97C5ED63004E415EBABD8347ACB659ACB01DD6664B16C56B6EA16",
+        "Bytes":  138
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/62.in",
+        "Sha256":  "F14C716CEED141C8BB4E272E581F565579660D1C252AF2481467000035B11C25",
+        "Bytes":  30
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/62.out",
+        "Sha256":  "2EB8AEF53ECA597122AB1FF5AC0678A5D6FFA11EAE756B163FE41C63AE55FFF2",
+        "Bytes":  123
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/63.in",
+        "Sha256":  "23C7F5929FB51C9E71E3BA6412DCFB27E5678503D6058CEA669CD65028000BF2",
+        "Bytes":  22
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/63.out",
+        "Sha256":  "3D22E2F601CC1661C0041E0D045B9C66289CF8AAA97DFBDA6505CBF1D8B2DD52",
+        "Bytes":  128
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/64.in",
+        "Sha256":  "DC932CCE15AF99591CDE0C7754804FF263C47EC499F2380F1D88081C94B7EABC",
+        "Bytes":  27
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/64.out",
+        "Sha256":  "6B5EC0AACE6C0E1B95B8B1B0E93901C5FB7CDB015709FEE42A7D232826F7CC03",
+        "Bytes":  154
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/65.in",
+        "Sha256":  "5A6A9CD47C40D80E7678E2AD06D0A5E59B5ACD64EA2DFBC38A11720C6C8488B6",
+        "Bytes":  27
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/65.out",
+        "Sha256":  "283E8197714F17A71AC0957AEFAF7000EDA37C5BE327897CD28E1ED88198A360",
+        "Bytes":  140
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/66.in",
+        "Sha256":  "5BA7102250FD4FEEE5FB4490A5BDB9FE5840B533BBF607217111844C077D324C",
+        "Bytes":  29
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/66.out",
+        "Sha256":  "53A31C0B7E83FA7B246BC1CDF68EB3A9560BA4B9A02CD269AFF4B8BC36ECEC35",
+        "Bytes":  144
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/67.in",
+        "Sha256":  "9ADDD048D7944CCCF4B3B271702BA24003C772B277A321D1AD49B449B9B37035",
+        "Bytes":  12
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/67.out",
+        "Sha256":  "3F3269CA318C899D8297FC43312396E1A8411732C3FEEC8173F4E0F22A2A0BE4",
+        "Bytes":  132
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/68.in",
+        "Sha256":  "E84BF9F8D51F6952A83F80A8EA3427F848DAF3E578E89AFCA0D72B55CC3523E1",
+        "Bytes":  35
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/68.out",
+        "Sha256":  "54AD01E6F7E82EAAA2EE09025A6EE700D684F35321840A528024FDF29ECC1D12",
+        "Bytes":  156
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/69.in",
+        "Sha256":  "229EBFD9512919DB0079113BCB0B7363A2AD17EE538352E93E781B9E45BEB2BD",
+        "Bytes":  39
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/69.out",
+        "Sha256":  "2FFA419953B1464FF852B8B9547F3CA16BD62213F4B6C9A13CE6CB0759A11488",
+        "Bytes":  200
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/7.in",
+        "Sha256":  "C5197F9BB34C62A1C03D3860AECADD5A770C6F3516DF4646146F90996A44A607",
+        "Bytes":  68
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/7.out",
+        "Sha256":  "20DBBD36E3FDB1AD38DBC4BDD2566D7DA469A005F057436A14253F73F9487CAC",
+        "Bytes":  145
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/70.in",
+        "Sha256":  "F8934FBB3F1420394CDE15DE55B488F4B320002895671664A4C8E9D723704A7E",
+        "Bytes":  38
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/70.out",
+        "Sha256":  "2AC1C46701E2EFFF84AF9C4CD29AA1EA5D17650F760BFD7D11D8971004A13B0B",
+        "Bytes":  170
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/71.in",
+        "Sha256":  "EEC245FD006425870FBD9EEAFF9FA398E2C383C19B46397C318A1408DA1A8CF1",
+        "Bytes":  36
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/71.out",
+        "Sha256":  "7CD3B38F0623F64921F19D6DDD84476D6E7B65A81AC7795FCA13C7C6CB932691",
+        "Bytes":  141
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/72.in",
+        "Sha256":  "65D6F28FD73DEEDF0F9186B2A347828680EFC4C59066FC291BE6D80AC7F1D0F6",
+        "Bytes":  24
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/72.out",
+        "Sha256":  "474FC28A145BBE74CB7FF67913223E134FB08010199D3EDD793AA7C241203D4F",
+        "Bytes":  148
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/73.in",
+        "Sha256":  "F0A73FB9AD1D105D91D56790106AD1FBBA49B8A614FBC75BD7470DCA60132360",
+        "Bytes":  41
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/73.out",
+        "Sha256":  "F57EE33CF7FAAD03CEABBB6F7DCB50CAB28C45E710FDE1E8BEEDF1B18D0D8C58",
+        "Bytes":  147
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/74.in",
+        "Sha256":  "0E855AE2714065E8368761299754409F524C913BC6B8654970004DD84AA55A38",
+        "Bytes":  40
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/74.out",
+        "Sha256":  "D976BD932C8827CB2A0FCDEEE35143C51EDF2D3C8A3D71D9FD42502B90E75B0D",
+        "Bytes":  146
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/75.in",
+        "Sha256":  "99C4BBC8AE6A2ACDF257FD10E64EAFE41226D31560A8C0F99155ACF77207D7DB",
+        "Bytes":  43
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/75.out",
+        "Sha256":  "46104C49870068897208E5F2A3227344BFB892D3A3D3E1836DDE62F53F1F8C1B",
+        "Bytes":  155
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/76.in",
+        "Sha256":  "CDFE31F323907C1A05824CD7A5BE87055B2C935DFBAB3009F9365C724C86E8FC",
+        "Bytes":  28
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/76.out",
+        "Sha256":  "12BF57B1175D150D8AB87FF6B4AF67D3CA2316826DA35DD1E49A8AFEE86BA1AE",
+        "Bytes":  156
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/77.in",
+        "Sha256":  "0F97B9F4FEA79E1CEF8B0F1909DBD502822E3DB90DDEAE119B8AE240845BA0C1",
+        "Bytes":  33
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/77.out",
+        "Sha256":  "625A4FDD61F479020F50964E19E5AD82359F214C40D1DCB3AD16487DFCA8C7EB",
+        "Bytes":  135
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/78.in",
+        "Sha256":  "020313C28FAE22F2C291BB326F10DDB2C1F2D33D3F3FDE3074C6A1BF75D7A9AD",
+        "Bytes":  46
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/78.out",
+        "Sha256":  "A264F0B288F56D794EDE796B8D427D5E7E2E17BF7EF9E6CE71C8F9C07694B707",
+        "Bytes":  161
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/79.in",
+        "Sha256":  "299FD5B6709A5B734853786C0607602FA60484FCC85F2ECB0865F6498F18C91E",
+        "Bytes":  59
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/79.out",
+        "Sha256":  "7C95C9C1B732B2E396B1077EAF08F7FF6086C01AECBBC20B736D0BA85D90D8B3",
+        "Bytes":  130
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/8.in",
+        "Sha256":  "B37B6AA617A90B62857B9F93E2DE462F6CBB61AF5B16B98CDD5DD0E0EF329E67",
+        "Bytes":  43
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/8.out",
+        "Sha256":  "9E59FBCC7525CD639C58E06337C2594EEECA7E0A40A3DF5D4E3CED8EA4FF4A90",
+        "Bytes":  161
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/80.in",
+        "Sha256":  "8311DE680E3228B2CED88B3B6E18E607B9DE0E75DF12B41B6DB8265057E4AE30",
+        "Bytes":  59
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/80.out",
+        "Sha256":  "CD3A0265977CB56DDC2A4BC939DDC964E2C609271FECD0ECE6F7C4EC0F2216E0",
+        "Bytes":  116
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/81.in",
+        "Sha256":  "8C47C2A4DAD66F44E39E3EB575BFBB9E77FC3E5319F08E26EF6BA2698164FE3D",
+        "Bytes":  58
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/81.out",
+        "Sha256":  "0BF20A52F3D326CDB9F4C44DC2C6123EC0DC357019D0C721E0F872BACC650309",
+        "Bytes":  138
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/82.in",
+        "Sha256":  "FE7D2AE00E59BD219AC48D5073A87FD1892559D4E4D0A060F227CC907C95CD8C",
+        "Bytes":  60
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/82.out",
+        "Sha256":  "A88DA2BC0DD59658625F11B545395474ABE4F08C3831159540FCB4DAC1BD63C8",
+        "Bytes":  117
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/83.in",
+        "Sha256":  "80533D3E0FA8AB958F07A486EDF804A62DC55F25F1E34FBFE6F4E1C720B26884",
+        "Bytes":  59
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/83.out",
+        "Sha256":  "69982660FE3A52D77AF342E2DF3F5BE1E8D1B1A672B6E50EE73E1B5D77F24142",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/84.in",
+        "Sha256":  "35CEF300ACACE51402B22112354405F460B1A37BD00262EDA1DE253BE9B768C6",
+        "Bytes":  53
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/84.out",
+        "Sha256":  "B720847F7B7955CDD5B5827CCFED3DAF13D761DC804CA0E56B6F80290A0B504F",
+        "Bytes":  112
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/85.in",
+        "Sha256":  "666DA62C9C3BE68D55D18B74083281F3070A0B06F734DB3CF2F51DC3E43F2EC2",
+        "Bytes":  58
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/85.out",
+        "Sha256":  "232B4E25A95736ED381155014936C2933C90FDB1DA7A0524E447477EC13FFD41",
+        "Bytes":  131
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/86.in",
+        "Sha256":  "8A3C0C88C1656093A1D4D2DDC87D0173147316AA0EF1050254C74E86EEB1F908",
+        "Bytes":  58
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/86.out",
+        "Sha256":  "1E797ACB33D75A08CB03E9FBB7EEE0B20AAD9C997A1384BEABBA343BD7BE558C",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/87.in",
+        "Sha256":  "5B912FD18E151610105ECBE990027569573454A8CA3806E6A264FAC246E3867D",
+        "Bytes":  53
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/87.out",
+        "Sha256":  "2C9B0183333542BE80B6A78BEAB5394436202BB9B9CE13163F4C79281735F391",
+        "Bytes":  117
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/88.in",
+        "Sha256":  "B28D8290D09351F5DBAB4811F53B97E95AFFE9FA6C30C1EFECAF14C89F97354A",
+        "Bytes":  46
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/88.out",
+        "Sha256":  "7652CADFD9D8CD565C9DF9CE51577051D3D71FE23B8A9023129D9BD388D0702E",
+        "Bytes":  110
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/89.in",
+        "Sha256":  "567EBB152756EDC1AB899ACCD749991B3E47F5E67D3BBAA0DEB33D44DB373446",
+        "Bytes":  36
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/89.out",
+        "Sha256":  "4CB8BACA202A72C5EE37AE51C64E1797AC5C5004EE0DA7175D0B3909EA8C5F7C",
+        "Bytes":  153
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/9.in",
+        "Sha256":  "034FB6A8D3D410FC8E19653C62B169F5D3885A6247061588FC841E2329263773",
+        "Bytes":  52
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/9.out",
+        "Sha256":  "0C9A96DBD76DD0D9F1B0E7A0BF15DD1036672FC9930FDE922F44A25FCA0AFA2E",
+        "Bytes":  178
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/90.in",
+        "Sha256":  "0CF0C8805D0AE5AD8A82FDD68C7E987244DF987F6F8BF8ACEA11853F36871B81",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/90.out",
+        "Sha256":  "2D6FC45753129CB422ACA8A87AA1985AC396DD6D7A40D5B7CBAF302D96495FA3",
+        "Bytes":  185
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/91.in",
+        "Sha256":  "1DD3EFE506EC241650A2B60FAFCEC616838CD93AD5AE49C6346E6A6DAAE8A08C",
+        "Bytes":  35
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/91.out",
+        "Sha256":  "CBD557EAB14234C4D350068277066D171A77E7AF4CBDE28A0096F76F3346DD62",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/92.in",
+        "Sha256":  "5C4019A15B330F1BFFBE4DC9A2540AE511C47FCC04F8E3A37A5A67222162DEEC",
+        "Bytes":  40
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/92.out",
+        "Sha256":  "7FC49249FB2302C991DE462E1B8986FC18D93B545BFBE0CFFCB6EEC2E7DCF1D1",
+        "Bytes":  134
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/93.in",
+        "Sha256":  "830FFE357B1E9CF6CA172F87C7113A4B85621FCA35D44F0D0DD4C1E6891D0B3F",
+        "Bytes":  40
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/93.out",
+        "Sha256":  "A6797C282A701F51C260231CC0504C1257C537F83715E2B8214B9368B1584D26",
+        "Bytes":  134
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/94.in",
+        "Sha256":  "EC7536251596EE6483E29A05C4A871991BB993774CBEBE73047211B4732FB890",
+        "Bytes":  40
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/94.out",
+        "Sha256":  "5C229223C8287720D186B3F148CE08AE6FB23E9A60421FA5AA28B370D7466036",
+        "Bytes":  134
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/95.in",
+        "Sha256":  "682641BC81C80FAA6E4381AB8C52502F321818A6161B4184D08C10D60A4E3F64",
+        "Bytes":  98
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/95.out",
+        "Sha256":  "4F678715CB736FB88F2EA29293E6C189A5844CFDC60F7BB0A864A0F11456E3E2",
+        "Bytes":  125
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/96.in",
+        "Sha256":  "B51186BE1441365E3E7C175C9653843BACEF1330C9AF825F1E479A3A205F6E50",
+        "Bytes":  64
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/96.out",
+        "Sha256":  "B4713D9174D995E6CC55466B109F6FB81852FBA315882350B7C8E2E5C5737BC2",
+        "Bytes":  122
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/97.in",
+        "Sha256":  "38631C78E11CFC39E0AE323288E9C879C18E72B2C78A36DF0AC435B7D745A93F",
+        "Bytes":  98
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/97.out",
+        "Sha256":  "8556DAE77C397BF3C22963322C91A33296907EBCE1EC46DCC1B46D28A607F051",
+        "Bytes":  123
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/98.in",
+        "Sha256":  "3BCF96AD0C82B13FA29439726439F5E1F64D1D98914A75623F18878E2C0723E0",
+        "Bytes":  61
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/98.out",
+        "Sha256":  "E2AB6B8C05BD24A3638E81B4EB40D21F2AA2F22B0CEC2DFDA5CE9D9540D6367E",
+        "Bytes":  124
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/99.in",
+        "Sha256":  "DA4184D7315AF9434D8B3484439E9F8CB1590479A6F53052AA0056D076004F76",
+        "Bytes":  48
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/errors/99.out",
+        "Sha256":  "347A39FB526765CA06C661DF973CB4E49E48A237EAE3C010FE304A7DDCC537FA",
+        "Bytes":  208
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/includes/included_circular.yar",
+        "Sha256":  "A1679DEC751CEB77D5F3545A5F7D365930B7F4D8EB203E899ADB7E9C2FDAD50C",
+        "Bytes":  31
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/includes/included_error.yar",
+        "Sha256":  "579CEFE3043F9D02397E288B455BC223172030BAF4C0BDCC3D1C5A2E53058D84",
+        "Bytes":  15
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/includes/included_ok.yar",
+        "Sha256":  "A385330D23D0D330711C238844DF4C42A471B8CD24BE59C4117FBBE57032DB19",
+        "Bytes":  46
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/includes/included_relative.yar",
+        "Sha256":  "0D3B748E74435B3103F93BE685AD886909D50903B36CAE57DC5188553475B24D",
+        "Bytes":  17
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/includes/a/a.yar",
+        "Sha256":  "3E1536BA786EADC4B3D22C55D9E432EEA1B87446DB870B0D591F80F3340B0085",
+        "Bytes":  20
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/includes/b/b.yar",
+        "Sha256":  "F03316A5AD0D6C8E023E3934C990C0470F6186E4D04089135F8B4CAD59AB4964",
+        "Bytes":  28
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/1.in",
+        "Sha256":  "7EF819600696CB401B849482F9B348137C9AA1215B1133A1CFDB47334A181199",
+        "Bytes":  90
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/1.out",
+        "Sha256":  "DF0723CCCAF0287FBF30EB43ECD52ECD66BAC5B10B645F8079808E6FEDF9AB74",
+        "Bytes":  347
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/10.in",
+        "Sha256":  "A91528F0A76E82F9A3EAD1B803A09775CF85F8A82501DE24C65FEBC6DC8C9CE4",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/10.out",
+        "Sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "Bytes":  0
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/11.in",
+        "Sha256":  "33F67CAF93580F9498C3A0F98E7A7EC8E8819E9899B7361C82B76E8F20DC8E43",
+        "Bytes":  68
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/11.out",
+        "Sha256":  "66EBBF63A7EDE1F352723B015AE93FB49EB1A8ADABC3658CBE3B93ECA23D76EB",
+        "Bytes":  274
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/12.in",
+        "Sha256":  "C6CD620CC6109E500EEF945917AE7E139511F475370CEAC9A5EA24AF71DD5FF6",
+        "Bytes":  81
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/12.out",
+        "Sha256":  "61ED07E6FD0E255442EE5B1001227E91A520A763C99A8099AC001F2536A35ECA",
+        "Bytes":  207
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/13.in",
+        "Sha256":  "BA350EDBE1CDD256DB0A69C01DFE1385C9A9E645C08604C201BA21CC6F94ABBD",
+        "Bytes":  41
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/13.out",
+        "Sha256":  "1E67A376D6FC7CB1C42051A129310BAEC38ED4CC22EEC175728F91860812327D",
+        "Bytes":  309
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/14.in",
+        "Sha256":  "A1DFCB793B5C9B293B20A42AEEC6B6E2EAA6A7C6A64FCD11902E2E25EA9AC87D",
+        "Bytes":  28
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/14.out",
+        "Sha256":  "9FFBD7C4A7AD9CB97B95C347C63FDB350CFACD053FD58A7D78A878EDD446347D",
+        "Bytes":  441
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/15.in",
+        "Sha256":  "F6A8ACA58087CED2E080B1CE5FD2FCAAC5EF0CB4641EC81C346925F2A6C9FFD4",
+        "Bytes":  53
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/15.out",
+        "Sha256":  "D015C3122FCBAE37149F134C6A1CACBFEC7F9BD8F5EAD723635A9009FCE89C39",
+        "Bytes":  302
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/16.in",
+        "Sha256":  "F90F6E82A878EEB8EEA609F1C578D6DCBC0E515E3AEF0887925BBCC1E86FFDAE",
+        "Bytes":  81
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/16.out",
+        "Sha256":  "FB900E7C2BC2F75F25A7633517103FBB45BD19D538B3DBD5C42EE609DFFBC2E0",
+        "Bytes":  276
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/17.in",
+        "Sha256":  "656DB5929F4DD1B5DD9F39FBFF10DFD1766C582688800F860D63BAFCB363B377",
+        "Bytes":  63
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/17.out",
+        "Sha256":  "F07B6A0B21640EE7DD5CC449D38A5C521358CD0FB8325B7FB755666E005317B7",
+        "Bytes":  723
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/18.in",
+        "Sha256":  "A17B77EA222E5281FC3132F24851C0F8352E79787E69D7A155238DDA15FBB9F4",
+        "Bytes":  69
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/18.out",
+        "Sha256":  "067EEB97991502CB675B679128C1C205A8B97BC82D144277F36A90A011E46562",
+        "Bytes":  495
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/19.in",
+        "Sha256":  "BF1CA948325F2F356BAC0F5A1CFBA713E1DF121198BF0EBF337B62FFDD566254",
+        "Bytes":  71
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/19.out",
+        "Sha256":  "7233ECFA4EAA93B2B901BD85720DCC82184F96880B2CF084B8BF4AFF825EAE66",
+        "Bytes":  511
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/2.in",
+        "Sha256":  "4796AD5C554C151ABD235EC84FDAB90FD777F1B81974285D5A1D0A700BBDAB56",
+        "Bytes":  81
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/2.out",
+        "Sha256":  "2113CBE04A36B7D89EF4D4BE96F5EAC89CCB6308F47AE495C0431D2E768E68B0",
+        "Bytes":  322
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/20.in",
+        "Sha256":  "0E7305F94DF9AD79622F4E4651FECD13461C8CAAD35A4B6036D8700C31BBE1CA",
+        "Bytes":  32
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/20.out",
+        "Sha256":  "72E51EDC76F60FB1B53100E45722BE0F9B678CAC420A56225B29AA36C0BF7800",
+        "Bytes":  262
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/21.in",
+        "Sha256":  "86BB7C31B6C7B7F54FEACB541AEE4A9FCEB86FDAADEFC77092A4A08A9731B905",
+        "Bytes":  34
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/21.out",
+        "Sha256":  "63EBD7CAD99421AFCE366720B08B249EEFBF460422E2CB4DC0FA204F7CB5E9BA",
+        "Bytes":  266
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/22.in",
+        "Sha256":  "D4967198412DD65C63C8D9FD86BAEDBE60B945D94276A661E6CE5BD0309D0C4D",
+        "Bytes":  63
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/22.out",
+        "Sha256":  "BA641E2CD40E1D030E4CAF2816C61AA766E53F550779A601782C5AD900A74B5F",
+        "Bytes":  243
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/23.in",
+        "Sha256":  "089E73028D41D16D606D8326135BB0D9C06B41901C027989AC8C502773824F04",
+        "Bytes":  129
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/23.out",
+        "Sha256":  "F09CDD6400BF602264168688127B6A822C9C2AEFF6D99FAA21FDCD7CCA2BE9D6",
+        "Bytes":  278
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/24.in",
+        "Sha256":  "A8321CCB51D3CD5D81D0A6F32AD570EDA763AB42C5C0BCAC046CB9694D98AA16",
+        "Bytes":  128
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/24.out",
+        "Sha256":  "FB32C773681AABC53188592D03A1D25B90FB51B7072F3033EB26CDAA74F75066",
+        "Bytes":  677
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/25.in",
+        "Sha256":  "E48C1B6843DE987FB64D73600BCD391A3B6B68A595C3B763BEA290475AE65460",
+        "Bytes":  73
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/25.out",
+        "Sha256":  "8DEFD9A2FA2CC34D4DB4B02F07B5467B990935A23EA4491DF88BC34EF9C2D481",
+        "Bytes":  190
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/26.in",
+        "Sha256":  "80E1FB8E8D34A22653F14A331A17AD059D063F9A802B53342EF4225D2E3F3E64",
+        "Bytes":  63
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/26.out",
+        "Sha256":  "0DF2C3A9506BE657A4C2DC41E2624BD630433435EDA5457207E84183D2E1C09B",
+        "Bytes":  409
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/27.in",
+        "Sha256":  "166452F1531606003BD6E86A6EECB4CFAECE1A972CCF301E46539ED83288C873",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/27.out",
+        "Sha256":  "5577B695B8B54F9D653BC5E289B37CA56ABD04F2A584850186C2EDFC8F7A5EE1",
+        "Bytes":  362
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/28.in",
+        "Sha256":  "A60AA86AE877302F4E026CB928B4E6AC1CD1EED7109E91C307CD9D2A5AF1AEA0",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/28.out",
+        "Sha256":  "8BB09B7558B91A267EBEB7BA8C74B39B4FEEE15A9D68B193AA43E8528DDF1FAE",
+        "Bytes":  366
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/29.in",
+        "Sha256":  "981DC30C055E11F0726AC1367BAD16D9BECAFDDA3CBB9745EA8D183C9676B336",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/29.out",
+        "Sha256":  "E3E360EFB740079DE5A8E060FE486C1E50A0BF0B2A4BB8AD6F1EABB80E1A7770",
+        "Bytes":  362
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/3.in",
+        "Sha256":  "8E33ED4AB4B9263A566AE245A7CE578EEF0DAED3F638F669BA32A063E7CB91F0",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/3.out",
+        "Sha256":  "0D8BB35CD1BA9CAB55D0624E71B5CD5A473FFAA415F68BF11366BB56ABB4C280",
+        "Bytes":  238
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/30.in",
+        "Sha256":  "2B1B2136A3E3E8641B2F4DA9BF29C0E7585049C24114BF8DE3871E2B675270FD",
+        "Bytes":  78
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/30.out",
+        "Sha256":  "5DC4D6B5AF2A0178669D4CE79F789BB2C7BA2FAC2117B57F7EC1AFDB2BD1D363",
+        "Bytes":  366
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/31.in",
+        "Sha256":  "5EF093398179BE646D3AEF95400BFEB582AF622FE13CF5AA326AE899AB0EEFAC",
+        "Bytes":  555
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/31.out",
+        "Sha256":  "F16298A504C6CEDB312C2DBEF516F9789F5A6ACFF5A36B7D010B0988835646AB",
+        "Bytes":  786
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/32.in",
+        "Sha256":  "CAAC26D4BC167513A6F4321048C5054F738078458A87B9C8F70231CF7DA71906",
+        "Bytes":  634
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/32.out",
+        "Sha256":  "4AA0D94A541DC4AE247EE5F2FABEC0AFE085B3ABB6FB8FDC151AB71EDFCB4E2E",
+        "Bytes":  930
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/33.in",
+        "Sha256":  "AC86BD7764381084CC0B5072C9F0CFE8963F7ABF24E7FD953661D621AE321774",
+        "Bytes":  52
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/33.out",
+        "Sha256":  "98BFDC4F05F81D2291C6B7AFE2CD4FA0891460F81F4ADE24AC419E6AD74B5C11",
+        "Bytes":  268
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/34.in",
+        "Sha256":  "AD3F1DA0FD0B18AFBF45BB2951170065A71E3E547313290F725EB23535096EE5",
+        "Bytes":  384
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/34.out",
+        "Sha256":  "800005C30E231BA2B48ED54FB2C9BA65738CA4628B2B39EC0DFAD1E4E28252B3",
+        "Bytes":  1354
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/35.in",
+        "Sha256":  "9D35ED88B961710C4B16A2F5CF7E5D6372732C941EFA8508F950B7D4DA15F4DB",
+        "Bytes":  67
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/35.out",
+        "Sha256":  "C5DBE5564B55AF63515005D17AE9A31CE92F476D8BC46ACC055A87C745B5859F",
+        "Bytes":  146
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/36.in",
+        "Sha256":  "ACF7B30F6F8F1912F77EF513F091FE069A8CFF0F9E00090500C4F95BD1B42B1B",
+        "Bytes":  2981
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/36.out",
+        "Sha256":  "5C65F689652C56344A566AE437F3C015545D6EE72BA79892EFD18CBD5426FA71",
+        "Bytes":  2132
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/37.in",
+        "Sha256":  "1AE5C5A6F3F0FA4D62B74C063BFC689FCC6EB48D0A002CBD0214703234964A13",
+        "Bytes":  134
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/37.out",
+        "Sha256":  "13322BA024F6F3678FF6787D01DF99136637E3FD7F32CD0BC969D492AA671EE1",
+        "Bytes":  648
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/38.in",
+        "Sha256":  "AE68C2EC2D8EA7EB542E66D9AB055B68C5A25EAD83735482B081AC7C547B2F80",
+        "Bytes":  93
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/38.out",
+        "Sha256":  "4ACF86BC39482DCA2D4F4B23C1324C70DBCF224404619D7FA83BEFFDD1EE0AC4",
+        "Bytes":  472
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/39.in",
+        "Sha256":  "86150E1640C1F7F395C42794D4CE25CEAF6D8D83C4A9CC6D23B64E229D10A5DD",
+        "Bytes":  93
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/39.out",
+        "Sha256":  "7E3658E5CC2BA8EA14AC03459FAA8847EE8DABC981467465519F7E7FE88CDC0D",
+        "Bytes":  285
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/4.in",
+        "Sha256":  "679AB82D7C18829F80DF5B16B6C5CB610F893D2B90B9166986D4508BD3D81D3F",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/4.out",
+        "Sha256":  "4256CFBBFA25B7573398F81C6CCFA71968F87F1A329C83957514B0DFD1CE4E86",
+        "Bytes":  238
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/40.in",
+        "Sha256":  "8529CC403AE15FC5AFD61ADF341B1BF39D4BB31BD9BE0CA581006DC81CE551C7",
+        "Bytes":  741
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/40.out",
+        "Sha256":  "02497DB059710D423CD1E79456DFD736FEAF2FA64CDFBD526AA9A0366AE79BB9",
+        "Bytes":  3310
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/41.in",
+        "Sha256":  "678F1972E069C13E88B877AC8199B1C099E6A7468AD70C1DB5D433853D2E4A3B",
+        "Bytes":  783
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/41.out",
+        "Sha256":  "39AF174077E3EC4A7A608352558FA86B33224B3CC805FF08D6D880BD15486816",
+        "Bytes":  474
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/42.in",
+        "Sha256":  "EDE1521EC1C052730F76BFD318A96736E32EBDD1C54700280331ECDB4BC9FB7E",
+        "Bytes":  82
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/42.out",
+        "Sha256":  "69D3B2B42CB746A0623BD310DA09496FA008C3635E5B10916D42F23BB7165E2D",
+        "Bytes":  223
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/43.in",
+        "Sha256":  "0EB208D660DE6E19655A790366C94C51EC265B61770103E31915627C62A5A103",
+        "Bytes":  205
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/43.out",
+        "Sha256":  "A01D61A3764B3964625F5A9412E7228336DB5DD1C61140FEDCE73BF93D6FA499",
+        "Bytes":  359
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/44.in",
+        "Sha256":  "3269F959838AA2F19865DEEAF89848352D8592C694FB9B79A9801165D932C432",
+        "Bytes":  117
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/44.out",
+        "Sha256":  "5703485638A4D1D125879181A5B5582A8F0A7B1B469DBC4470C06861AD635FE2",
+        "Bytes":  245
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/45.in",
+        "Sha256":  "A7908FCFD48E076B00FC2597089782E9B5E421D5604705114E1BFD8A191FEC38",
+        "Bytes":  84
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/45.out",
+        "Sha256":  "7B2A18A88B67F2D5A39882987B7F613568DCBB852F2B58D9BD685ED117E352CD",
+        "Bytes":  470
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/46.in",
+        "Sha256":  "D2530B6C695B724DF288DF5244BDD6FB3C4A31BA661535B059F6FC5A536F0D88",
+        "Bytes":  85
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/46.out",
+        "Sha256":  "E189F044B2A4013B7D24546B2F494F708B8528BF446592A2B6829108990B4869",
+        "Bytes":  547
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/47.in",
+        "Sha256":  "34922E6878CF291BDE82490BA436CF4717E17F0B807F8F6B3E88C7537A8D8D4F",
+        "Bytes":  134
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/47.out",
+        "Sha256":  "F105C55EAA1A41B5C89DB5809C90992D8DF248161CEC5E1A323492E6C3E4F71A",
+        "Bytes":  266
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/48.in",
+        "Sha256":  "5E748A420B0B8E3FEAADB49B2A75A88CDAF6FC919AD717B12A21980F707ACC68",
+        "Bytes":  317
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/48.out",
+        "Sha256":  "1D0BC40702F5B13EB8EB2783E4B93C5789C50448936268D7092ED21C60B7EBDC",
+        "Bytes":  386
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/49.in",
+        "Sha256":  "F85BE2EFF4A0BFA0465AD7750713D49720CBCA5EAFD4A7FF14D6B9E4E6607D5E",
+        "Bytes":  302
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/49.out",
+        "Sha256":  "649D5656BEA950059121B2F79D4A5F8E519D79F9947BCE270C11792D04659C8C",
+        "Bytes":  633
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/5.in",
+        "Sha256":  "679AB82D7C18829F80DF5B16B6C5CB610F893D2B90B9166986D4508BD3D81D3F",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/5.out",
+        "Sha256":  "4256CFBBFA25B7573398F81C6CCFA71968F87F1A329C83957514B0DFD1CE4E86",
+        "Bytes":  238
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/50.in",
+        "Sha256":  "CAA16BDEA85A4E3DA33CE2B744FA70D0009DED18BEB6D81269FD20AB3EEDED1A",
+        "Bytes":  310
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/50.out",
+        "Sha256":  "7F3DB45B64DA4382970280B6B394AC2DC5B8B36FA4D269F193C4949CDCC3D17A",
+        "Bytes":  1342
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/51.in",
+        "Sha256":  "391A09493FD95BDFDF09546C961331FBD5516A5A210E37180E809D54F3471DF9",
+        "Bytes":  161
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/51.out",
+        "Sha256":  "CCB4B0140B5D3FFA2AEDB949F3D9BE88A8C52D1E029564B283E52F109754D7F5",
+        "Bytes":  660
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/52.in",
+        "Sha256":  "8D600DF3E60176B4AE68DF7B0B972960BD3D8781877E5779C4674B8F2994B94E",
+        "Bytes":  139
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/52.out",
+        "Sha256":  "3441E3285C01B55DAD4CC92CE4FC8049C81FF20650DC8CEDAD91D1134954F441",
+        "Bytes":  702
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/6.in",
+        "Sha256":  "4796AD5C554C151ABD235EC84FDAB90FD777F1B81974285D5A1D0A700BBDAB56",
+        "Bytes":  81
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/6.out",
+        "Sha256":  "2113CBE04A36B7D89EF4D4BE96F5EAC89CCB6308F47AE495C0431D2E768E68B0",
+        "Bytes":  322
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/7.in",
+        "Sha256":  "8E33ED4AB4B9263A566AE245A7CE578EEF0DAED3F638F669BA32A063E7CB91F0",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/7.out",
+        "Sha256":  "0D8BB35CD1BA9CAB55D0624E71B5CD5A473FFAA415F68BF11366BB56ABB4C280",
+        "Bytes":  238
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/8.in",
+        "Sha256":  "679AB82D7C18829F80DF5B16B6C5CB610F893D2B90B9166986D4508BD3D81D3F",
+        "Bytes":  88
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/8.out",
+        "Sha256":  "4256CFBBFA25B7573398F81C6CCFA71968F87F1A329C83957514B0DFD1CE4E86",
+        "Bytes":  238
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/9.in",
+        "Sha256":  "0933317BF0AA4B38904A3668C3B2A393FD9E49A35E7D6EF6C86883CF2751CE25",
+        "Bytes":  86
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/9.out",
+        "Sha256":  "67D13BBFC78B0528A8425AFCDCF9A09BEC66D976AFB0846F939B649D012765A4",
+        "Bytes":  234
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/no_warnings.in",
+        "Sha256":  "4B608B330DF142ABCA4C2CB6E4171AC0285878C9812E402AAAE9E42E4F718913",
+        "Bytes":  2290
+    },
+    {
+        "Path":  "src/compiler/tests/testdata/warnings/no_warnings.out",
+        "Sha256":  "8B3D87A70A1EEB551C0DE24E6F343E55FDDAD7B68DDEB92D81892CDA69C0EF27",
+        "Bytes":  1317
+    },
+    {
+        "Path":  "src/modules/add_modules.rs",
+        "Sha256":  "D223B8F11B55007C1DF85BA8DAB5936933BA0DA6EF7BCFAE89D567FC98DE6BD5",
+        "Bytes":  2617
+    },
+    {
+        "Path":  "src/modules/console.rs",
+        "Sha256":  "E821822B852F111C2FA61C4ACF236B5B82F2BCF52BE2D27BEA23A9A795A67922",
+        "Bytes":  5995
+    },
+    {
+        "Path":  "src/modules/field_docs.rs",
+        "Sha256":  "F00AB53804B4F2F4F86C7BAA3731F68E771D60DE4E48A624E2328544769A6BA9",
+        "Bytes":  37917
+    },
+    {
+        "Path":  "src/modules/math.rs",
+        "Sha256":  "3268D53E2CB1A19EC8FD01D65D616F4C1959F649627968A61C96DFD2AF44F1D8",
+        "Bytes":  24236
+    },
+    {
+        "Path":  "src/modules/mod.rs",
+        "Sha256":  "974BAB73C8B1E125F941F456D40F8174A1DA8D7B80D930E7D6E1E6E607CCC416",
+        "Bytes":  22033
+    },
+    {
+        "Path":  "src/modules/modules.rs",
+        "Sha256":  "B9A9B79C4937AC951117C04F1F88BF7FC363F764AC3E213D47624837CC7402DC",
+        "Bytes":  969
+    },
+    {
+        "Path":  "src/modules/string.rs",
+        "Sha256":  "202569DB6A28F49745D8E08A05CAECBAAC45DFB7207F394F6289F8ED16FA49D6",
+        "Bytes":  2539
+    },
+    {
+        "Path":  "src/modules/tests.rs",
+        "Sha256":  "D0565CF7539970CEEB0764196D292D92D418A2A8CE98442F0194406379889F15",
+        "Bytes":  18374
+    },
+    {
+        "Path":  "src/modules/time.rs",
+        "Sha256":  "4003AEAB7E9149020FFBF0FA2F6CFD61B31881AC89E7F4FA3609EC465036DB2E",
+        "Bytes":  1252
+    },
+    {
+        "Path":  "src/modules/crx/mod.rs",
+        "Sha256":  "DCF61B1EFA2C04AC585267B097BE162846F45B42562D77CE7D5F7D55940BB45B",
+        "Bytes":  1741
+    },
+    {
+        "Path":  "src/modules/crx/parser.rs",
+        "Sha256":  "70885D5609363748DA72F7CE2E28FD7D22E97B1C564C81D333A1A37522800A6B",
+        "Bytes":  12158
+    },
+    {
+        "Path":  "src/modules/crx/tests/mod.rs",
+        "Sha256":  "94142765928FAD23CBDFE18DA639B19F7EEC8F6796F7FF9BC6DA43F43A0C1922",
+        "Bytes":  575
+    },
+    {
+        "Path":  "src/modules/cuckoo/mod.rs",
+        "Sha256":  "6FAAC78EB67CFBDD978AE93115FED7DB20269DE0FB9D3228FCA73EA443CDC1E9",
+        "Bytes":  9405
+    },
+    {
+        "Path":  "src/modules/cuckoo/schema.rs",
+        "Sha256":  "EC8039807E6E3D77037BDCB97A1749254FFF355EF54841E0F26C2BB6369DAA35",
+        "Bytes":  5925
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/mod.rs",
+        "Sha256":  "1DB23F875284926E7269E73B113B7EE3B0FCF336BA6869E7E4808F7B00CBF32F",
+        "Bytes":  2167
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/testdata/1.json",
+        "Sha256":  "62D3B38083BA3D750B9BAB04B49D231DA3EC4755C866F80635F02DE0DA9ECEC6",
+        "Bytes":  333372
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/testdata/1.yar",
+        "Sha256":  "5589C0FC2249A4D230D2EAD949A7EADF152B25670CBB4A2F6D8A4D20479D7280",
+        "Bytes":  477
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/testdata/2.json",
+        "Sha256":  "BD6952B67C6BCF2B14F269D184057D88E140110EA47EE804A207EFAA9248A624",
+        "Bytes":  33986
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/testdata/2.yar",
+        "Sha256":  "CB7B5EEFBDF88971C29373C78EB98DDD923B462BA8F1E3DF4681E268738FCA8D",
+        "Bytes":  418
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/testdata/3.json",
+        "Sha256":  "A891FD0D12F6A3F7A7EECCC1B5898F072505D51A799F474A4E052C3CA867E28F",
+        "Bytes":  79
+    },
+    {
+        "Path":  "src/modules/cuckoo/tests/testdata/3.yar",
+        "Sha256":  "7BD0C056FD4D9405F1F2E7DCE0CEEC253088DC81A2217045A3FFC418CE6EEA72",
+        "Bytes":  588
+    },
+    {
+        "Path":  "src/modules/dex/mod.rs",
+        "Sha256":  "763291B008F4104E2B00F61149E228621035A85D83171D555930ADC01DB68612",
+        "Bytes":  4325
+    },
+    {
+        "Path":  "src/modules/dex/parser.rs",
+        "Sha256":  "8F31C810A7593FDFB7DB3804DEE211488A725A3E469F0CDA0D67E1E5A93BECAB",
+        "Bytes":  21726
+    },
+    {
+        "Path":  "src/modules/dex/tests/mod.rs",
+        "Sha256":  "0687F87E30547428512F885F4E3AFD3DCD5063CCCFD14E023037B53EF3497367",
+        "Bytes":  2518
+    },
+    {
+        "Path":  "src/modules/dotnet/mod.rs",
+        "Sha256":  "EE2A2B550D696A1474240D082EDD5E3EA4217AD25C4A767460203F59F4CE4023",
+        "Bytes":  540
+    },
+    {
+        "Path":  "src/modules/dotnet/parser.rs",
+        "Sha256":  "33B2193E76D28036D00E4375A3236B5FBABFE51562DB277875C55C74C8CB5617",
+        "Bytes":  97373
+    },
+    {
+        "Path":  "src/modules/dotnet/tests/testdata/605ebe5b5f4b94e1a73e0ad1162bd542e5cb948d1a4ea5a575a14d6b9d6ee849.in",
+        "Sha256":  "4ED8ADC4922626C26FDEAC03AEBFA2BE733FA75EC522F3023279911F5CAA7182",
+        "Bytes":  107020
+    },
+    {
+        "Path":  "src/modules/dotnet/tests/testdata/86a1e48cfc843eabfe1b468ef9358c1068950f849c612ab808225b359db0bb8c.in",
+        "Sha256":  "C001E2A98A067B30D9F55A6501C6107E2EBFDC22FE9FBB9A04D3444D5E93AAB7",
+        "Bytes":  30988
+    },
+    {
+        "Path":  "src/modules/elf/mod.rs",
+        "Sha256":  "0C6FBEA025CCF3E093799414BC460234062839C2BD5F878BF212931E1F34D2F1",
+        "Bytes":  5102
+    },
+    {
+        "Path":  "src/modules/elf/parser.rs",
+        "Sha256":  "9DE58671C31E9603BC7941B84FB48979B25EB18D30CC6604331173B5156D99A5",
+        "Bytes":  23191
+    },
+    {
+        "Path":  "src/modules/elf/tests/mod.rs",
+        "Sha256":  "DECC50D41B3FB466E549E01376E6B0A0C301EF1BAB1E1464540F96B1153B171D",
+        "Bytes":  1517
+    },
+    {
+        "Path":  "src/modules/elf/tlsh/error.rs",
+        "Sha256":  "EA5A095CDE497896D725E38BEC1B64F0723E548CA99CA5DDB140A972AB470F8E",
+        "Bytes":  1460
+    },
+    {
+        "Path":  "src/modules/elf/tlsh/helper.rs",
+        "Sha256":  "8E826B7186BC2E1A343DAF3367C3E1EFDE232929E47E43E7FA341E871ACE44DE",
+        "Bytes":  8261
+    },
+    {
+        "Path":  "src/modules/elf/tlsh/mod.rs",
+        "Sha256":  "5A8804FC660F5DB558324AB6F99181059200EB6A4569E534C4B51FDEF518C30E",
+        "Bytes":  13168
+    },
+    {
+        "Path":  "src/modules/elf/tlsh/tests.rs",
+        "Sha256":  "9F6C4F88FEF0B1C9A09A973CC595BBB41DAADF05E564C47E2C6D01F040F91ACC",
+        "Bytes":  6202
+    },
+    {
+        "Path":  "src/modules/hash/mod.rs",
+        "Sha256":  "D283CC86C40AD5A76A29398D8779B90D39F1B53089F83B4993D9686A1F2B9AD1",
+        "Bytes":  7342
+    },
+    {
+        "Path":  "src/modules/hash/tests/mod.rs",
+        "Sha256":  "F5757FD397568826249B59087CE31679D9C40A4291A6DA87B5219E14447129BF",
+        "Bytes":  2499
+    },
+    {
+        "Path":  "src/modules/lnk/mod.rs",
+        "Sha256":  "F14107DFFF9A191754F2C967FF28BCC7DDBF1FEEC7D94ECE1DB472E8944C4F5E",
+        "Bytes":  1071
+    },
+    {
+        "Path":  "src/modules/lnk/parser.rs",
+        "Sha256":  "56C309D50BDED347F291F37F095A0EC86EB38B9DA2AB475295B969D673ACA283",
+        "Bytes":  29248
+    },
+    {
+        "Path":  "src/modules/macho/mod.rs",
+        "Sha256":  "623FE65FC963DB32E48D4B8111A0E1DE8EA0C55E9E863028B9F4A803639DD3C0",
+        "Bytes":  17993
+    },
+    {
+        "Path":  "src/modules/macho/parser.rs",
+        "Sha256":  "DE2EBA0E99FC463D7CC47353E0AE77EBB5F425442D92BF2BD48F2814BEC4CC4D",
+        "Bytes":  89160
+    },
+    {
+        "Path":  "src/modules/macho/tests/mod.rs",
+        "Sha256":  "46A04DC5FFABBA6FE7AD75082F9CDDD408B6EFEE9102BAA4DDD3A66F63CA685F",
+        "Bytes":  13532
+    },
+    {
+        "Path":  "src/modules/magic/mod.rs",
+        "Sha256":  "FAD57DD568EAE496B7AE7AFF699B1B04CFEBD63A5D76BCE0DE1F262DC8C06160",
+        "Bytes":  2852
+    },
+    {
+        "Path":  "src/modules/magic/tests/mod.rs",
+        "Sha256":  "6DDE6ABD9307559523A0D2FA1798A714627EF667822CA2DD58642EA49BD3C34A",
+        "Bytes":  1429
+    },
+    {
+        "Path":  "src/modules/msi/mod.rs",
+        "Sha256":  "BE0E265893490A93AFC56E5D8DB9CF68A9D685FAD45766E77F331E2C3AB1CAD3",
+        "Bytes":  1029
+    },
+    {
+        "Path":  "src/modules/msi/parser.rs",
+        "Sha256":  "1874B6E60CF586C1A911E4595AAE5F766EA70E8CD5D74B9977E992432A9DE0C8",
+        "Bytes":  2638
+    },
+    {
+        "Path":  "src/modules/olecf/mod.rs",
+        "Sha256":  "44C1A01313DE3A29C625C0801E65EF48052BEAE6035F05F46D3ACB3B4224508E",
+        "Bytes":  1776
+    },
+    {
+        "Path":  "src/modules/olecf/parser.rs",
+        "Sha256":  "F28F357FDA81C88AB8D45C1E4A4495D6365FDFCDCCB106483F3D5716C2C7A13C",
+        "Bytes":  26873
+    },
+    {
+        "Path":  "src/modules/olecf/tests/mod.rs",
+        "Sha256":  "6BCC9DC0BCF3BF0B8F88F055CE97AF022BE8D1ECFC414C56EAEB72B5DFFA65E4",
+        "Bytes":  4349
+    },
+    {
+        "Path":  "src/modules/pe/mod.rs",
+        "Sha256":  "7C049E4E2B8548C4A545812DC41539159E8F78F2D4FBF3D894EB7C1B2B6E39D9",
+        "Bytes":  27198
+    },
+    {
+        "Path":  "src/modules/pe/parser.rs",
+        "Sha256":  "342FD8C46474E2C62BCFACFB5462BDFB1D93CA9EE7CCFD1108223C5D43F6708D",
+        "Bytes":  132422
+    },
+    {
+        "Path":  "src/modules/pe/rva2off.rs",
+        "Sha256":  "AF821B34FA93CF71EEE9EF786887DAC3FC57021F78EA91120AF57A7B246EA775",
+        "Bytes":  4613
+    },
+    {
+        "Path":  "src/modules/pe/tests/mod.rs",
+        "Sha256":  "BA756B36887A702D25326CAB5D8172D52BD464832051490A6861373AF4C1F3CA",
+        "Bytes":  11193
+    },
+    {
+        "Path":  "src/modules/protos/console.proto",
+        "Sha256":  "6998A2D76CFC3EFDF138FA22658C6056C19549067B2F049828F5210D24CD3EA9",
+        "Bytes":  281
+    },
+    {
+        "Path":  "src/modules/protos/crx.proto",
+        "Sha256":  "3E67C45AF8E6D7AEEAE89A5EF816B1218FA38B14BF6BB45476E3B535116B0DC0",
+        "Bytes":  2542
+    },
+    {
+        "Path":  "src/modules/protos/cuckoo.proto",
+        "Sha256":  "9BE7BE3A2658140991B2878A6E5B99663FA7FFF7687A007E66EB0FB888A13C13",
+        "Bytes":  275
+    },
+    {
+        "Path":  "src/modules/protos/dex.proto",
+        "Sha256":  "C919CBD2CA7221F000DB98A1D45FD1CED78E7B933F6581FF3D02A2CD6B1CEEA9",
+        "Bytes":  7841
+    },
+    {
+        "Path":  "src/modules/protos/dotnet.proto",
+        "Sha256":  "FD08138C41ECDA55764B4B8F69C8AB30EE01AD9A3A6E06197151B47CF925B438",
+        "Bytes":  8777
+    },
+    {
+        "Path":  "src/modules/protos/elf.proto",
+        "Sha256":  "7D66FC79222A4A284A9E83D0B1239277DCB70BE757779302C9C127F780DE2BD2",
+        "Bytes":  11083
+    },
+    {
+        "Path":  "src/modules/protos/hash.proto",
+        "Sha256":  "2127A8B1EE2FC0239B54F77573F0D0204E2F8406C270756BA439913EE65274A3",
+        "Bytes":  263
+    },
+    {
+        "Path":  "src/modules/protos/lnk.proto",
+        "Sha256":  "5F100280FDA02763F739CEA386545C376E7E442BBD6AFF01F2BEBA449E66D4F3",
+        "Bytes":  7869
+    },
+    {
+        "Path":  "src/modules/protos/macho.proto",
+        "Sha256":  "F89C641491923CC36066E83F18B331EED0A0BB589C779B0CFB1630FCFFA3CF15",
+        "Bytes":  20057
+    },
+    {
+        "Path":  "src/modules/protos/magic.proto",
+        "Sha256":  "FAFC8240B5FA9E060E3CCD4CC971BC851B3E714B6A12C54FFA6DE2BF2FD746E2",
+        "Bytes":  270
+    },
+    {
+        "Path":  "src/modules/protos/math.proto",
+        "Sha256":  "35B4C03CD928A4981056C9AAE3F7382B6A773A60FEBA9952A9B10A98B51DB4E2",
+        "Bytes":  374
+    },
+    {
+        "Path":  "src/modules/protos/mods.proto",
+        "Sha256":  "5D4F78DBCB736DD29E392862DEAB9E2CE74218027992B2B7AC484770061BF5EE",
+        "Bytes":  666
+    },
+    {
+        "Path":  "src/modules/protos/msi.proto",
+        "Sha256":  "F064C90A8F6F4DC1215C12BB95C43B357F88C82B2B5ED75D7E734120EA0A1281",
+        "Bytes":  390
+    },
+    {
+        "Path":  "src/modules/protos/olecf.proto",
+        "Sha256":  "F48F350A3A1BDEE871246CA2209C5EDAE6A10C25309D24DDBC32D0EF2D716624",
+        "Bytes":  578
+    },
+    {
+        "Path":  "src/modules/protos/pe.proto",
+        "Sha256":  "90EB5D83904F29C37BA9C40A2B7A25582BC37B80FC2CD16F2E86F43CA5CC09F2",
+        "Bytes":  24711
+    },
+    {
+        "Path":  "src/modules/protos/string.proto",
+        "Sha256":  "07895CE286E5FCC6DCCD1169398B0D2BE5C9562C726773B3E414AF4C8C9B1026",
+        "Bytes":  275
+    },
+    {
+        "Path":  "src/modules/protos/test_proto2.proto",
+        "Sha256":  "0F54959DC8AC3A69DA39406421938455BC4CAC4A9AD43AA0B0C4C1751B7FD6AD",
+        "Bytes":  8386
+    },
+    {
+        "Path":  "src/modules/protos/test_proto3.proto",
+        "Sha256":  "8AD1B594C7C6C73404FB354DA92ECF16EA9240BC59160BC6FD25F302EF9B75AD",
+        "Bytes":  3905
+    },
+    {
+        "Path":  "src/modules/protos/time.proto",
+        "Sha256":  "07F409416AA01A12DA7FCBA688187A9048316F9F8890E8022F0D6611CB3D1B98",
+        "Bytes":  263
+    },
+    {
+        "Path":  "src/modules/protos/vba.proto",
+        "Sha256":  "244682FA6E82154B7E495AB7F35C9EE0333030109F3E633BD217019393A38B6C",
+        "Bytes":  799
+    },
+    {
+        "Path":  "src/modules/protos/yara.proto",
+        "Sha256":  "439A3B097713D9D37A92E1581D9569F48E50E3080F760BEE8095584DC0B1F299",
+        "Bytes":  6291
+    },
+    {
+        "Path":  "src/modules/protos/zip.proto",
+        "Sha256":  "95887B42C76C93466B404C4962B20867AF0B8A418FE95BAAD2AA0498A776878E",
+        "Bytes":  713
+    },
+    {
+        "Path":  "src/modules/protos/generated/analysis.rs",
+        "Sha256":  "01DD3CAE6C729FC403527547AEAC22BB0648D01984F57F15F172C6ABCF7FD35D",
+        "Bytes":  10321
+    },
+    {
+        "Path":  "src/modules/protos/generated/console.rs",
+        "Sha256":  "D199CE704AF0392DE971787FCE593EB5893CA5FFEDF1B006A9B103907237385D",
+        "Bytes":  5653
+    },
+    {
+        "Path":  "src/modules/protos/generated/crx.rs",
+        "Sha256":  "3094F21E8CCE88B189EC437C35A723796CD7271E8BAF4F27ADA990CEF64E7BD4",
+        "Bytes":  56018
+    },
+    {
+        "Path":  "src/modules/protos/generated/cuckoo.rs",
+        "Sha256":  "1DF3C05E24A0053ED10F1A137A26808071B284883A1B4FBB9905062B5F879DC4",
+        "Bytes":  5615
+    },
+    {
+        "Path":  "src/modules/protos/generated/dex.rs",
+        "Sha256":  "6AFAD7E637130F110CBE29D9558F806AF426BC4769EDC6B92BD33333A1D78B5D",
+        "Bytes":  105275
+    },
+    {
+        "Path":  "src/modules/protos/generated/dotnet.rs",
+        "Sha256":  "6E394B523C5BC01E630724E03E3A93F4D6999EA53EF8F0606664F77AF15D7A06",
+        "Bytes":  127981
+    },
+    {
+        "Path":  "src/modules/protos/generated/elf.rs",
+        "Sha256":  "1F2E8673E557DA77D32543447CB8D26B140845910857571B244A337DF88FD54C",
+        "Bytes":  134176
+    },
+    {
+        "Path":  "src/modules/protos/generated/filetypes.rs",
+        "Sha256":  "7111F3E6A19A94AD77CB1129FA6CA6698F8048FFDEFCB7D3361EA7F502AAB4AC",
+        "Bytes":  61942
+    },
+    {
+        "Path":  "src/modules/protos/generated/gti_score.rs",
+        "Sha256":  "2FCDA67586FD45E6EB80AFE2DE1FB28CDF637E0762D4753CFB748B04801E9781",
+        "Bytes":  9327
+    },
+    {
+        "Path":  "src/modules/protos/generated/hash.rs",
+        "Sha256":  "BB0B67C1F96232B2A066B094745D86213BE5BD3503CB047B0F9AE9FE06EEB151",
+        "Bytes":  5555
+    },
+    {
+        "Path":  "src/modules/protos/generated/hunting_gti_score.rs",
+        "Sha256":  "9D1C544A599DA6D47B6893403BE218733C2075A351284B044CDFB76AC81159E8",
+        "Bytes":  22701
+    },
+    {
+        "Path":  "src/modules/protos/generated/lnk.rs",
+        "Sha256":  "A08840BC7E415E82D4A3A419D265DC5355E66BCA073179AFDA1B1D1F9CCA0BF7",
+        "Bytes":  95275
+    },
+    {
+        "Path":  "src/modules/protos/generated/macho.rs",
+        "Sha256":  "FC04FA90FC156363DC4769E49BB0382F0E2F05CE2535287663D1FC466FF092D3",
+        "Bytes":  336972
+    },
+    {
+        "Path":  "src/modules/protos/generated/magic.rs",
+        "Sha256":  "995E01190B65BA616C3C0512D407EC14C6021E8BD070E354C5C36C209C3C10D3",
+        "Bytes":  5588
+    },
+    {
+        "Path":  "src/modules/protos/generated/math.rs",
+        "Sha256":  "B515E286269FB4DC88ECF3FB3A24B8A765CE234FB89770D6C1E3439A75B74B02",
+        "Bytes":  7398
+    },
+    {
+        "Path":  "src/modules/protos/generated/mod.rs",
+        "Sha256":  "1D052939ACD846C120BACE9302AE3D842CB35E342D4156234869D97DE4A32F51",
+        "Bytes":  526
+    },
+    {
+        "Path":  "src/modules/protos/generated/mods.rs",
+        "Sha256":  "2F848FFCD624973D5FDAFA3B1D0B012826BCCEFE4FF8C3F05C9384832A26D95E",
+        "Bytes":  16793
+    },
+    {
+        "Path":  "src/modules/protos/generated/msi.rs",
+        "Sha256":  "9525FF96F66370991F8CFE7F2A2FC33DA36B48109720E2E8DE17CA402B51E1C9",
+        "Bytes":  7735
+    },
+    {
+        "Path":  "src/modules/protos/generated/net_analysis.rs",
+        "Sha256":  "C8287DA92F5265A80C0C6A6163FF0BFFAF3D8016C36EF66CCB08DF735BB22FA5",
+        "Bytes":  34668
+    },
+    {
+        "Path":  "src/modules/protos/generated/olecf.rs",
+        "Sha256":  "3B29FBC9E2E92C4F1BD64A72817ADE92C15B80CEED4B8B6DE7ADFFDA9D891B7F",
+        "Bytes":  18527
+    },
+    {
+        "Path":  "src/modules/protos/generated/pe.rs",
+        "Sha256":  "5B4E0ACDE824093BDD1A022FA32FED4440F2EBE6C5BE0DA718F081C39CACC929",
+        "Bytes":  352234
+    },
+    {
+        "Path":  "src/modules/protos/generated/sandbox.rs",
+        "Sha256":  "D94853D9B43CFF245B209749A526DE6AD2A001DFE6061D81268B18C2335CB12D",
+        "Bytes":  244627
+    },
+    {
+        "Path":  "src/modules/protos/generated/sigma.rs",
+        "Sha256":  "D229020A4767AFDB7A40E9F56B146E3C60D5FAE7FFB8FCE439C794738E7524D5",
+        "Bytes":  48152
+    },
+    {
+        "Path":  "src/modules/protos/generated/string.rs",
+        "Sha256":  "E21B9F2992BBACB17B07781A373279949F541DFE56988B46606A710D17AD066A",
+        "Bytes":  5615
+    },
+    {
+        "Path":  "src/modules/protos/generated/submitter.rs",
+        "Sha256":  "53CC8FD710F3DACF4E47006DB4810D0B80ECC8982C6FE11B39FD82EA4456DE19",
+        "Bytes":  7172
+    },
+    {
+        "Path":  "src/modules/protos/generated/test_proto2.rs",
+        "Sha256":  "21531A335753A0B8C92CA4C09A08A99F1071D3E64E2B67C77E3E3D255CA8FB56",
+        "Bytes":  133964
+    },
+    {
+        "Path":  "src/modules/protos/generated/test_proto3.rs",
+        "Sha256":  "3F108D05A027FD6CFAE4448049A5BF2A25C2A1857F4AEF2F68EBF99C0E0DB5F1",
+        "Bytes":  36190
+    },
+    {
+        "Path":  "src/modules/protos/generated/text.rs",
+        "Sha256":  "7DF931FAB8DABD8AB089B3EB64468BF71E5B645714D1E9D5C376DFE8240C5B8D",
+        "Bytes":  10903
+    },
+    {
+        "Path":  "src/modules/protos/generated/time.rs",
+        "Sha256":  "AD26CBF27F103D30BEDBDD506D8ACDAFD1C4D6CBCEE67AD383EFFD3FBDD9CF7B",
+        "Bytes":  5555
+    },
+    {
+        "Path":  "src/modules/protos/generated/titan.rs",
+        "Sha256":  "AD6A6D2723D3A7D87D590F210165579D17FCF1230DE455421FDEDC6E3DDF43A5",
+        "Bytes":  69440
+    },
+    {
+        "Path":  "src/modules/protos/generated/vba.rs",
+        "Sha256":  "2FCFCF998A2280BBE20682ECC06B6E6E5376FF1FFB678BEA8D3B91E7A128A833",
+        "Bytes":  31017
+    },
+    {
+        "Path":  "src/modules/protos/generated/vtnet.rs",
+        "Sha256":  "88561FA888DFE875E5BBA302274F35EC2B28A63CA870ADBC382CCF840E5DC4FD",
+        "Bytes":  171802
+    },
+    {
+        "Path":  "src/modules/protos/generated/yara.rs",
+        "Sha256":  "9AA3B7B78BF35A2F55D398166F6173A4D7560AC6C63BA324CD65D05117DEB683",
+        "Bytes":  62933
+    },
+    {
+        "Path":  "src/modules/protos/generated/zip.rs",
+        "Sha256":  "33AFA699D691A72CFA77FDC46E94E9759F7299ABB3734B0338D434B0C25F8571",
+        "Bytes":  23641
+    },
+    {
+        "Path":  "src/modules/protos/vt/analysis.proto",
+        "Sha256":  "2908EB5B1BF173D3373571FC82D8023B36F766317D4AD089EC7174564B11D225",
+        "Bytes":  311
+    },
+    {
+        "Path":  "src/modules/protos/vt/filetypes.proto",
+        "Sha256":  "8E29B69D5E49008FACBC81970761AF6CAB436584B3AB02D93043ED710D3F2F4F",
+        "Bytes":  2883
+    },
+    {
+        "Path":  "src/modules/protos/vt/gti_score.proto",
+        "Sha256":  "64CA3248A543412D72E03BBDFEED31C4A19D74D7EBB598B224D80CAF42283E74",
+        "Bytes":  538
+    },
+    {
+        "Path":  "src/modules/protos/vt/hunting_gti_score.proto",
+        "Sha256":  "80197EC00212FAA85C3F7D8E3F934A93FAFAE54E3A04A68CD1C30ADE9DA07FBB",
+        "Bytes":  482
+    },
+    {
+        "Path":  "src/modules/protos/vt/sandbox.proto",
+        "Sha256":  "97D326F97BAAF874D4ED3667E834B9E2F900205A64750A6C243C3FFA691148A6",
+        "Bytes":  8855
+    },
+    {
+        "Path":  "src/modules/protos/vt/sigma.proto",
+        "Sha256":  "D5AB5D88A2ED55348355E0D3EF86ACAAE7E0495496B1055D706798CFED79D810",
+        "Bytes":  1155
+    },
+    {
+        "Path":  "src/modules/protos/vt/submitter.proto",
+        "Sha256":  "A65C42386B8E66E460E3AF9ACF977184B869A9095E4992FB3F8DFE56844F1DFE",
+        "Bytes":  205
+    },
+    {
+        "Path":  "src/modules/protos/vt/titan.proto",
+        "Sha256":  "79FC9EAA5A88E195657B2895D49A92B857A7773E2FA68A89F09D1D2811799320",
+        "Bytes":  3458
+    },
+    {
+        "Path":  "src/modules/protos/vt/vtnet.proto",
+        "Sha256":  "D9CE28EA675314DD5536CCF9C518C912C0C45B7C94197360FD2254D05D5EB87B",
+        "Bytes":  6902
+    },
+    {
+        "Path":  "src/modules/protos/vt/tools/net_analysis.proto",
+        "Sha256":  "27028CC0AAE5B3382F4A52F4A057B1F1B09BDAA36F87FD4BB178298B671ACC54",
+        "Bytes":  960
+    },
+    {
+        "Path":  "src/modules/test_proto2/mod.rs",
+        "Sha256":  "1E419DCCC33E13ED542EFB486A59BA385654D57311C62F1690CDA47472ADD75B",
+        "Bytes":  5286
+    },
+    {
+        "Path":  "src/modules/test_proto2/tests/mod.rs",
+        "Sha256":  "B16DC47111CBF0C4F3059CDBF587592E938A3147BC2A51E2426DDB9991ECEBA5",
+        "Bytes":  11404
+    },
+    {
+        "Path":  "src/modules/test_proto3/mod.rs",
+        "Sha256":  "64A815635C5E15B75A410F79F90D11F4B81437493A86BB9EAA931AF6534C18E3",
+        "Bytes":  1027
+    },
+    {
+        "Path":  "src/modules/utils/asn1.rs",
+        "Sha256":  "7252226E48EF2AE72C9DED24EE888A23DF48FE4A20F940386B2A5C5FEEE0801C",
+        "Bytes":  23776
+    },
+    {
+        "Path":  "src/modules/utils/authenticode.rs",
+        "Sha256":  "E1E2C141FF8B7650907B091046C69A8DD589437FB3F3508F3C0F3FC9A7EE8AE6",
+        "Bytes":  38753
+    },
+    {
+        "Path":  "src/modules/utils/crypto.rs",
+        "Sha256":  "D808ABF045CD30D27E4666F3AB15BA9B5B5E20D44DCC1C66DE8F893A958CC648",
+        "Bytes":  8324
+    },
+    {
+        "Path":  "src/modules/utils/leb128.rs",
+        "Sha256":  "0BCCF35B1AF5800515CF018C35DAF2C3BB8B3B4F94BC4AA6E53D77D128E702B8",
+        "Bytes":  3011
+    },
+    {
+        "Path":  "src/modules/utils/mod.rs",
+        "Sha256":  "12ABF39A2D08EA90E73C767CDD8BB5936BC5C58A61E5544B911059AF550A810A",
+        "Bytes":  367
+    },
+    {
+        "Path":  "src/modules/utils/olecf.rs",
+        "Sha256":  "CD71FA27AA74AAAD8ADB6DDE7F372156F4EDA9EDE9E59EABA570013745E0C692",
+        "Bytes":  341
+    },
+    {
+        "Path":  "src/modules/utils/zip.rs",
+        "Sha256":  "79AF5F4E00481928ECC9B19FFA30792B52D8DFE7F765E9E47533F915308DA4B0",
+        "Bytes":  4908
+    },
+    {
+        "Path":  "src/modules/vba/mod.rs",
+        "Sha256":  "E47B43261EC5255EE01B557374858055B32EB90B0A38C8410538A9E0F8793A6C",
+        "Bytes":  3699
+    },
+    {
+        "Path":  "src/modules/vba/parser.rs",
+        "Sha256":  "2746E032D0FEBDE6B7D1F07218775DD3065EC383BC691D6EF2F98763E78AA63B",
+        "Bytes":  24969
+    },
+    {
+        "Path":  "src/modules/vt/bitsquatting.rs",
+        "Sha256":  "1C7BA4FB47B75CEEB8B31E845D0F9096C13E05D01FB16E01C2B13E05A5CA0502",
+        "Bytes":  1339
+    },
+    {
+        "Path":  "src/modules/vt/homoglyphs.rs",
+        "Sha256":  "3999D19670F37B3275F85480F8F039FA23C7CBEA3A6571D732261C6EB67BF174",
+        "Bytes":  5659
+    },
+    {
+        "Path":  "src/modules/vt/interleaved.rs",
+        "Sha256":  "3B1CBB096CEE082BED9EC23AB1C8ADED604E926FFB1FBF2D93A51131655C58FA",
+        "Bytes":  1678
+    },
+    {
+        "Path":  "src/modules/vt/mod.rs",
+        "Sha256":  "2D1D1D1BCD71852A3B4C71245A81ACC6AAF3508083C736E74E24DFCBC24192A9",
+        "Bytes":  15895
+    },
+    {
+        "Path":  "src/modules/vt/typos.rs",
+        "Sha256":  "8F10A0B3D0D1569E9FD7414E958A37BC5F47F3CE06E89F1CD3355DA968391B6C",
+        "Bytes":  13157
+    },
+    {
+        "Path":  "src/modules/zip/mod.rs",
+        "Sha256":  "9C99FE8C8A8763EF7E7C2FF5ADC78AA08AC1A9504973870CCF0F6EB5A8632941",
+        "Bytes":  600
+    },
+    {
+        "Path":  "src/re/bitmapset.rs",
+        "Sha256":  "B4DB7E26563CEDF7DDFCFFC1CA42A2E241490EE94A075B9B9CAC98ECA940F8BB",
+        "Bytes":  8386
+    },
+    {
+        "Path":  "src/re/hir.rs",
+        "Sha256":  "5BE0CBEDC20A9997AE7B89A55128BDDC74F438AEFB369DFF95F4621196F00375",
+        "Bytes":  26510
+    },
+    {
+        "Path":  "src/re/mod.rs",
+        "Sha256":  "7EB571565E76CC168B88D13B666ECFFA98AC74F2C786AF95CE01806E3F1D48C6",
+        "Bytes":  7783
+    },
+    {
+        "Path":  "src/re/parser.rs",
+        "Sha256":  "4F71108233DACE2A1CC025F99ECBDD0DACC18D565634D768654EEC7A0E35D653",
+        "Bytes":  24832
+    },
+    {
+        "Path":  "src/re/fast/compiler.rs",
+        "Sha256":  "BBE0F8916F587BAAF9ABFE227DE4DE24F2F44640C638704EC2A87EBDD72473A3",
+        "Bytes":  22673
+    },
+    {
+        "Path":  "src/re/fast/fastvm.rs",
+        "Sha256":  "9F6C2E92E32410A16FFB3E89873498EA26CF3A3F2AB5F850DC9B3BE925871B81",
+        "Bytes":  28853
+    },
+    {
+        "Path":  "src/re/fast/instr.rs",
+        "Sha256":  "1A6561444627FD30DBBA89A14AF817C43BADAD02748B8D541F29BD665B7598B6",
+        "Bytes":  5563
+    },
+    {
+        "Path":  "src/re/fast/mod.rs",
+        "Sha256":  "333FC8B11CC4A7B122F2016DB12413EAF75B160D16C686A3AD4B2B23095CE191",
+        "Bytes":  1752
+    },
+    {
+        "Path":  "src/re/thompson/compiler.rs",
+        "Sha256":  "D8F4CD3974FFE1DBFEDB53781396A658BF6DC0B19C8903FD0EB534E4BB86D254",
+        "Bytes":  79958
+    },
+    {
+        "Path":  "src/re/thompson/instr.rs",
+        "Sha256":  "F3A295C669BA6CCA4FC8CCCACEF37A6BAC63AC64B259977ACEC1A55B6D5AC682",
+        "Bytes":  25842
+    },
+    {
+        "Path":  "src/re/thompson/mod.rs",
+        "Sha256":  "7089FEDEAC344BB5A8FB2038CE6014C47C8A8401E0AE104086A7A31456F061C3",
+        "Bytes":  1463
+    },
+    {
+        "Path":  "src/re/thompson/pikevm.rs",
+        "Sha256":  "303F5939485B2C3F254F82A073FE882238B3F697C65668BB6665337F5AA9DBD9",
+        "Bytes":  27241
+    },
+    {
+        "Path":  "src/re/thompson/tests.rs",
+        "Sha256":  "0472BBB44DCCB2E8D4E2BD1CC052565B82F0EDDFF2302F0EACB4C1A39487C3C7",
+        "Bytes":  34529
+    },
+    {
+        "Path":  "src/scanner/blocks.rs",
+        "Sha256":  "6AA1DAC90BE64BA2027D412294481267AF6FA23D28B97A77C3A997EB8E04F0C2",
+        "Bytes":  20858
+    },
+    {
+        "Path":  "src/scanner/context.rs",
+        "Sha256":  "6658A422F2D7D7F49205E5B5EE32A3F6624785E957A7ED9F65EE38B53CB77A23",
+        "Bytes":  84496
+    },
+    {
+        "Path":  "src/scanner/matches.rs",
+        "Sha256":  "66D257D177880D0A5170C73D924D415C2808122657AF52F073B32E9ABAC754D2",
+        "Bytes":  14026
+    },
+    {
+        "Path":  "src/scanner/mod.rs",
+        "Sha256":  "3EEC85222CA0C573D1CAAD22A7D2E599858BC029EF5F27594FF39078CED3911E",
+        "Bytes":  41644
+    },
+    {
+        "Path":  "src/scanner/tests.rs",
+        "Sha256":  "282804D3BAC665DDAE3DDEE3B7F1B803010FB0D84BEA791CC96C1EAED8189858",
+        "Bytes":  29202
+    },
+    {
+        "Path":  "src/symbols/mod.rs",
+        "Sha256":  "F3336A8FDD494F6EA43CBB1444D68AE482A2D0ACC47D6830FFF838B49E562B55",
+        "Bytes":  14506
+    },
+    {
+        "Path":  "src/teddy/generic.rs",
+        "Sha256":  "670EBD5BEC3266E303192DBA5623D45FD69AC638116EE0A56712B41625C49839",
+        "Bytes":  64373
+    },
+    {
+        "Path":  "src/teddy/LICENSE-MIT.md",
+        "Sha256":  "154C1AF2B38E25E5C18613DFE352EED29B0863CB39E494007822CDEB39150AC5",
+        "Bytes":  1080
+    },
+    {
+        "Path":  "src/teddy/mod.rs",
+        "Sha256":  "5FC0365CBB7F85DEBE44C06125006A2C5D0DE153DAF6EAB1D1A18A36998A9E64",
+        "Bytes":  25551
+    },
+    {
+        "Path":  "src/teddy/vector.rs",
+        "Sha256":  "791874F439B0F6AB997DC51789A0E2479EC45D6F959962482533768DA045A865",
+        "Bytes":  26460
+    },
+    {
+        "Path":  "src/tests/mod.rs",
+        "Sha256":  "B5ED952865E4714F3329469636FF43443397C268ADE7E1805405F1C28B6DDF52",
+        "Bytes":  123346
+    },
+    {
+        "Path":  "src/tests/testdata/jumps.bin",
+        "Sha256":  "66DCA9447009EDA998CABC25A1533D73FAC554841CDD4BEA2E20CD30F37321F6",
+        "Bytes":  1664
+    },
+    {
+        "Path":  "src/types/array.rs",
+        "Sha256":  "7736681DDE9EB76E951E8563750E1734679922AD1DA784DF0D2F088BA1F9ABC2",
+        "Bytes":  2494
+    },
+    {
+        "Path":  "src/types/func.rs",
+        "Sha256":  "7F914F21790A9FA0EE032A5770EBE1A89D5D0AFB7D7950C518C341565E3B7EF3",
+        "Bytes":  18707
+    },
+    {
+        "Path":  "src/types/map.rs",
+        "Sha256":  "50A2C7C76D30CFC8CBB89CFCF0E9895B43C200EDB7F68874B3B5CA22DD2EBB56",
+        "Bytes":  3242
+    },
+    {
+        "Path":  "src/types/mod.rs",
+        "Sha256":  "5C8C194601AA905BF343270C8CB97F1B3B46851926EBF4B7FA48932D29F5CB8A",
+        "Bytes":  22737
+    },
+    {
+        "Path":  "src/types/structure.rs",
+        "Sha256":  "451002DFD376B4ABBC9280657AD0CE2F95E24DB82E471E8E927D132AAB25701E",
+        "Bytes":  55057
+    },
+    {
+        "Path":  "src/wasm/builder.rs",
+        "Sha256":  "29B317035EFA27C6AB27DB0194A088C9E09C2A50454C4E7EB8995D0412AAF30E",
+        "Bytes":  17046
+    },
+    {
+        "Path":  "src/wasm/integer.rs",
+        "Sha256":  "94E3038F8E79240915533DDE7D251243D31928E3E8DFF8C9D66AB1761EA3567E",
+        "Bytes":  857
+    },
+    {
+        "Path":  "src/wasm/mod.rs",
+        "Sha256":  "FF3008604585C851421A9BC3E6C748B13D9150374B8531907369198AEBBF89CD",
+        "Bytes":  55440
+    },
+    {
+        "Path":  "src/wasm/string.rs",
+        "Sha256":  "2247D89F92587E84E84C3CAF357DF4D094D19515BB4E7DF3234086525C434DF0",
+        "Bytes":  14918
+    },
+    {
+        "Path":  "src/wasm/runtime/browser.rs",
+        "Sha256":  "69A1EE4B659B675113C760F04733C8EE8588B666E70CDC4E1C280FDD978EA4CE",
+        "Bytes":  14906
+    },
+    {
+        "Path":  "src/wasm/runtime/common.rs",
+        "Sha256":  "4520BB2A1CA4090990CB629FA3FA0FDFFC75A572DAF022F6AACD735DD7851260",
+        "Bytes":  25991
+    },
+    {
+        "Path":  "src/wasm/runtime/mod.rs",
+        "Sha256":  "6EDFD5EF445D28615A69FFAF6292640F86D0A7E0CE73395B14A6519F436CABF2",
+        "Bytes":  2438
+    },
+    {
+        "Path":  "src/wasm/runtime/native.rs",
+        "Sha256":  "A028DF09C08525FCCA364847BDE6613401196C1FDF98DCD854702F20CC75F262",
+        "Bytes":  4215
+    }
+]

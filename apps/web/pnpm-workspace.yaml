@@ -1,0 +1,17 @@
+# `esbuild` ships a prebuilt binary through the optional `@esbuild/win32-x64`
+# (linux-x64, darwin-arm64, …) package and resolves it at runtime, so its
+# postinstall script is not needed for Vite. Declaring it here with `false`
+# records that decision explicitly and stops pnpm from failing the install with
+# ERR_PNPM_IGNORED_BUILDS.
+allowBuilds:
+  esbuild: false
+minimumReleaseAgeExclude:
+  - '@tanstack/query-core@5.103.1'
+  - '@tanstack/react-query@5.103.1'
+  - jsdom@30.1.0
+
+# The lockfile lives next to this package (`apps/web/pnpm-lock.yaml`) because
+# `pnpm install` is run from `apps/web`. `lockfileDir` pins it there even when the
+# command is issued from the repository root, which also declares `apps/web` in
+# its own workspace file.
+lockfileDir: .

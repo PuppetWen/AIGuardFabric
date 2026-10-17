@@ -1,0 +1,46 @@
+# Microsoft Windows —— 安全事件日志（JSON 转发形态，winlogbeat/Windows Event Forwarding）
+# 正样本：parsers/os/samples.json 中 key = windows-eventlog-json
+# 说明：`@timestamp` 以 `@` 开头，必须用 `$['@timestamp']` 括号取键。
+key: windows-eventlog-json
+name: Windows 事件日志（JSON）
+vendor: Microsoft Windows
+product: Event Log
+protocols: [file, beats, webhook, http-pull]
+engine: json-path
+pattern: |
+  ts=$['@timestamp']
+  channel=$.winlog.channel
+  provider=$.winlog.provider_name
+  event_id=$.winlog.event_id
+  record_id=$.winlog.record_id
+  rule_id=$.winlog.event_id
+  computer=$.winlog.computer_name
+  user=$.winlog.event_data.TargetUserName
+  src_ip=$.winlog.event_data.IpAddress
+  logon_type=$.winlog.event_data.LogonType
+  status=$.winlog.event_data.Status
+  outcome=$.event.outcome
+mapping:
+  map:
+    ts: event.time
+    channel: log.channel
+    provider: event.provider
+    event_id: event.code
+    record_id: event.sequence
+    rule_id: rule.id
+    computer: host.name
+    user: user.name
+    src_ip: source.ip
+    logon_type: log.logon.type
+    status: error.code
+    outcome: event.outcome
+  category_map:
+    '4625': authentication
+    '4624': authentication
+    '4688': process
+    '4720': authentication
+  defaults:
+    event.severity: medium
+required_fields: [event_id, computer]
+sample_fixture: parsers/os/samples.json#windows-eventlog-json
+description: Windows 安全事件日志 JSON 转发（4625 登录失败/4624 登录成功/4688 进程创建），winlog.event_data 落用户与来源 IP。

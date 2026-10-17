@@ -1,0 +1,27 @@
+@media (max-width: 1280px) {
+  .agf-content {
+    padding: 14px 14px 26px;
+  }
+
+  .agf-search {
+    width: 220px;
+  }
+
+  .agf-login__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .agf-login__aside {
+    display: none;
+  }
+
+  .agf-timeline__item {
+    grid-template-columns: 104px 18px 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .agf-grid--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

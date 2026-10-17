@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "note": "Snort 模板正样本与关键字段断言。syslog 样本按 Snort 2.x alert 公开行格式重建，JSON 样本按 Snort 3 alert_json 公开字段（src_addr/dst_addr/alert.*）重建；未联网抓取。",
+  "samples": {
+    "snort-alert-syslog": {
+      "protocol": "syslog",
+      "line": "Feb 21 10:28:00 snort-ids1 snort[1234]: [1:1000001:0] ICMP test [**] [Classification: Generic ICMP event] [Priority: 3] {ICMP} 203.0.113.140 -> 10.20.30.140",
+      "expect": {
+        "host.name": "snort-ids1",
+        "process.name": "snort",
+        "process.pid": "1234",
+        "rule.gid": "1",
+        "rule.id": "1000001",
+        "rule.version": "0",
+        "rule.name": "ICMP test",
+        "rule.category": "Generic ICMP event",
+        "source.ip": "203.0.113.140",
+        "destination.ip": "10.20.30.140",
+        "network.transport": "ICMP",
+        "event.severity": "low",
+        "event.action": "alert",
+        "event.category": "intrusion"
+      }
+    },
+    "snort3-alert-json": {
+      "protocol": "file",
+      "line": "{\"timestamp\":\"2026-02-21T10:29:00.123456+0000\",\"event_type\":\"alert\",\"src_addr\":\"203.0.113.141\",\"src_port\":44321,\"dst_addr\":\"10.20.30.141\",\"dst_port\":80,\"proto\":\"TCP\",\"alert\":{\"action\":\"blocked\",\"gid\":1,\"signature_id\":1000002,\"rev\":1,\"signature\":\"Snort3 SQL Injection Attempt\",\"category\":\"web-application-attack\",\"severity\":1}}",
+      "expect": {
+        "event.time": "2026-02-21T10:29:00.123Z",
+        "event.type": "alert",
+        "source.ip": "203.0.113.141",
+        "source.port": "44321",
+        "destination.ip": "10.20.30.141",
+        "destination.port": "80",
+        "network.transport": "TCP",
+        "rule.id": "1000002",
+        "rule.name": "Snort3 SQL Injection Attempt",
+        "rule.category": "web-application-attack",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "web"
+      }
+    }
+  }
+}

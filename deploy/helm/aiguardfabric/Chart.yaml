@@ -1,0 +1,47 @@
+# =============================================================================
+# AIGuardFabric（智御矩阵）Helm Chart 元数据
+#
+# 与规格对应：AIGuardFabric_PROMPT.md §9「Docker 与部署」、§11「验收标准」（M9 Helm lint 通过）
+# 事实来源：docker-compose.yml（服务名/端口/健康检查）、deploy/docker/Dockerfile（镜像 target）、
+#           crates/agf-core/src/config.rs（环境变量名）、.env.example（变量全集）
+# =============================================================================
+apiVersion: v2
+name: aiguardfabric
+description: |
+  AIGuardFabric（智御矩阵）AI 安全治理平台 —— 四服务一体部署：
+  agf-server（API/控制台后端）、agf-ingest（日志接入与解析）、
+  agf-scheduler（调度巡航）、agf-web（nginx 静态控制台）。
+  可选内置 PostgreSQL/Redis/NATS/MinIO/ClickHouse/Grafana（默认关闭，指向外部托管实例）。
+type: application
+
+# chart 版本：随打包规则/模板变更递增（SemVer）
+version: 0.1.0
+# 应用版本：与 docker-compose.yml 的 AGF_IMAGE_TAG 默认值 0.1.0 对齐，
+# 亦作为 .Values.image.tag 的默认回退值（见 templates/_helpers.tpl 的 agf.image）。
+appVersion: "0.1.0"
+
+kubeVersion: ">=1.27.0-0"
+
+keywords:
+  - ai-security
+  - ai-governance
+  - llm-gateway
+  - siem
+  - log-ingest
+  - runtime-protection
+  - aliyun
+  - privatelink
+
+home: https://github.com/aiguardfabric/aiguardfabric
+sources:
+  - https://github.com/aiguardfabric/aiguardfabric
+
+maintainers:
+  - name: AIGuardFabric Platform Team
+    email: platform@aiguardfabric.local
+
+annotations:
+  # 平台规格版本，便于审计追溯
+  aiguardfabric.io/spec-version: "AIGuardFabric_PROMPT.md"
+  # 制品安全：镜像均以非 root（uid 10001）运行，详见 README 的「安全基线」小节
+  aiguardfabric.io/run-as-uid: "10001"

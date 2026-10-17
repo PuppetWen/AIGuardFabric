@@ -1,0 +1,10 @@
+# rustfmt 配置（**只使用 stable 可用的选项**）。
+#
+# 说明：`format_code_in_doc_comments` / `wrap_comments` / `comment_width` 是 nightly-only，
+# 在 stable 上会被忽略并打印 "unstable features are only available in nightly channel" 警告——
+# 那会让 `cargo fmt --all --check` 的门禁输出充满噪声（且 CI 上看起来像配置失效）。
+# 本项目只承诺 stable 工具链（见 rust-toolchain.toml），因此这里不声明这些选项。
+max_width = 120
+edition = "2024"
+use_small_heuristics = "Max"
+newline_style = "Unix"

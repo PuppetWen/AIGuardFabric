@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "note": "阿里云模板正样本与关键字段断言。line 为按厂商公开文档（WAF 3.0 SLS 字段、ActionTrail 事件结构、云安全中心 API 字段、云防火墙日志字段、OSS/CDN 访问日志列序）重建的真实感样本，未联网抓取；fixture 指向 tests/fixtures/logs/ 下登记的样本文件（同一份内容）。",
+  "samples": {
+    "aliyun-waf-sls-json": {
+      "protocol": "webhook",
+      "fixture": "parsers/aliyun-waf-sls-1.log",
+      "expect": {
+        "event.time": "2026-02-21T02:30:15.000Z",
+        "host.name": "www.example.com",
+        "source.ip": "203.0.113.77",
+        "http.request.method": "POST",
+        "url.path": "/api/login?user=admin'--",
+        "user_agent.original": "sqlmap/1.7.2#stable (http://sqlmap.org)",
+        "rule.id": "waf-100012",
+        "rule.name": "SQL注入攻击",
+        "http.response.status_code": "403",
+        "cloud.region": "cn-hangzhou",
+        "trace.id": "ac1b2c3d4e5f60718293a4b5c6d7e8f9",
+        "event.severity": "medium",
+        "event.category": "web",
+        "event.action": "denied"
+      }
+    },
+    "aliyun-actiontrail-json": {
+      "protocol": "object-storage",
+      "fixture": "parsers/aliyun-actiontrail-1.log",
+      "expect": {
+        "event.time": "2026-02-21T10:35:00.000Z",
+        "event.id": "ac1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9",
+        "event.action_raw": "DeleteSecurityGroup",
+        "event.provider": "ecs.aliyuncs.com",
+        "event.type": "ApiCall",
+        "cloud.account.id": "1234567890123456",
+        "user.name": "ops-admin",
+        "source.ip": "203.0.113.61",
+        "user_agent.original": "AlibabaCloud CLI/3.0.0",
+        "event.reference": "A1B2C3D4-5E6F-7890-1234-567890ABCDEF",
+        "event.category": "cloud-control",
+        "event.severity": "info"
+      }
+    },
+    "aliyun-sas-baseline-json": {
+      "protocol": "webhook",
+      "line": "{\"riskId\":900123,\"riskName\":\"Redis 未授权访问\",\"riskLevel\":\"high\",\"riskType\":\"baseline\",\"instanceName\":\"ecs-prod-01\",\"instanceId\":\"i-bp1example0001\",\"internetIp\":\"203.0.113.70\",\"intranetIp\":\"10.20.30.70\",\"firstTime\":\"2026-02-21 10:40:00\",\"lastTime\":\"2026-02-21 10:45:00\",\"status\":\"unhandled\",\"detail\":\"Redis 6379 端口对公网开放\"}",
+      "expect": {
+        "rule.id": "900123",
+        "rule.name": "Redis 未授权访问",
+        "host.name": "ecs-prod-01",
+        "host.id": "i-bp1example0001",
+        "host.ip": "10.20.30.70",
+        "destination.ip": "203.0.113.70",
+        "message": "Redis 6379 端口对公网开放",
+        "event.time": "2026-02-21T10:45:00.000Z",
+        "event.severity": "high",
+        "event.category": "configuration"
+      }
+    },
+    "aliyun-sas-vuln-json": {
+      "protocol": "webhook",
+      "line": "{\"vulId\":\"AVD-2026-0001\",\"vulName\":\"Apache Log4j2 远程代码执行漏洞\",\"vulLevel\":\"critical\",\"vulType\":\"cve\",\"cveId\":\"CVE-2021-44228\",\"instanceName\":\"ecs-app-02\",\"instanceId\":\"i-bp1example0002\",\"firstTime\":\"2026-02-21 11:00:00\",\"status\":\"unfixed\",\"detail\":\"组件 log4j-core 2.14.1 存在远程代码执行漏洞\"}",
+      "expect": {
+        "rule.id": "AVD-2026-0001",
+        "rule.name": "Apache Log4j2 远程代码执行漏洞",
+        "vulnerability.id": "CVE-2021-44228",
+        "host.name": "ecs-app-02",
+        "host.id": "i-bp1example0002",
+        "event.time": "2026-02-21T11:00:00.000Z",
+        "event.action_raw": "unfixed",
+        "event.severity": "critical",
+        "event.category": "intrusion"
+      }
+    },
+    "aliyun-cloudfw-flow-json": {
+      "protocol": "webhook",
+      "line": "{\"log_time\":\"2026-02-21T10:50:00+08:00\",\"src_ip\":\"203.0.113.80\",\"src_port\":52341,\"dst_ip\":\"10.20.30.80\",\"dst_port\":3306,\"protocol\":\"TCP\",\"action\":\"deny\",\"direction\":\"in\",\"bytes\":1024,\"packets\":8,\"rule_id\":\"cfw-rule-2001\",\"app\":\"MySQL\",\"account_id\":\"1234567890123456\",\"region\":\"cn-hangzhou\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:50:00.000Z",
+        "source.ip": "203.0.113.80",
+        "source.port": "52341",
+        "destination.ip": "10.20.30.80",
+        "destination.port": "3306",
+        "network.transport": "TCP",
+        "network.direction": "in",
+        "network.bytes_in": "1024",
+        "network.packets_in": "8",
+        "rule.id": "cfw-rule-2001",
+        "network.application": "MySQL",
+        "cloud.account.id": "1234567890123456",
+        "cloud.region": "cn-hangzhou",
+        "event.action": "denied",
+        "event.category": "network",
+        "event.severity": "low"
+      }
+    },
+    "aliyun-oss-access-log": {
+      "protocol": "file",
+      "line": "10.20.30.45 - - [21/Feb/2026:10:30:15 +0800] \"GET /static/app.js HTTP/1.1\" 200 2048 1024 15 5 \"https://www.example.com/index.html\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\" - \"www.example.com\" \"65b1f1a2c3d4e5f60718293a\" \"On\" \"example-static\" \"oss-cn-hangzhou\" \"Standard\"",
+      "expect": {
+        "source.ip": "10.20.30.45",
+        "event.time": "2026-02-21T02:30:15.000Z",
+        "http.request.method": "GET",
+        "url.path": "/static/app.js",
+        "http.version": "1.1",
+        "http.response.status_code": "200",
+        "http.response.body.bytes": "2048",
+        "file.size": "1024",
+        "event.duration": "15",
+        "http.response.time": "5",
+        "http.request.referrer": "https://www.example.com/index.html",
+        "user_agent.original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "aliyun-cdn-access-log": {
+      "protocol": "file",
+      "line": "203.0.113.88 - - [21/Feb/2026:10:31:02 +0800] \"GET /live/index.m3u8 HTTP/1.1\" 200 53241 \"https://www.example.cn/\" \"HLSPlayer/1.0\" \"cdn.example.cn\"",
+      "expect": {
+        "source.ip": "203.0.113.88",
+        "event.time": "2026-02-21T02:31:02.000Z",
+        "url.path": "/live/index.m3u8",
+        "http.response.status_code": "200",
+        "http.response.body.bytes": "53241",
+        "http.request.referrer": "https://www.example.cn/",
+        "user_agent.original": "HLSPlayer/1.0",
+        "url.domain": "cdn.example.cn",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    }
+  }
+}

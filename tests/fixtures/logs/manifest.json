@@ -1,0 +1,527 @@
+{
+  "version": 1,
+  "note": "模板 key → 样本文件映射。`templates` 段 = agf-ingest 内置模板（crates/agf-ingest/src/template.rs，测试断言一一对应）；`parser_library` 段 = `parsers/` 目录模板库中**另有独立样本文件**的模板（新增，不改动 templates 段）。severity/category/host/ip 为归一化后的期望值；host/ip 为空表示该日志格式本身不含该字段（或公开来源已脱敏）。synthetic=false 表示样本逐字取自公开来源；synthetic=true 表示按厂商公开文档格式重建的真实感样本。来源与获取方式见 SOURCES.md。",
+  "templates": {
+    "qingteng-hive-syslog": {
+      "fixture": "qingteng-hive-1.log",
+      "vendor": "青藤云",
+      "product": "蜂巢",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "high",
+      "category": "intrusion",
+      "host": "app-prod-01",
+      "ip": "10.20.30.40"
+    },
+    "aliyun-waf-webhook": {
+      "fixture": "aliyun-waf-1.log",
+      "vendor": "阿里云",
+      "product": "Web应用防火墙",
+      "protocol": "webhook",
+      "synthetic": true,
+      "severity": "medium",
+      "category": "web",
+      "host": "www.example.com",
+      "ip": "203.0.113.77"
+    },
+    "aliyun-sas-alert": {
+      "fixture": "aliyun-sas-1.log",
+      "vendor": "阿里云",
+      "product": "云安全中心",
+      "protocol": "webhook",
+      "synthetic": true,
+      "severity": "high",
+      "category": "intrusion",
+      "host": "ecs-prod-01",
+      "ip": "10.20.30.41"
+    },
+    "huawei-waf-webhook": {
+      "fixture": "huawei-waf-1.log",
+      "vendor": "华为云",
+      "product": "Web应用防火墙",
+      "protocol": "webhook",
+      "synthetic": true,
+      "severity": "high",
+      "category": "web",
+      "host": "api.example.cn",
+      "ip": "203.0.113.88"
+    },
+    "huawei-hss-alert": {
+      "fixture": "huawei-hss-1.log",
+      "vendor": "华为云",
+      "product": "主机安全服务",
+      "protocol": "webhook",
+      "synthetic": true,
+      "severity": "critical",
+      "category": "malware",
+      "host": "ecs-app-02",
+      "ip": "10.20.30.42"
+    },
+    "tencent-cfw-alert": {
+      "fixture": "tencent-cfw-1.log",
+      "vendor": "腾讯云",
+      "product": "云防火墙",
+      "protocol": "webhook",
+      "synthetic": true,
+      "severity": "low",
+      "category": "network",
+      "host": "",
+      "ip": "203.0.113.99"
+    },
+    "sangfor-af-cef": {
+      "fixture": "sangfor-af-1.log",
+      "vendor": "深信服",
+      "product": "AF",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "medium",
+      "category": "intrusion",
+      "host": "sangfor-af1",
+      "ip": "10.20.30.50"
+    },
+    "qianxin-tianyan-cef": {
+      "fixture": "qianxin-tianyan-1.log",
+      "vendor": "奇安信",
+      "product": "天眼",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "high",
+      "category": "web",
+      "host": "qax-tianyan1",
+      "ip": "203.0.113.60"
+    },
+    "nsfocus-ips-leef": {
+      "fixture": "nsfocus-ips-1.log",
+      "vendor": "绿盟",
+      "product": "IPS",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "high",
+      "category": "intrusion",
+      "host": "nsfocus-ips1",
+      "ip": "10.20.30.61"
+    },
+    "topsec-topsap-leef": {
+      "fixture": "topsec-topsap-1.log",
+      "vendor": "天融信",
+      "product": "TopSAP",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "high",
+      "category": "authentication",
+      "host": "topsec-soc1",
+      "ip": "10.20.30.71"
+    },
+    "fortinet-fortigate-kv": {
+      "fixture": "fortinet-fortigate-1.log",
+      "vendor": "Fortinet",
+      "product": "FortiGate",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "critical",
+      "category": "intrusion",
+      "host": "FGT-EDGE-01",
+      "ip": "203.0.113.90"
+    },
+    "paloalto-panos-csv": {
+      "fixture": "paloalto-panos-1.log",
+      "vendor": "Palo Alto",
+      "product": "PAN-OS",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "info",
+      "category": "network",
+      "host": "PA-VM-FW1",
+      "ip": "10.20.30.100"
+    },
+    "crowdstrike-falcon-webhook": {
+      "fixture": "crowdstrike-falcon-1.log",
+      "vendor": "CrowdStrike",
+      "product": "Falcon",
+      "protocol": "webhook",
+      "synthetic": true,
+      "severity": "high",
+      "category": "intrusion",
+      "host": "WIN-APP-03",
+      "ip": "10.20.30.110"
+    },
+    "wazuh-alert-json": {
+      "fixture": "wazuh-alert-1.log",
+      "vendor": "Wazuh",
+      "product": "Wazuh Manager",
+      "protocol": "file",
+      "synthetic": true,
+      "severity": "high",
+      "category": "authentication",
+      "host": "web-01",
+      "ip": "203.0.113.111"
+    },
+    "suricata-eve-json": {
+      "fixture": "suricata-eve-1.log",
+      "vendor": "Suricata",
+      "product": "eve.json",
+      "protocol": "file",
+      "synthetic": false,
+      "severity": "high",
+      "category": "intrusion",
+      "host": "",
+      "ip": ""
+    },
+    "zeek-conn-tsv": {
+      "fixture": "zeek-conn-1.log",
+      "vendor": "Zeek",
+      "product": "conn.log",
+      "protocol": "file",
+      "synthetic": true,
+      "severity": "info",
+      "category": "network",
+      "host": "",
+      "ip": "10.20.30.130"
+    },
+    "linux-auditd-execve": {
+      "fixture": "linux-auditd-execve-1.log",
+      "vendor": "Linux",
+      "product": "auditd",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "high",
+      "category": "process",
+      "host": "app-prod-01",
+      "ip": "203.0.113.200"
+    },
+    "syslog-generic": {
+      "fixture": "syslog-rfc3164-1.log",
+      "vendor": "generic",
+      "product": "syslog",
+      "protocol": "syslog",
+      "synthetic": true,
+      "severity": "critical",
+      "category": "authentication",
+      "host": "web-prod-01",
+      "ip": ""
+    },
+    "otlp-json-log": {
+      "fixture": "otlp-json-1.log",
+      "vendor": "OpenTelemetry",
+      "product": "OTLP Logs",
+      "protocol": "otlp",
+      "synthetic": true,
+      "severity": "high",
+      "category": "other",
+      "host": "agf-sim-host",
+      "ip": ""
+    }
+  },
+  "parser_library": {
+    "note": "parsers/ 模板库的独立样本文件登记。原有按厂商公开文档重建的示例保留 synthetic=true；新增公开实验原文标 synthetic=false，并在本清单 public_samples 段登记五家完整来源 URL、固定 revision、源文件 SHA-256、摘录 SHA-256、行号、许可证和原文提取方式。public_samples 允许同一个生产模板拥有额外原文样本，原有 AWS/PAN-OS 主样本不替换。",
+    "samples": {
+      "aliyun-waf-sls-json": {
+        "fixture": "parsers/aliyun-waf-sls-1.log",
+        "vendor": "阿里云",
+        "product": "Web应用防火墙",
+        "protocol": "webhook",
+        "synthetic": true,
+        "severity": "medium",
+        "category": "web",
+        "host": "www.example.com",
+        "ip": "203.0.113.77"
+      },
+      "aliyun-actiontrail-json": {
+        "fixture": "parsers/aliyun-actiontrail-1.log",
+        "vendor": "阿里云",
+        "product": "ActionTrail",
+        "protocol": "object-storage",
+        "synthetic": true,
+        "severity": "info",
+        "category": "cloud-control",
+        "host": "",
+        "ip": "203.0.113.61"
+      },
+      "huawei-hss-alert-json": {
+        "fixture": "parsers/huawei-hss-alert-1.log",
+        "vendor": "华为云",
+        "product": "主机安全服务",
+        "protocol": "webhook",
+        "synthetic": true,
+        "severity": "critical",
+        "category": "process",
+        "host": "ecs-app-02",
+        "ip": "10.20.30.42"
+      },
+      "tencent-waf-attack-json": {
+        "fixture": "parsers/tencent-waf-attack-1.log",
+        "vendor": "腾讯云",
+        "product": "Web应用防火墙",
+        "protocol": "webhook",
+        "synthetic": true,
+        "severity": "medium",
+        "category": "web",
+        "host": "www.example.com",
+        "ip": "203.0.113.95"
+      },
+      "sangfor-edr-json": {
+        "fixture": "parsers/sangfor-edr-1.log",
+        "vendor": "深信服",
+        "product": "EDR",
+        "protocol": "webhook",
+        "synthetic": true,
+        "severity": "high",
+        "category": "malware",
+        "host": "WIN-APP-03",
+        "ip": "10.20.30.110"
+      },
+      "qianxin-tianyan-cef": {
+        "fixture": "parsers/qianxin-tianyan-cef-1.log",
+        "vendor": "奇安信",
+        "product": "天眼",
+        "protocol": "syslog",
+        "synthetic": true,
+        "severity": "high",
+        "category": "web",
+        "host": "qax-tianyan1",
+        "ip": "203.0.113.60"
+      },
+      "nsfocus-waf-cef": {
+        "fixture": "parsers/nsfocus-waf-cef-1.log",
+        "vendor": "绿盟",
+        "product": "WAF",
+        "protocol": "syslog",
+        "synthetic": true,
+        "severity": "medium",
+        "category": "web",
+        "host": "nsfocus-waf1",
+        "ip": "203.0.113.62"
+      },
+      "fortinet-fortigate-dns-kv": {
+        "fixture": "parsers/fortinet-fortigate-dns-1.log",
+        "vendor": "Fortinet",
+        "product": "FortiGate",
+        "protocol": "syslog",
+        "synthetic": true,
+        "severity": "info",
+        "category": "network",
+        "host": "FGT-EDGE-01",
+        "ip": "10.20.30.50"
+      },
+      "suricata-eve-dns-json": {
+        "fixture": "parsers/suricata-eve-dns-1.log",
+        "vendor": "Suricata",
+        "product": "eve.json",
+        "protocol": "file",
+        "synthetic": true,
+        "severity": "info",
+        "category": "network",
+        "host": "ids-01",
+        "ip": "10.20.30.50"
+      },
+      "linux-sshd-auth-grok": {
+        "fixture": "parsers/linux-sshd-auth-1.log",
+        "vendor": "Linux",
+        "product": "OpenSSH",
+        "protocol": "syslog",
+        "synthetic": true,
+        "severity": "medium",
+        "category": "authentication",
+        "host": "web-prod-01",
+        "ip": "203.0.113.212"
+      },
+      "azure-entra-service-principal-json": {
+        "fixture": "public/azure-entra-service-principal-json.log",
+        "vendor": "Microsoft Azure",
+        "product": "Microsoft Entra ID",
+        "protocol": "object-storage",
+        "synthetic": false,
+        "severity": "medium",
+        "category": "authentication",
+        "source": {
+          "repository": "https://github.com/splunk/attack_data",
+          "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+          "path": "datasets/attack_techniques/T1078.004/azure_ad_service_principal_authentication/azure_ad_service_principal_authentication.log",
+          "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1078.004/azure_ad_service_principal_authentication/azure_ad_service_principal_authentication.log",
+          "sha256": "9134A3A6C8FA2EF745AD24BC7A6E32351C984A28450E8C50B9BE6B2523DD4D78"
+        },
+        "fixtureSha256": "1527AFD3CA252512BC33EAB50B3638CFD9410D1A384C7A54606B21A678A8D11A",
+        "license": "Apache-2.0",
+        "datasetKind": "public-lab-capture"
+      },
+      "crowdstrike-falcon-fdr-process-json": {
+        "fixture": "public/crowdstrike-falcon-fdr-process-json.log",
+        "vendor": "CrowdStrike",
+        "product": "Falcon Data Replicator",
+        "protocol": "object-storage",
+        "synthetic": false,
+        "severity": "info",
+        "category": "process",
+        "source": {
+          "repository": "https://github.com/splunk/attack_data",
+          "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+          "path": "datasets/attack_techniques/T1003.003/atomic_red_team/crowdstrike_falcon.log",
+          "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1003.003/atomic_red_team/crowdstrike_falcon.log",
+          "sha256": "C4275AB0EF976B0D00BA7840031A06D9F47D1BEEAF4C3056D2FC7BB8FE08B38A"
+        },
+        "fixtureSha256": "68612FC46AF3C62F4FD94DB4D869B34C6CFD6DF53614265C9EBE3DE668B05493",
+        "license": "Apache-2.0",
+        "datasetKind": "public-lab-capture"
+      },
+      "zeek-conn-json": {
+        "fixture": "public/zeek-conn-json.log",
+        "vendor": "Zeek",
+        "product": "conn.log",
+        "protocol": "file",
+        "synthetic": false,
+        "severity": "info",
+        "category": "network",
+        "source": {
+          "repository": "https://github.com/splunk/attack_data",
+          "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+          "path": "datasets/attack_techniques/T1021.001/remote_desktop_connection/zeek_conn.log",
+          "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1021.001/remote_desktop_connection/zeek_conn.log",
+          "sha256": "57926A175CAD5CF4A5DF8AA208AD02D68FF07C8B65EB0B5138D8A8BFCC8E1590"
+        },
+        "fixtureSha256": "57926A175CAD5CF4A5DF8AA208AD02D68FF07C8B65EB0B5138D8A8BFCC8E1590",
+        "license": "Apache-2.0",
+        "datasetKind": "public-lab-capture"
+      }
+    }
+  },
+  "public_samples": {
+    "aws-cloudtrail-json": {
+      "key": "aws-cloudtrail-json",
+      "fixture": "public/aws-cloudtrail-json.log",
+      "vendor": "AWS",
+      "product": "CloudTrail",
+      "protocol": "object-storage",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1078.004/aws_login_sfa/cloudtrail.json",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1078.004/aws_login_sfa/cloudtrail.json",
+        "sha256": "395D8A667D12577FE83116C5FD0D850EA1B27DD21B1E303D08529869A5872B9A"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "1EEA73C1EC85B6245BA62E84F50D70D33506475ED9E37D86D9BCC7D02DB43F93",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "event.id": "630d3da9-9cdc-44a4-a617-33e2f8f21a32",
+        "event.action_raw": "ConsoleLogin",
+        "source.ip": "142.254.89.27",
+        "event.category": "authentication",
+        "event.severity": "info"
+      }
+    },
+    "azure-entra-service-principal-json": {
+      "key": "azure-entra-service-principal-json",
+      "fixture": "public/azure-entra-service-principal-json.log",
+      "vendor": "Microsoft Azure",
+      "product": "Microsoft Entra ID",
+      "protocol": "object-storage",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1078.004/azure_ad_service_principal_authentication/azure_ad_service_principal_authentication.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1078.004/azure_ad_service_principal_authentication/azure_ad_service_principal_authentication.log",
+        "sha256": "9134A3A6C8FA2EF745AD24BC7A6E32351C984A28450E8C50B9BE6B2523DD4D78"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "1527AFD3CA252512BC33EAB50B3638CFD9410D1A384C7A54606B21A678A8D11A",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "user.id": "60ee4f4e-9221-479c-92df-4c97cb5e2f9d",
+        "user.name": "Research",
+        "source.ip": "120.1.97.19",
+        "event.category": "authentication",
+        "event.severity": "medium"
+      }
+    },
+    "crowdstrike-falcon-fdr-process-json": {
+      "key": "crowdstrike-falcon-fdr-process-json",
+      "fixture": "public/crowdstrike-falcon-fdr-process-json.log",
+      "vendor": "CrowdStrike",
+      "product": "Falcon Data Replicator",
+      "protocol": "object-storage",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1003.003/atomic_red_team/crowdstrike_falcon.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1003.003/atomic_red_team/crowdstrike_falcon.log",
+        "sha256": "C4275AB0EF976B0D00BA7840031A06D9F47D1BEEAF4C3056D2FC7BB8FE08B38A"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "68612FC46AF3C62F4FD94DB4D869B34C6CFD6DF53614265C9EBE3DE668B05493",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "event.id": "9b9afac9-0d86-11ed-b9af-0248097df5d7",
+        "host.id": "665e9c4418234e1e92fe20df52616163",
+        "process.executable": "\\Device\\HarddiskVolume1\\Windows\\System32\\cmd.exe",
+        "process.command_line": "\"cmd.exe\" /c \"vssadmin.exe create shadow /for=C: & mklink /D C:\\Temp\\vssstore \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy1\"",
+        "event.category": "process",
+        "event.severity": "info"
+      }
+    },
+    "paloalto-panos-threat-csv": {
+      "key": "paloalto-panos-threat-csv",
+      "fixture": "public/paloalto-panos-threat-csv.log",
+      "vendor": "Palo Alto",
+      "product": "PAN-OS",
+      "protocol": "syslog",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1190/fortigate/fortinetcve202240684.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1190/fortigate/fortinetcve202240684.log",
+        "sha256": "0859A24067009985CE89E8B721B3641931B82F6937A6FB4720D17FAF47F05F87"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "0859A24067009985CE89E8B721B3641931B82F6937A6FB4720D17FAF47F05F87",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "observer.serial_number": "016201013868",
+        "source.ip": "159.65.30.189",
+        "url.path": "2.1.22.1/api/v2/cmdb/system/admin/admin",
+        "rule.id": "(9999)",
+        "event.category": "intrusion",
+        "event.severity": "info"
+      }
+    },
+    "zeek-conn-json": {
+      "key": "zeek-conn-json",
+      "fixture": "public/zeek-conn-json.log",
+      "vendor": "Zeek",
+      "product": "conn.log",
+      "protocol": "file",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1021.001/remote_desktop_connection/zeek_conn.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1021.001/remote_desktop_connection/zeek_conn.log",
+        "sha256": "57926A175CAD5CF4A5DF8AA208AD02D68FF07C8B65EB0B5138D8A8BFCC8E1590"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "57926A175CAD5CF4A5DF8AA208AD02D68FF07C8B65EB0B5138D8A8BFCC8E1590",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "event.id": "CzeKJi1fKJy8mqFsTi",
+        "source.ip": "217.241.55.94",
+        "destination.ip": "10.0.1.14",
+        "network.transport": "tcp",
+        "event.category": "network",
+        "event.severity": "info"
+      }
+    }
+  }
+}

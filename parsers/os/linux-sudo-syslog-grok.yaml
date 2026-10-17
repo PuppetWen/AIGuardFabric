@@ -1,0 +1,23 @@
+# Linux sudo —— 提权命令审计（Grok，syslog 信封）
+# 正样本：parsers/os/samples.json 中 key = linux-sudo-syslog-grok
+key: linux-sudo-syslog-grok
+name: Linux sudo 提权审计
+vendor: Linux
+product: sudo
+protocols: [syslog, file, beats]
+engine: grok
+pattern: '%{USER:user} : TTY=%{NOTSPACE:tty} ; PWD=%{NOTSPACE:pwd} ; USER=%{USER:dst_user} ; COMMAND=%{GREEDYDATA:command}'
+mapping:
+  map:
+    user: user.name
+    tty: process.tty
+    pwd: process.working_directory
+    dst_user: destination.user.name
+    command: process.command_line
+  defaults:
+    event.category: process
+    event.action: elevate
+    event.severity: low
+required_fields: [user, command]
+sample_fixture: parsers/os/samples.json#linux-sudo-syslog-grok
+description: sudo 提权审计（执行者 → 目标用户 + 完整命令），提权链与高危命令检测来源。

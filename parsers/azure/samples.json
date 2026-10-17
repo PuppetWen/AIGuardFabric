@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "note": "Azure 模板正样本与关键字段断言。JSON 样本按 Azure 活动日志、Defender for Cloud 告警、NSG 流日志、Entra ID 登录日志的公开结构重建；未联网抓取，IP 用 RFC 5737 段。 新增 public/ 样本为公开原文捕获，独立来源见 public/manifest.json；原有合成样本标注不变。",
+  "samples": {
+    "azure-activity-json": {
+      "protocol": "object-storage",
+      "line": "{\"time\":\"2026-02-21T10:55:00.0000000Z\",\"resourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-prod/providers/Microsoft.Compute/virtualMachines/vm-app-01\",\"operationName\":\"Microsoft.Compute/virtualMachines/delete\",\"category\":\"Administrative\",\"resultType\":\"Success\",\"resultSignature\":\"Succeeded\",\"level\":\"Informational\",\"callerIpAddress\":\"203.0.113.190\",\"identity\":{\"authorization\":{\"scope\":\"/subscriptions/00000000-0000-0000-0000-000000000001\",\"action\":\"Microsoft.Compute/virtualMachines/delete\",\"evidence\":{\"role\":\"Contributor\",\"principalId\":\"11111111-1111-1111-1111-111111111111\",\"principalType\":\"User\"}},\"claims\":{\"name\":\"ops-admin\"}},\"location\":\"eastus\",\"correlationId\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"subscriptionId\":\"00000000-0000-0000-0000-000000000001\",\"tenantId\":\"22222222-2222-2222-2222-222222222222\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:55:00.000Z",
+        "cloud.resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-prod/providers/Microsoft.Compute/virtualMachines/vm-app-01",
+        "event.action_raw": "Microsoft.Compute/virtualMachines/delete",
+        "event.category_raw": "Administrative",
+        "event.outcome": "Success",
+        "source.ip": "203.0.113.190",
+        "user.name": "ops-admin",
+        "user.roles": "Contributor",
+        "user.id": "11111111-1111-1111-1111-111111111111",
+        "cloud.account.id": "00000000-0000-0000-0000-000000000001",
+        "cloud.tenant_id": "22222222-2222-2222-2222-222222222222",
+        "cloud.region": "eastus",
+        "trace.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "event.severity": "info",
+        "event.category": "configuration"
+      }
+    },
+    "azure-defender-alert-json": {
+      "protocol": "webhook",
+      "line": "{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-prod/providers/Microsoft.Security/alerts/2518000000001\",\"alertType\":\"VM_Threat\",\"systemAlertId\":\"2518000000001\",\"alertDisplayName\":\"Suspicious process executed on VM\",\"description\":\"A suspicious process was executed on the virtual machine\",\"severity\":\"High\",\"status\":\"Active\",\"timeGeneratedUtc\":\"2026-02-21T10:56:00Z\",\"startTimeUtc\":\"2026-02-21T10:55:30Z\",\"endTimeUtc\":\"2026-02-21T10:56:00Z\",\"compromisedEntity\":\"vm-app-01\",\"vendorName\":\"Microsoft\",\"productName\":\"Azure Security Center\",\"extendedProperties\":{\"processName\":\"powershell.exe\",\"commandLine\":\"powershell -enc SQBFAFgA\",\"resourceType\":\"Virtual Machine\"}}",
+      "expect": {
+        "event.time": "2026-02-21T10:56:00.000Z",
+        "event.start": "2026-02-21T10:55:30Z",
+        "rule.name": "Suspicious process executed on VM",
+        "rule.id": "2518000000001",
+        "event.outcome": "Active",
+        "host.name": "vm-app-01",
+        "observer.vendor": "Microsoft",
+        "observer.product": "Azure Security Center",
+        "process.name": "powershell.exe",
+        "process.command_line": "powershell -enc SQBFAFgA",
+        "cloud.resource_type": "Virtual Machine",
+        "event.severity": "high",
+        "event.category": "intrusion"
+      }
+    },
+    "azure-nsg-flow-json": {
+      "protocol": "object-storage",
+      "line": "{\"time\":\"2026-02-21T10:57:00.000Z\",\"systemId\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"macAddress\":\"001DD8B71C01\",\"category\":\"NetworkSecurityGroupFlowEvent\",\"resourceId\":\"/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000001/RESOURCEGROUPS/RG-PROD/PROVIDERS/MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/NSG-APP\",\"operationName\":\"NetworkSecurityGroupFlowEvents\",\"properties\":{\"Version\":2,\"flows\":[{\"rule\":\"DefaultRule_AllowInternetOutBound\",\"flows\":[{\"mac\":\"001DD8B71C01\",\"flowTuples\":[\"1771665120,203.0.113.192,10.20.30.192,52001,443,T,O,A\"]}]}]}}",
+      "expect": {
+        "event.time": "2026-02-21T10:57:00.000Z",
+        "cloud.resource_id": "/SUBSCRIPTIONS/00000000-0000-0000-0000-000000000001/RESOURCEGROUPS/RG-PROD/PROVIDERS/MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/NSG-APP",
+        "event.category_raw": "NetworkSecurityGroupFlowEvent",
+        "event.type": "NetworkSecurityGroupFlowEvents",
+        "host.mac": "001DD8B71C01",
+        "rule.name": "DefaultRule_AllowInternetOutBound",
+        "event.flow_tuple": "1771665120,203.0.113.192,10.20.30.192,52001,443,T,O,A",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    },
+    "azure-entra-signin-json": {
+      "protocol": "object-storage",
+      "line": "{\"time\":\"2026-02-21T10:58:00Z\",\"resourceId\":\"/tenants/22222222-2222-2222-2222-222222222222/resourceId\",\"operationName\":\"Sign-in activity\",\"category\":\"SignInLogs\",\"resultType\":\"50126\",\"resultSignature\":\"None\",\"resultDescription\":\"Invalid username or password or Invalid on-premise credentials.\",\"durationMs\":0,\"callerIpAddress\":\"203.0.113.193\",\"correlationId\":\"9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b\",\"identity\":\"ops-admin\",\"level\":\"4\",\"location\":\"US\",\"properties\":{\"userPrincipalName\":\"ops-admin@example.com\",\"appDisplayName\":\"Azure Portal\",\"ipAddress\":\"203.0.113.193\",\"status\":{\"errorCode\":50126,\"failureReason\":\"Invalid username or password\"},\"deviceDetail\":{\"operatingSystem\":\"Windows 10\",\"browser\":\"Edge 120.0\"}}}",
+      "expect": {
+        "event.time": "2026-02-21T10:58:00.000Z",
+        "event.action_raw": "Sign-in activity",
+        "event.category_raw": "SignInLogs",
+        "event.outcome": "50126",
+        "message": "Invalid username or password or Invalid on-premise credentials.",
+        "source.ip": "203.0.113.193",
+        "user.email": "ops-admin@example.com",
+        "service.name": "Azure Portal",
+        "error.code": "50126",
+        "error.message": "Invalid username or password",
+        "host.os": "Windows 10",
+        "user_agent.name": "Edge 120.0",
+        "trace.id": "9f2c1d4b-6a8e-0f3c-5d7b-9a1e2f4c6d8b",
+        "event.severity": "medium",
+        "event.category": "authentication"
+      }
+    },
+    "azure-entra-service-principal-json": {
+      "fixture": "public/azure-entra-service-principal-json.log",
+      "protocol": "object-storage",
+      "expect": {
+        "user.id": "60ee4f4e-9221-479c-92df-4c97cb5e2f9d",
+        "user.name": "Research",
+        "source.ip": "120.1.97.19",
+        "event.category": "authentication",
+        "event.severity": "medium"
+      }
+    }
+  }
+}

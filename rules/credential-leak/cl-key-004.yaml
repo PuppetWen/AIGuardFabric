@@ -1,0 +1,43 @@
+# AIGuardFabric 检测规则 —— PEM 私钥块（关键词全命中）
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: config ｜ 算子: keyword-all ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-KEY-004
+name: PEM 私钥块（关键词全命中）
+description: 只有同时出现 BEGIN 行与 PRIVATE KEY 结束标记才判定为私钥，避免命中证书。
+domain: credential-leak
+severity: critical
+kind: keyword
+target: config
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-798
+- private-key
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: keyword-all
+  all:
+  - '-----BEGIN'
+  - PRIVATE KEY-----
+samples:
+  positive:
+  - '-----BEGIN RSA PRIVATE KEY-----
+
+    MIIEowIBAAKCAQEAx7fJk2Lm9Qp3Rt5Vw8Yb1Nc4Zd6Hf0Gj
+
+    -----END RSA PRIVATE KEY-----'
+  - 把 id_rsa 的内容贴给你：-----BEGIN OPENSSH PRIVATE KEY----- b3BlbnNzaC1rZXk= -----END OPENSSH PRIVATE KEY-----
+  negative:
+  - '-----BEGIN CERTIFICATE-----
+
+    MIIDXTCCAkWgAwIBAgIJAKl0UG+mRkS9MA0GCSqGSIb3DQEBCwUA
+
+    -----END CERTIFICATE-----'
+  - 证书链由中间证书与根证书组成，私钥请存放在 KMS 中，不要入库。
+remediation: 判定为私钥泄露即隔离该文件并轮换密钥对；私钥统一托管到 KMS/HSM。
+author: agf-rules
+version: 1

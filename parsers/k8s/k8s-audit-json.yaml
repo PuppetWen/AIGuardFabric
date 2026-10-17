@@ -1,0 +1,48 @@
+# Kubernetes —— API Server 审计日志（audit.k8s.io/v1 Event，JSON）
+# 正样本：parsers/k8s/samples.json 中 key = k8s-audit-json
+# 说明：注解键含 `/` 与 `.`，必须用 `['...']` 括号取键（RFC 9535 name selector）。
+key: k8s-audit-json
+name: Kubernetes 审计日志
+vendor: Kubernetes
+product: API Server Audit
+protocols: [file, beats, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.stageTimestamp
+  audit_id=$.auditID
+  stage=$.stage
+  level=$.level
+  verb=$.verb
+  user=$.user.username
+  uid=$.user.uid
+  src_ip=$.sourceIPs[0]
+  ua=$.userAgent
+  res=$.objectRef.resource
+  ns=$.objectRef.namespace
+  name=$.objectRef.name
+  code=$.responseStatus.code
+  uri=$.requestURI
+  decision=$.annotations['authorization.k8s.io/decision']
+mapping:
+  map:
+    audit_id: event.id
+    stage: event.type
+    level: log.level
+    verb: event.action_raw
+    user: user.name
+    uid: user.id
+    src_ip: source.ip
+    ua: user_agent.original
+    res: kubernetes.resource
+    ns: host.k8s_namespace
+    name: kubernetes.object.name
+    code: http.response.status_code
+    uri: url.path
+    decision: event.outcome
+  time_field: ts
+  defaults:
+    event.category: cloud-control
+    event.severity: info
+required_fields: [verb, user]
+sample_fixture: parsers/k8s/samples.json#k8s-audit-json
+description: K8s API Server 审计日志（verb/user/objectRef/responseStatus/authorization 决策），敏感对象访问与越权尝试检测来源。

@@ -1,0 +1,20 @@
+# 深信服 SIP 安全感知平台 —— 横向移动/失陷告警 CEF
+# 正样本：parsers/sangfor/samples.json 中 key = sangfor-sip-cef
+key: sangfor-sip-cef
+name: 深信服 SIP 安全感知告警（CEF）
+vendor: 深信服
+product: SIP
+protocols: [syslog, webhook]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    suser: user.name
+    cs1: rule.external_id
+  category_map:
+    横向移动: intrusion
+    入侵检测: intrusion
+    数据外传: exfiltration
+required_fields: [destination.ip]
+sample_fixture: parsers/sangfor/samples.json#sangfor-sip-cef
+description: 深信服 SIP 安全感知平台 CEF 告警（cat=横向移动 归 intrusion，act=alert → alert）。

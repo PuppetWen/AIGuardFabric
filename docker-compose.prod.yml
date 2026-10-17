@@ -1,0 +1,230 @@
+# =============================================================================
+# 生产编排（§9 prod compose：外部托管库、资源限制、健康检查、非 root、
+# 只读根文件系统、日志轮转、备份 sidecar）
+#
+# 用法：
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+#
+# 与 docker-compose.yml 的差异：
+#   * 不自建 postgres/redis/clickhouse —— 连接外部托管实例（RDS/Tair/ClickHouse 云服务）
+#   * NATS 仍内置（可换成外部 JetStream 集群，用 AGF_NATS_URL 指向）
+#   * 应用容器：read_only 根文件系统 + tmpfs + 资源上限 + 非 root
+#   * 附备份 sidecar：定期 pg_dump + 证据包归档到对象存储
+# =============================================================================
+
+name: aiguardfabric-prod
+
+x-prod-env: &prod-env
+  AGF_ENV: prod
+  AGF_MOCK_MODE: "0"
+  AGF_DEGRADE_ON_MISSING: "1"
+  AGF_LOG_LEVEL: ${AGF_LOG_LEVEL:-info}
+  AGF_LOG_FORMAT: json
+  AGF_PROJECT_ROOT: /app
+  AGF_DATA_DIR: /data
+  AGF_SERVER_HOST: 0.0.0.0
+  AGF_SERVER_PORT: "8080"
+  AGF_PG_HOST: ${AGF_PG_HOST:?生产环境必须指定托管数据库主机}
+  AGF_PG_PORT: ${AGF_PG_PORT:-5432}
+  AGF_PG_DB: ${AGF_PG_DB:-aiguardfabric}
+  AGF_PG_USER: ${AGF_PG_USER:?}
+  AGF_PG_PASSWORD: ${AGF_PG_PASSWORD:?}
+  AGF_PG_POOL_MAX: ${AGF_PG_POOL_MAX:-50}
+  AGF_REDIS_URL: ${AGF_REDIS_URL:?生产环境必须指定托管 Redis}
+  AGF_NATS_URL: ${AGF_NATS_URL:-nats://nats:4222}
+  AGF_CLICKHOUSE_ENABLED: ${AGF_CLICKHOUSE_ENABLED:-1}
+  AGF_CLICKHOUSE_URL: ${AGF_CLICKHOUSE_URL:-}
+  AGF_S3_ENDPOINT: ${AGF_S3_ENDPOINT:?生产环境必须指定对象存储端点}
+  AGF_S3_BUCKET: ${AGF_S3_BUCKET:-agf-evidence}
+  AGF_S3_ACCESS_KEY: ${AGF_S3_ACCESS_KEY:?}
+  AGF_S3_SECRET_KEY: ${AGF_S3_SECRET_KEY:?}
+  AGF_JWT_SECRET: ${AGF_JWT_SECRET:?}
+  AGF_MASTER_KEY_BASE64: ${AGF_MASTER_KEY_BASE64:?}
+  AGF_KMS_BACKEND: ${AGF_KMS_BACKEND:-aliyun-kms}
+  AGF_KMS_KEY_ID: ${AGF_KMS_KEY_ID:-}
+  AGF_FORCE_PASSWORD_CHANGE: "1"
+  AGF_OTEL_ENABLED: ${AGF_OTEL_ENABLED:-1}
+  AGF_OTEL_ENDPOINT: ${AGF_OTEL_ENDPOINT:-}
+  AGF_ALIYUN_ENABLED: ${AGF_ALIYUN_ENABLED:-0}
+  AGF_ALIYUN_REGION_ID: ${AGF_ALIYUN_REGION_ID:-cn-hangzhou}
+  AGF_ALIYUN_ASSUME_ROLE_ARN: ${AGF_ALIYUN_ASSUME_ROLE_ARN:-}
+  RUST_LOG: ${AGF_LOG_LEVEL:-info}
+
+x-prod-hardening: &prod-hardening
+  restart: always
+  read_only: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  logging:
+    driver: json-file
+    options:
+      max-size: "50m"
+      max-file: "10"
+  networks: [agf-prod-net]
+
+services:
+  nats:
+    image: ${NATS_IMAGE:-nats:2.10-alpine}
+    container_name: agf-prod-nats
+    restart: always
+    networks: [agf-prod-net]
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/nats:/data
+    deploy:
+      resources:
+        limits: { cpus: "2.0", memory: 1G }
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  agf-server:
+    <<: *prod-hardening
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-server:${AGF_IMAGE_TAG:?必须指定镜像 tag}
+    container_name: agf-prod-server
+    environment:
+      <<: *prod-env
+    volumes:
+      - type: bind
+        source: ${AGF_DATA_DIR:-./data}/evidence
+        target: /data/evidence
+      # 首次部署先执行scripts/prepare-audit-data.ps1；不让Docker创建无归属空目录。
+      - type: bind
+        source: ${AGF_DATA_DIR:-./data}/audit-witnesses-v1
+        target: /data/audit-witnesses-v1
+        read_only: false
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./rules
+        target: /app/rules
+        read_only: true
+    ports:
+      - "${AGF_SERVER_PORT:-8080}:8080"
+      - "${AGF_METRICS_PORT:-9100}:9100"
+    user: "10001:10001"
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 }
+    deploy:
+      resources:
+        limits: { cpus: "4.0", memory: 4G }
+        reservations: { cpus: "1.0", memory: 1G }
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/agf-server", "healthcheck", "--url", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    stop_grace_period: 60s
+
+  agf-ingest:
+    <<: *prod-hardening
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-ingest:${AGF_IMAGE_TAG:?必须指定镜像 tag}
+    container_name: agf-prod-ingest
+    environment:
+      <<: *prod-env
+      AGF_INGEST_HOST: 0.0.0.0
+      AGF_INGEST_PORT: "8090"
+      AGF_SYSLOG_TCP_PORT: "5514"
+      AGF_SYSLOG_UDP_PORT: "5514"
+    ports:
+      - "${AGF_INGEST_PORT:-8090}:8090"
+      - "${AGF_SYSLOG_TCP_PORT:-5514}:5514/tcp"
+      - "${AGF_SYSLOG_UDP_PORT:-5514}:5514/udp"
+    user: "10001:10001"
+    deploy:
+      resources:
+        limits: { cpus: "4.0", memory: 2G }
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/agf-ingest", "healthcheck", "--url", "http://127.0.0.1:8090/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  agf-scheduler:
+    <<: *prod-hardening
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-scheduler:${AGF_IMAGE_TAG:?必须指定镜像 tag}
+    container_name: agf-prod-scheduler
+    environment:
+      <<: *prod-env
+      AGF_SCHEDULER_BACKEND: ${AGF_SCHEDULER_BACKEND:-schedulerx3}
+    volumes:
+      - type: bind
+        source: ./rules
+        target: /app/rules
+        read_only: true
+    user: "10001:10001"
+    deploy:
+      resources:
+        limits: { cpus: "2.0", memory: 1G }
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/agf-scheduler", "healthcheck", "--url", "http://127.0.0.1:9101/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  agf-web:
+    <<: *prod-hardening
+    image: ${AGF_IMAGE_PREFIX:-aiguardfabric}/agf-web:${AGF_IMAGE_TAG:?必须指定镜像 tag}
+    container_name: agf-prod-web
+    environment:
+      AGF_API_UPSTREAM: http://agf-server:8080
+    ports:
+      - "${AGF_WEB_PORT:-8081}:8080"
+    user: "10001:10001"
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 256M }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/ >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # 备份 sidecar：每日 pg_dump + 证据包同步到对象存储
+  # ---------------------------------------------------------------------------
+  backup:
+    image: ${POSTGRES_IMAGE:-timescale/timescaledb:latest-pg16}
+    container_name: agf-prod-backup
+    restart: always
+    networks: [agf-prod-net]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        echo "[backup] sidecar started, interval=${AGF_BACKUP_INTERVAL_SECS:-86400}s"
+        while true; do
+          ts=$$(date -u +%Y%m%dT%H%M%SZ)
+          out="/backup/agf-$${ts}.dump"
+          echo "[backup] dumping to $$out"
+          PGPASSWORD="$$AGF_PG_PASSWORD" pg_dump \
+            -h "$$AGF_PG_HOST" -p "$$AGF_PG_PORT" -U "$$AGF_PG_USER" -d "$$AGF_PG_DB" \
+            --format=custom --compress=6 --file="$$out" || echo "[backup] dump failed"
+          # 保留最近 7 份
+          ls -1t /backup/agf-*.dump 2>/dev/null | tail -n +8 | xargs -r rm -f
+          echo "[backup] done; sleeping"
+          sleep "$${AGF_BACKUP_INTERVAL_SECS:-86400}"
+        done
+    environment:
+      AGF_PG_HOST: ${AGF_PG_HOST:?}
+      AGF_PG_PORT: ${AGF_PG_PORT:-5432}
+      AGF_PG_DB: ${AGF_PG_DB:-aiguardfabric}
+      AGF_PG_USER: ${AGF_PG_USER:?}
+      AGF_PG_PASSWORD: ${AGF_PG_PASSWORD:?}
+      AGF_BACKUP_INTERVAL_SECS: ${AGF_BACKUP_INTERVAL_SECS:-86400}
+    volumes:
+      - ${AGF_DATA_DIR:-./data}/backup:/backup
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+networks:
+  agf-prod-net:
+    name: agf-prod-net
+    driver: bridge

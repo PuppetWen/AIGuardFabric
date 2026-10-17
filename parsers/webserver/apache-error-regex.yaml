@@ -1,0 +1,34 @@
+# Apache httpd —— error.log（正则）
+# 正样本：parsers/webserver/samples.json 中 key = apache-error-regex
+key: apache-error-regex
+name: Apache 错误日志
+vendor: Apache
+product: HTTP Server
+protocols: [file, beats, syslog]
+engine: regex
+pattern: '\[(?P<ts>\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2}\.\d{6} \d{4})\] \[(?P<module>\w+):(?P<level>\w+)\] \[pid (?P<pid>\d+):tid (?P<tid>\d+)\] \[client (?P<src_ip>[\d.]+):(?P<src_port>\d+)\] (?P<code>AH\d+): (?P<msg>.*)'
+mapping:
+  map:
+    module: log.logger
+    pid: process.pid
+    src_ip: source.ip
+    src_port: source.port
+    code: error.code
+    msg: message
+  time_field: ts
+  time_format: '%a %b %d %H:%M:%S%.f %Y'
+  severity_field: level
+  severity_map:
+    emerg: critical
+    alert: critical
+    crit: critical
+    error: high
+    warn: medium
+    notice: low
+    info: info
+    debug: info
+  defaults:
+    event.category: web
+required_fields: [msg, src_ip]
+sample_fixture: parsers/webserver/samples.json#apache-error-regex
+description: Apache error_log（模块:级别/pid:pid/client/AH 错误码），AH 码可用于已知漏洞利用尝试识别。

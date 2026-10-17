@@ -1,0 +1,25 @@
+{{/*
+  ConfigMap：所有**非敏感**运行配置。
+  事实来源：crates/agf-core/src/config.rs 的 from_env_map（变量名严格一致）
+            .env.example（变量全集）
+  安全：本 ConfigMap 严禁出现任何口令/密钥/Token；密钥一律走 templates/secret.yaml。
+*/}}
+{{- include "agf.validateSecrets" . }}
+{{- include "agf.validateJwtLength" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "agf.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+  annotations:
+    # 配置变更触发滚动更新（校验和注解，避免 Pod 长期运行旧配置）
+    aiguardfabric.io/config-revision: {{ toYaml .Values.config | sha256sum | trunc 16 }}
+data:
+  {{- range $k, $v := .Values.config }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}
+  {{- range $k, $v := .Values.extraConfig }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}

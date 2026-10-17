@@ -1,0 +1,114 @@
+{{/*
+  Ingress —— 控制台与 API 统一入口（含 TLS 与 nginx 注解）
+  设计：
+    * 同域优先：web.host 留空时，所有路径都指向 agf-web 的 Service，
+      由 nginx.conf 内部把 /api、/ws 反代到 agf-server（与 compose 同源部署一致，避免 CORS）
+    * 分域：web.host 显式设置时，/api 等路径直接指向 agf-server，其余指向 agf-web
+    * TLS： ingress.tls.enabled=true + secretName，或 ingress.certManager.enabled=true 自动签发
+*/}}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "agf.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+  annotations:
+    # ---- 通用 ----
+    nginx.ingress.kubernetes.io/ssl-redirect: {{ .Values.ingress.tls.enabled | quote }}
+    nginx.ingress.kubernetes.io/force-ssl-redirect: {{ .Values.ingress.tls.enabled | quote }}
+    nginx.ingress.kubernetes.io/proxy-body-size: "32m"
+    # ---- 流式（SSE / 大模型流式转发）必须关闭缓冲与压缩 ----
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    # WebSocket 长连接（/ws）
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    # ---- 安全响应头（与 deploy/docker/nginx.conf 保持一致）----
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Permissions-Policy: geolocation=(), microphone=(), camera=()";
+      more_set_headers "Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ws: wss:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'";
+    # ---- 速率限制（登录/API 防爆破的粗粒度第一道闸）----
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+    # ---- 阿里云 ALB Ingress 场景示例（按需替换上面的 nginx 注解）----
+    # alb.ingress.kubernetes.io/address-type: intranet              # PrivateLink 前置：私网
+    # alb.ingress.kubernetes.io/vswitch-ids: "vsw-xxx,vsw-yyy"
+    # alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    # alb.ingress.kubernetes.io/ssl-redirect: "true"
+    {{- if .Values.ingress.certManager.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.certManager.clusterIssuer | quote }}
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.api.host | quote }}
+        {{- if .Values.ingress.web.host }}
+        - {{ .Values.ingress.web.host | quote }}
+        {{- end }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    {{- if .Values.ingress.web.host }}
+    # ---- 分域模式：API 域直连 agf-server，控制台域走 agf-web ----
+    - host: {{ .Values.ingress.api.host | quote }}
+      http:
+        paths:
+          {{- range .Values.ingress.api.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "agf.componentName" (dict "root" $ "component" "server") }}
+                port:
+                  number: {{ $.Values.ports.api }}
+          {{- end }}
+    - host: {{ .Values.ingress.web.host | quote }}
+      http:
+        paths:
+          {{- range .Values.ingress.web.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "agf.componentName" (dict "root" $ "component" "web") }}
+                port:
+                  number: 80
+          {{- end }}
+    {{- else }}
+    # ---- 同域模式（推荐）：全部指向 agf-web，由 nginx 内部反代 /api 与 /ws ----
+    - host: {{ .Values.ingress.api.host | quote }}
+      http:
+        paths:
+          {{- range .Values.ingress.api.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "agf.componentName" (dict "root" $ "component" "web") }}
+                port:
+                  number: 80
+          {{- end }}
+          {{- range .Values.ingress.web.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "agf.componentName" (dict "root" $ "component" "web") }}
+                port:
+                  number: 80
+          {{- end }}
+    {{- end }}
+{{- end }}

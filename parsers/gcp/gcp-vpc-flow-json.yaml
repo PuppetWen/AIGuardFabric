@@ -1,0 +1,51 @@
+# Google Cloud —— VPC Flow Logs（jsonPayload 结构）
+# 正样本：parsers/gcp/samples.json 中 key = gcp-vpc-flow-json
+key: gcp-vpc-flow-json
+name: GCP VPC Flow Logs
+vendor: Google Cloud
+product: VPC Flow Logs
+protocols: [object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  start=$.jsonPayload.start_time
+  end=$.jsonPayload.end_time
+  src_ip=$.jsonPayload.connection.src_ip
+  src_port=$.jsonPayload.connection.src_port
+  dst_ip=$.jsonPayload.connection.dest_ip
+  dst_port=$.jsonPayload.connection.dest_port
+  proto=$.jsonPayload.connection.protocol
+  sent=$.jsonPayload.bytes_sent
+  recv=$.jsonPayload.bytes_received
+  psent=$.jsonPayload.packets_sent
+  precv=$.jsonPayload.packets_received
+  rtt=$.jsonPayload.rtt_msec
+  src_vm=$.jsonPayload.src_instance.vm_name
+  dst_vm=$.jsonPayload.dest_instance.vm_name
+  reporter=$.jsonPayload.reporter
+  sub=$.resource.labels.subnetwork_name
+mapping:
+  map:
+    ts: event.time
+    start: event.start
+    end: event.end
+    src_ip: source.ip
+    src_port: source.port
+    dst_ip: destination.ip
+    dst_port: destination.port
+    proto: network.iana_number
+    sent: source.bytes
+    recv: destination.bytes
+    psent: source.packets
+    precv: destination.packets
+    rtt: network.round_trip_time
+    src_vm: source.host.name
+    dst_vm: destination.host.name
+    reporter: observer.name
+    sub: cloud.subnetwork
+  defaults:
+    event.category: network
+    event.severity: info
+required_fields: [src_ip, dst_ip]
+sample_fixture: parsers/gcp/samples.json#gcp-vpc-flow-json
+description: GCP VPC Flow Logs（connection 五元组、双向字节/包数、rtt_msec 与源/目的实例），云内东西向基线。

@@ -1,0 +1,54 @@
+# AIGuardFabric 检测规则 —— 第三方平台 Token 前缀（GitHub/Slack/GCP/GitLab）
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: prompt ｜ 算子: any ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-PFX-012
+name: 第三方平台 Token 前缀（GitHub/Slack/GCP/GitLab）
+description: 一次性覆盖多个平台的可识别 Token 前缀，任一命中即告警。
+domain: credential-leak
+severity: high
+kind: composite
+target: prompt
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-798
+- token
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: any
+  of:
+  - type: regex
+    pattern: '\bghp_[A-Za-z0-9]{16,}\b'
+    case_insensitive: true
+    min_matches: 1
+  - type: regex
+    pattern: '\bxox[baprs]-[A-Za-z0-9\-]{10,}\b'
+    case_insensitive: true
+    min_matches: 1
+  - type: regex
+    pattern: '\bAIza[0-9A-Za-z_\-]{20,}\b'
+    case_insensitive: true
+    min_matches: 1
+  - type: regex
+    pattern: '\bglpat-[A-Za-z0-9_\-]{16,}\b'
+    case_insensitive: true
+    min_matches: 1
+  - type: regex
+    pattern: '\bsk_live_[A-Za-z0-9]{16,}\b'
+    case_insensitive: true
+    min_matches: 1
+samples:
+  positive:
+  - export GITHUB_TOKEN=ghp_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789
+  # Deliberately not an issued Slack token; still exercises the prefix rule.
+  - 'slack token: xoxb-example-only'
+  negative:
+  - 请说明 ghp_ 前缀代表哪种 GitHub 凭据类型，以及它的最小权限范围。
+  - 示例：AIzaSyXXXX（占位符，请勿直接使用）。
+remediation: 统一接入密钥轮换平台；按前缀分类落库并自动通知对应平台的凭据负责人。
+author: agf-rules
+version: 1

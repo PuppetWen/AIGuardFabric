@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "note": "Palo Alto 模板正样本与关键字段断言。CSV 样本按 PAN-OS 公开日志字段顺序（TRAFFIC/THREAT 列序）重建，JSON 样本按 PAN-OS/Cortex XDR 公开字段名重建；未联网抓取。",
+  "samples": {
+    "paloalto-panos-traffic-csv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:30:00 PA-VM-FW1 1,2026/02/21 10:30:00,001801000123,TRAFFIC,end,2816,2026/02/21 10:30:00,10.20.30.100,203.0.113.10,0.0.0.0,0.0.0.0,allow-web,example\\alice,example\\bob,ssl,vsys1,trust,untrust,ethernet1/1,ethernet1/2,allow,2026/02/21 10:30:00,12345,1,53001,443,0,0,0x400000,6,allow,4096,2048,2048,32,2026/02/21 10:30:00,5,any",
+      "expect": {
+        "event.time": "2026-02-21T10:30:00.000Z",
+        "observer.serial_number": "001801000123",
+        "event.category_raw": "TRAFFIC",
+        "event.type": "end",
+        "source.ip": "10.20.30.100",
+        "destination.ip": "203.0.113.10",
+        "rule.name": "allow-web",
+        "user.name": "example\\alice",
+        "destination.user.name": "example\\bob",
+        "network.application": "ssl",
+        "source.zone": "trust",
+        "destination.zone": "untrust",
+        "network.session_id": "12345",
+        "source.port": "53001",
+        "destination.port": "443",
+        "network.iana_number": "6",
+        "source.bytes": "2048",
+        "destination.bytes": "2048",
+        "network.bytes": "4096",
+        "network.packets": "32",
+        "event.duration": "5",
+        "rule.category": "any",
+        "event.action": "allowed",
+        "event.category": "network"
+      }
+    },
+    "paloalto-panos-threat-csv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:31:00 PA-VM-FW1 1,2026/02/21 10:31:00,001801000123,THREAT,vulnerability,2816,2026/02/21 10:31:00,203.0.113.20,10.20.30.101,0.0.0.0,0.0.0.0,allow-web,example\\alice,example\\bob,web-browsing,vsys1,untrust,trust,ethernet1/2,ethernet1/1,reset-both,2026/02/21 10:31:00,22345,1,52001,80,0,0,0x800000,6,reset-both,/cgi-bin/../../etc/passwd,30697,info-leak,high,client-to-server,1234,0x8000000000000000",
+      "expect": {
+        "event.time": "2026-02-21T10:31:00.000Z",
+        "observer.serial_number": "001801000123",
+        "event.category_raw": "THREAT",
+        "event.type": "vulnerability",
+        "source.ip": "203.0.113.20",
+        "destination.ip": "10.20.30.101",
+        "rule.name": "allow-web",
+        "user.name": "example\\alice",
+        "network.application": "web-browsing",
+        "destination.port": "80",
+        "url.path": "/cgi-bin/../../etc/passwd",
+        "rule.id": "30697",
+        "rule.category": "info-leak",
+        "network.direction": "client-to-server",
+        "event.action_flags": "0x8000000000000000",
+        "event.severity": "high",
+        "event.action": "reset-both",
+        "event.category": "intrusion"
+      }
+    },
+    "paloalto-panos-json": {
+      "protocol": "webhook",
+      "line": "{\"receive_time\":\"2026/02/21 10:32:00\",\"serial\":\"001801000123\",\"type\":\"SYSTEM\",\"subtype\":\"general\",\"severity\":\"high\",\"description\":\"interface ethernet1/1 down\",\"device_name\":\"PA-VM-FW1\",\"event_id\":\"evt-0001\",\"module\":\"management\"}",
+      "expect": {
+        "event.time": "2026-02-21T10:32:00.000Z",
+        "observer.serial_number": "001801000123",
+        "event.category_raw": "SYSTEM",
+        "event.type": "general",
+        "message": "interface ethernet1/1 down",
+        "host.name": "PA-VM-FW1",
+        "service.name": "management",
+        "event.id": "evt-0001",
+        "event.severity": "high",
+        "event.category": "configuration"
+      }
+    },
+    "paloalto-cortex-xdr-json": {
+      "protocol": "webhook",
+      "line": "{\"external_id\":\"cortex-0001\",\"severity\":\"high\",\"alert_name\":\"Suspicious PowerShell Execution\",\"host_name\":\"WIN-APP-03\",\"host_ip\":\"10.20.30.110\",\"user_name\":\"admin\",\"process_name\":\"powershell.exe\",\"cmd_line\":\"powershell -enc SQBFAFgA\",\"file_path\":\"C:\\\\Users\\\\admin\\\\a.ps1\",\"action\":\"blocked\",\"timestamp\":1771665120000,\"mitre_tactic\":\"Execution\"}",
+      "expect": {
+        "event.time": "2026-02-21T09:12:00.000Z",
+        "event.id": "cortex-0001",
+        "rule.name": "Suspicious PowerShell Execution",
+        "host.name": "WIN-APP-03",
+        "host.ip": "10.20.30.110",
+        "user.name": "admin",
+        "process.name": "powershell.exe",
+        "process.command_line": "powershell -enc SQBFAFgA",
+        "file.path": "C:\\Users\\admin\\a.ps1",
+        "threat.tactic.name": "Execution",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "intrusion"
+      }
+    }
+  }
+}

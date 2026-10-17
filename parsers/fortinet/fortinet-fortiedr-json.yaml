@@ -1,0 +1,47 @@
+# Fortinet FortiEDR —— 终端检测事件（JSON）
+# 正样本：parsers/fortinet/samples.json 中 key = fortinet-fortiedr-json
+key: fortinet-fortiedr-json
+name: FortiEDR 终端检测事件
+vendor: Fortinet
+product: FortiEDR
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  host=$.device
+  host_ip=$.host_ip
+  user=$.user
+  kind=$.event_type
+  pname=$.process_name
+  cmdline=$.cmd_line
+  sha256=$.file_hash
+  dst_ip=$.destination_ip
+  sev=$.severity
+  action=$.action
+  rule_id=$.rule_id
+mapping:
+  map:
+    ts: event.time
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    kind: event.category_raw
+    pname: process.name
+    cmdline: process.command_line
+    sha256: file.hash.sha256
+    dst_ip: destination.ip
+    rule_id: rule.id
+  severity_field: sev
+  severity_map:
+    Critical: critical
+    High: high
+    Medium: medium
+    Low: low
+  category_map:
+    malicious_process: intrusion
+    malware: malware
+    exfiltration: exfiltration
+  action_field: action
+required_fields: [rule_id, host]
+sample_fixture: parsers/fortinet/samples.json#fortinet-fortiedr-json
+description: FortiEDR 终端检测事件（device/event_type/process_name/cmd_line/file_hash/destination_ip）。

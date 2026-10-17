@@ -1,0 +1,94 @@
+[package]
+name = "agf-plugin-example"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric 示例插件（动态库）：KV 访问日志 → AGF-ECS 归一化 + 文件通知渠道"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+name = "agf_plugin_example"
+# cdylib = 插件本体（宿主用 libloading 在运行时加载的 .dll/.so/.dylib）。
+# 额外带上 rlib 是**为了让宿主侧的 `cargo test` 真能产出 cdylib**：
+# `agf-plugin` 通过 dev-dependency 依赖本包，cargo 为"链接依赖"而编译本 lib 时
+# 会在同一次 rustc 调用里同时产出 rlib 与 cdylib；若只声明 cdylib，
+# `cargo test` 不会构建它，端到端测试就没有真实动态库可加载。
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+agf-plugin.workspace = true
+serde_json.workspace = true
+
+# ---------------------------------------------------------------------------
+# 与 `crates/agf-plugin/Cargo.toml` 同理：整表复制 `[workspace.lints]`（cargo 不允许
+# `workspace = true` 与局部覆盖混用），唯一差异是把 `unsafe_code` 由 `forbid` 放宽为 `deny`——
+# 插件的 ABI 入口必须按 C ABI 解引用宿主传来的裸指针，`unsafe` 无法避免。
+# unsafe 全部集中在 src/ffi.rs 一个模块里（crate 根仍 `#![deny(unsafe_code)]`，每块带 SAFETY 注释）。
+# ⚠️ 根 Cargo.toml 的 `[workspace.lints]` 若调整，本表需同步。
+# ---------------------------------------------------------------------------
+[lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+linker_messages = "allow"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "deny"
+print_stdout = "warn"
+print_stderr = "warn"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+cast_possible_wrap = "allow"
+similar_names = "allow"
+option_if_let_else = "allow"
+map_unwrap_or = "allow"
+doc_markdown = "allow"
+literal_string_with_formatting_args = "allow"
+multiple_crate_versions = "allow"
+redundant_pub_crate = "allow"
+future_not_send = "allow"
+significant_drop_tightening = "allow"
+cognitive_complexity = "allow"
+missing_const_for_fn = "allow"
+suboptimal_flops = "allow"
+items_after_statements = "allow"
+unused_async = "allow"
+ref_option = "allow"
+manual_let_else = "allow"
+collapsible_if = "allow"
+if_not_else = "allow"
+needless_pass_by_value = "allow"
+implicit_hasher = "allow"
+wildcard_imports = "allow"
+single_match_else = "allow"
+match_same_arms = "allow"
+assigning_clones = "allow"
+derive_partial_eq_without_eq = "allow"
+float_cmp = "allow"
+case_sensitive_file_extension_comparisons = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"
+format_push_string = "allow"
+or_fun_call = "allow"
+redundant_clone = "allow"

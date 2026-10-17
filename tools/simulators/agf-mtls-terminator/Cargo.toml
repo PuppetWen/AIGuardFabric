@@ -1,0 +1,21 @@
+[package]
+name = "agf-mtls-terminator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "本地 mTLS 终结器（仅测试/联调）：校验客户端证书并透传身份头给 agf-server"
+keywords.workspace = true
+categories.workspace = true
+publish = false
+
+[dependencies]
+tokio.workspace = true
+rustls.workspace = true
+tokio-rustls.workspace = true
+rustls-pemfile.workspace = true
+
+[lints]
+workspace = true

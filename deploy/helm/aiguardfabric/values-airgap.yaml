@@ -1,0 +1,241 @@
+# =============================================================================
+# values-airgap.yaml —— 气隙（离线）环境覆盖值
+#
+# 适用场景：客户内网无外网出口、无公共 registry 访问能力。
+#
+# 用法：
+#   1) 在有网环境导出镜像与 Chart：
+#        bash scripts/airgap-export.sh            # 或在流水线里参考 .github/workflows/release.yml
+#        产物：agf-images-<tag>.tar.gz + aiguardfabric-<chart-version>.tgz + index.txt(SHA256)
+#   2) 把产物拷贝进内网，导入私有 registry：
+#        docker load -i agf-images-<tag>.tar
+#        对每个镜像 retag 后 docker push <registry>/agf/<svc>:<tag>
+#   3) 内网安装：
+#        helm upgrade --install agf ./aiguardfabric-<chart-version>.tgz \
+#          -n aiguardfabric --create-namespace \
+#          -f values-airgap.yaml -f values-local.yaml
+#
+# 关键差异（相对 values.yaml / values-prod.yaml）：
+#   1. global.imageRegistry 指向内网私有 registry（IP:PORT 形式，避免依赖内网 DNS）
+#   2. imagePullSecrets 必填（私有 registry 认证）
+#   3. 镜像 tag 固定为气隙包内实际推送的 tag（不用 latest，也不用浮动 tag）
+#   4. 内置依赖组件倾向开启（气隙内网通常无云托管服务），但也可指向内网既有实例
+#   5. AGF_MOCK_MODE=1（无外网大模型/云 API，全面 Mock/回放）
+#   6. NetworkPolicy 禁止公网出站；DNS 指向内网 CoreDNS
+#   7. 关闭 cert-manager 自动签发（无 ACME 外网），改用内网 CA 签发的证书 Secret
+# =============================================================================
+
+nameOverride: ""
+
+global:
+  # ★ 内网私有 registry 主机（**只写主机，不带仓库路径**，避免与 image.repositoryPrefix 重复）
+  #   最终镜像地址 = <imageRegistry>/<repositoryPrefix>/<repository>:<tag>
+  #   例：registry.internal.example.com/aiguardfabric/agf-server:0.1.0-airgap
+  #   支持 IP:PORT 形式：192.168.10.20:5000
+  imageRegistry: registry.internal.example.com
+  productionMode: true
+  imagePullSecrets:
+    - name: agf-registry-credentials
+
+# 镜像：tag 与气隙包内 push 的 tag 严格一致（发布流水线用 --set image.tag=<导出时的 tag>）
+image:
+  repositoryPrefix: aiguardfabric    # → registry.internal.example.com/aiguardfabric/agf-server
+  tag: "0.1.0-airgap"
+  pullPolicy: IfNotPresent      # 气隙内网不需要 Always
+
+# 顶层拉取密钥（各服务未单独覆盖时继承）
+imagePullSecrets:
+  - name: agf-registry-credentials
+
+# -----------------------------------------------------------------------------
+# 运行模式：离线 Mock（不调用任何外部云/大模型 API）
+# -----------------------------------------------------------------------------
+config:
+  AGF_ENV: prod
+  AGF_MOCK_MODE: "1"
+  AGF_DEGRADE_ON_MISSING: "1"
+  AGF_LOG_LEVEL: info
+  AGF_LOG_FORMAT: json
+
+  # ---- 内置组件（气隙内网优先自带，避免依赖不存在的托管服务）----
+  AGF_PG_HOST: agf-postgres          # release 名为 agf 时的内置 PostgreSQL Service
+  AGF_PG_PORT: "5432"
+  AGF_PG_DB: aiguardfabric
+  AGF_PG_USER: agf
+  AGF_PG_POOL_MAX: "50"
+  AGF_PG_POOL_MIN: "5"
+
+  AGF_REDIS_URL: redis://agf-redis:6379/0
+  AGF_REDIS_PREFIX: agf
+
+  AGF_NATS_ENABLED: "1"
+  AGF_NATS_URL: nats://agf-nats:4222
+  AGF_NATS_STREAM: AGF_EVENTS
+
+  AGF_CLICKHOUSE_ENABLED: "0"        # 按需开启（内置 ClickHouse 资源占用较大）
+  AGF_CLICKHOUSE_URL: http://agf-clickhouse:8123
+  AGF_CLICKHOUSE_DB: agf
+  AGF_CLICKHOUSE_USER: default
+
+  AGF_S3_ENDPOINT: http://agf-minio:9000
+  AGF_S3_REGION: us-east-1
+  AGF_S3_BUCKET: agf-evidence
+  AGF_S3_FORCE_PATH_STYLE: "1"
+
+  AGF_KMS_BACKEND: local-file        # 气隙内网无法调云 KMS，改本地文件密钥
+  AGF_FORCE_PASSWORD_CHANGE: "1"
+
+  AGF_OTEL_ENABLED: "0"              # 内网通常无 OTel Collector；有则改为 1 并填端点
+  AGF_OTEL_ENDPOINT: ""
+  AGF_PROMETHEUS_ENABLED: "1"
+
+  AGF_SCHEDULER_BACKEND: local-cron  # 气隙内网无 SchedulerX3
+  AGF_ALIYUN_ENABLED: "0"            # 无云凭据，全部走 MockAdapter
+
+# -----------------------------------------------------------------------------
+# 内置依赖：气隙内网倾向开启（如内网已有对应服务，请置 false 并改 config.* 指向）
+# -----------------------------------------------------------------------------
+postgresql:
+  enabled: true
+  image:
+    repository: timescale/timescaledb
+    tag: latest-pg16
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 100Gi
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7.4-alpine
+  persistence:
+    enabled: true
+    size: 20Gi
+
+nats:
+  enabled: true
+  image:
+    repository: nats
+    tag: 2.10-alpine
+  persistence:
+    enabled: true
+    size: 20Gi
+
+minio:
+  enabled: true
+  image:
+    repository: quay.io/minio/minio
+    tag: latest
+  initBuckets:
+    enabled: true
+    image:
+      repository: quay.io/minio/mc
+      tag: latest
+  persistence:
+    enabled: true
+    size: 100Gi
+
+clickhouse:
+  enabled: false
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: 24.8-alpine
+
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana
+    tag: 11.4.0
+  # 气隙内网无 GF_INSTALL_PLUGINS 下载能力，必须留空
+  env:
+    GF_INSTALL_PLUGINS: ""
+    GF_USERS_ALLOW_SIGN_UP: "false"
+  provisioning:
+    # 预置项 ConfigMap 需在气隙内手工创建（见文件头说明）
+    existingConfigMap: agf-grafana-provisioning
+    dashboardsExistingConfigMap: agf-grafana-dashboards
+
+# -----------------------------------------------------------------------------
+# 服务：气隙环境按容量调整副本
+# -----------------------------------------------------------------------------
+server:
+  enabled: true
+  replicaCount: 2
+  image:
+    pullPolicy: IfNotPresent
+ingest:
+  enabled: true
+  replicaCount: 2
+  image:
+    pullPolicy: IfNotPresent
+scheduler:
+  enabled: true
+  replicaCount: 1                     # local-cron 后端必须单副本
+  image:
+    pullPolicy: IfNotPresent
+web:
+  enabled: true
+  replicaCount: 2
+  image:
+    pullPolicy: IfNotPresent
+
+# -----------------------------------------------------------------------------
+# Ingress：气隙内网用内网域名 + 内网 CA 证书（无 cert-manager ACME）
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    # 内网自签/企业 CA 证书，不建议强制 HSTS 跳转（避免证书未受信时锁死）
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  api:
+    host: agf.internal.example.com
+    paths:
+      - path: /api
+        pathType: Prefix
+      - path: /ws
+        pathType: Prefix
+      - path: /healthz
+        pathType: Exact
+  web:
+    host: ""
+  tls:
+    enabled: true
+    # 由内网 CA 签发后手工创建的 Secret（不要用 cert-manager）
+    secretName: agf-tls-internal
+  certManager:
+    enabled: false
+
+# -----------------------------------------------------------------------------
+# NetworkPolicy：气隙内网禁止公网出站（keep default-deny + 内部放行）
+# -----------------------------------------------------------------------------
+networkPolicy:
+  enabled: true
+  defaultDeny: true
+  allowPublicEgress: false
+  externalEndpoints:
+    cidrs: []                          # 气隙内网无需放行外部托管库；如需内网既有实例，填入其网段
+  llmGatewayCidrs: []                  # 内网自建推理（Ollama/vLLM）网段，如 192.168.20.0/24
+
+# -----------------------------------------------------------------------------
+# 可观测性：内网自建 Prometheus（无 Operator 时用 Pod 注解抓取）
+# -----------------------------------------------------------------------------
+serviceMonitor:
+  enabled: false                       # 无 Prometheus Operator CRD 时保持 false
+  labels:
+    release: prometheus
+
+# -----------------------------------------------------------------------------
+# 密钥：气隙内网建议用 kubectl 预创建 Secret 后指向它
+#   kubectl -n aiguardfabric create secret generic agf-airgap-secrets \
+#     --from-literal=AGF_PG_PASSWORD='...' \
+#     --from-literal=AGF_JWT_SECRET="$(openssl rand -base64 48)" \
+#     --from-literal=AGF_MASTER_KEY_BASE64="$(openssl rand -base64 32)" \
+#     --from-literal=AGF_S3_ACCESS_KEY='agfminio' \
+#     --from-literal=AGF_S3_SECRET_KEY='...' \
+#     --from-literal=AGF_GRAFANA_ADMIN_PASSWORD='...'
+# -----------------------------------------------------------------------------
+secrets:
+  existingSecret: agf-airgap-secrets

@@ -1,0 +1,32 @@
+# 天融信 NGFW 下一代防火墙 —— 会话/策略日志（syslog KV）
+# 正样本：parsers/topsec/samples.json 中 key = topsec-ngfw-kv
+key: topsec-ngfw-kv
+name: 天融信 NGFW 会话日志
+vendor: 天融信
+product: NGFW
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    src: source.ip
+    dst: destination.ip
+    dport: destination.port
+    sport: source.port
+    proto: network.transport
+    rule_id: rule.id
+    msg: message
+    policy: rule.name
+    app: network.application
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  action_field: action
+  defaults:
+    event.category: network
+required_fields: [src, dst]
+sample_fixture: parsers/topsec/samples.json#topsec-ngfw-kv
+description: 天融信 NGFW syslog KV 会话日志（src/dst/dport/proto/action/level/policy），ACL 拒绝归 network。

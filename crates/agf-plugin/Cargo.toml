@@ -1,0 +1,108 @@
+[package]
+name = "agf-plugin"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric Rust 动态库插件加载器：版本化稳定 C ABI + ABI 版本门禁（同进程，不做沙箱承诺）"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+libloading.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+tempfile.workspace = true
+# 这条 dev-dependency 是**功能性**的，不是"忘了用的依赖"：
+# 它把示例插件的 cdylib 拉进 `cargo test -p agf-plugin` 的构建图，
+# 否则 cargo 不会产出 target/debug/agf_plugin_example.dll，
+# 端到端测试就找不到"真实的动态库"可加载（只能造假）。
+# dev-dependency 允许成环（agf-plugin → agf-plugin-example → agf-plugin），cargo 明确支持。
+# 必须带 `version`：只写 `path` 等于要求 `*`（隐式通配），`cargo deny check bans`
+# 的 `wildcards = "deny"` 会直接判失败（实测：`error[wildcard] found 1 wildcard dependency`）。
+agf-plugin-example = { path = "../agf-plugin-example", version = "0.1.0" }
+
+# ---------------------------------------------------------------------------
+# 为什么这里不用 `[lints] workspace = true`：
+# 工作区把 `unsafe_code` 设为 **forbid**，而 `forbid` 无法被任何层级的 `allow` 覆盖；
+# 本 crate 的 FFI 边界（装载动态库、按 C ABI 解引用插件指针）**必须**写 `unsafe`
+# （`libloading::Library::new` / `Library::get` 本身就是 unsafe fn）。
+# 而 cargo 不允许 `workspace = true` 与局部 lint 覆盖混用，其报错原文即：
+#   "either remove the overrides or `lints.workspace = true` and manually specify the lints"
+# 因此按 cargo 的指引**整表复制** `[workspace.lints]`，唯一差异是把
+# `unsafe_code` 由 `forbid` 放宽为 `deny`（其余 crate 仍受 forbid 约束，工作区表不动）。
+#
+# ⚠️ 维护约定：根 Cargo.toml 的 `[workspace.lints]` 若调整，本表与
+# `crates/agf-plugin-example/Cargo.toml` 的同名表需要同步（唯一允许的差异仍是 unsafe_code）。
+# ---------------------------------------------------------------------------
+[lints.rust]
+# 唯一相对工作区放宽的一项：deny（而非 forbid）以便 src/abi.rs 这一个模块
+# 用 `#[allow(unsafe_code)]` 显式放行；crate 根仍写 `#![deny(unsafe_code)]`。
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+# 本机 MSVC 链接器输出为中文（"正在创建库 …"），rustc 会把它当成 linker 诊断回显成警告。
+# 这是环境本地化产物，不是链接问题（构建成功），因此在工作区统一关闭该 lint。
+linker_messages = "allow"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "deny"
+print_stdout = "warn"
+print_stderr = "warn"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+cast_possible_wrap = "allow"
+similar_names = "allow"
+option_if_let_else = "allow"
+map_unwrap_or = "allow"
+doc_markdown = "allow"
+literal_string_with_formatting_args = "allow"
+multiple_crate_versions = "allow"
+redundant_pub_crate = "allow"
+future_not_send = "allow"
+significant_drop_tightening = "allow"
+cognitive_complexity = "allow"
+missing_const_for_fn = "allow"
+suboptimal_flops = "allow"
+items_after_statements = "allow"
+unused_async = "allow"
+ref_option = "allow"
+manual_let_else = "allow"
+collapsible_if = "allow"
+if_not_else = "allow"
+needless_pass_by_value = "allow"
+implicit_hasher = "allow"
+wildcard_imports = "allow"
+single_match_else = "allow"
+match_same_arms = "allow"
+assigning_clones = "allow"
+derive_partial_eq_without_eq = "allow"
+float_cmp = "allow"
+case_sensitive_file_extension_comparisons = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"
+format_push_string = "allow"
+or_fun_call = "allow"
+redundant_clone = "allow"

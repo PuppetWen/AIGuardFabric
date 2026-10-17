@@ -1,0 +1,23 @@
+# AIGuardFabric 项目内 cargo 配置（铁律 2：缓存与工具重定向进项目内，不污染全局）
+#
+# 注意：本文件只使用相对路径，保证仓库自包含、可迁移。
+
+[build]
+target-dir = "target"
+
+[alias]
+# 项目内常用别名（等价于脚本中的调用）
+xt = "nextest run --workspace --no-fail-fast"
+cov = "llvm-cov nextest --workspace --html --output-dir target/coverage"
+lint = "clippy --workspace --all-targets --all-features -- -D warnings"
+fmtcheck = "fmt --all -- --check"
+
+[net]
+retry = 5
+
+[term]
+color = "auto"
+verbose = false
+
+[future-incompat-report]
+frequency = "never"

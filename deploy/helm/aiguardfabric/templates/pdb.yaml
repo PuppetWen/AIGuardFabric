@@ -1,0 +1,81 @@
+{{/*
+  PodDisruptionBudget —— 节点排空/升级时的可用性下限
+  约束：minAvailable 必须 < replicaCount，否则节点排空会永久阻塞。
+        HPA 的 minReplicas 亦须 >= PDB 的 minAvailable。
+  agf-scheduler 单副本，minAvailable=1 会导致排空阻塞，故默认关闭（或改用 maxUnavailable）。
+*/}}
+
+{{- if .Values.pdb.server.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "server") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "server") | nindent 4 }}
+spec:
+  {{- if .Values.pdb.server.minAvailable }}
+  minAvailable: {{ .Values.pdb.server.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ .Values.pdb.server.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "server") | nindent 6 }}
+---
+{{- end }}
+
+{{- if .Values.pdb.ingest.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "ingest") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "ingest") | nindent 4 }}
+spec:
+  {{- if .Values.pdb.ingest.minAvailable }}
+  minAvailable: {{ .Values.pdb.ingest.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ .Values.pdb.ingest.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "ingest") | nindent 6 }}
+---
+{{- end }}
+
+{{- if .Values.pdb.web.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "web") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "web") | nindent 4 }}
+spec:
+  {{- if .Values.pdb.web.minAvailable }}
+  minAvailable: {{ .Values.pdb.web.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ .Values.pdb.web.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "web") | nindent 6 }}
+---
+{{- end }}
+
+{{- if .Values.pdb.scheduler.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "scheduler") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.pdb.scheduler.maxUnavailable | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" . "component" "scheduler") | nindent 6 }}
+{{- end }}

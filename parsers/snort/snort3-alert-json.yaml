@@ -1,0 +1,49 @@
+# Snort 3 —— JSON 告警输出（alert_json）
+# 正样本：parsers/snort/samples.json 中 key = snort3-alert-json
+key: snort3-alert-json
+name: Snort 3 JSON 告警
+vendor: Snort
+product: Snort 3
+protocols: [file, beats, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  kind=$.event_type
+  src_ip=$.src_addr
+  src_port=$.src_port
+  dst_ip=$.dst_addr
+  dst_port=$.dst_port
+  proto=$.proto
+  sig_id=$.alert.signature_id
+  signature=$.alert.signature
+  category=$.alert.category
+  cat=$.alert.category
+  sev=$.alert.severity
+  action=$.alert.action
+mapping:
+  map:
+    kind: event.type
+    src_ip: source.ip
+    src_port: source.port
+    dst_ip: destination.ip
+    dst_port: destination.port
+    proto: network.transport
+    sig_id: rule.id
+    signature: rule.name
+    category: rule.category
+    cat: event.category_raw
+  time_field: ts
+  severity_field: sev
+  severity_map:
+    '1': high
+    '2': medium
+    '3': low
+    '4': info
+  category_map:
+    web-application-attack: web
+    attempted-recon: intrusion
+  action_field: action
+  defaults:
+required_fields: [signature, src_ip]
+sample_fixture: parsers/snort/samples.json#snort3-alert-json
+description: Snort 3 alert_json 输出（src_addr/dst_addr/alert.signature_id/alert.severity），cat 命中时按 category_map 归 web。

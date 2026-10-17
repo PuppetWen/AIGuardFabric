@@ -1,0 +1,1 @@
+{"topic_id":"a1b2c3d4-0000-1111-2222-333344445555","log_time":1771674225,"event_name":"ACL 拒绝","src_ip":"203.0.113.99","dst_ip":"10.20.30.43","dst_port":3306,"protocol":"TCP","rule_id":"TCLOUD-FW-3306","action":"deny","account_id":"100001234567","region":"ap-guangzhou","count":7}

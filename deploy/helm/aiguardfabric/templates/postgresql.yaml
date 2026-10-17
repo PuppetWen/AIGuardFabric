@@ -1,0 +1,157 @@
+{{/*
+  内置 PostgreSQL（TimescaleDB）—— 可选组件，默认关闭
+  事实来源：docker-compose.yml 的 postgres 服务（镜像、命令、健康检查、初始化脚本挂载）
+
+  ★ 生产建议：使用云 RDS/ PolarDB 或 Timescale Cloud，把 postgresql.enabled=false，
+    并将 config.AGF_PG_HOST/PORT/DB/USER 指向托管端点。
+    内置组件仅用于演示、自测、离线演练。
+*/}}
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agf.fullname" . }}-postgres
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  type: {{ .Values.postgresql.service.type }}
+  ports:
+    - name: postgres
+      port: {{ .Values.postgresql.service.port }}
+      targetPort: postgres
+      protocol: TCP
+  selector:
+    {{- include "agf.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "agf.fullname" . }}-postgres
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  serviceName: {{ include "agf.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "agf.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgres
+  template:
+    metadata:
+      labels:
+        {{- include "agf.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: postgres
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70          # alpine postgres 镜像内置 postgres 用户 uid
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: "{{ if .Values.global.imageRegistry }}{{ trimSuffix "/" .Values.global.imageRegistry }}/{{ end }}{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          args:
+            {{- toYaml .Values.postgresql.command | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "agf.secretName" . }}
+                  key: {{ include "agf.secretKey" (dict "root" . "key" "AGF_PG_PASSWORD") }}
+            # 与 compose 一致：data-checksums + UTF8
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums --encoding=UTF8"
+            - name: TZ
+              value: UTC
+            # 默认 PGDATA 指向子目录，避免挂载点被 initdb 拒绝（lost+found）
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.postgresql.auth.username }}
+                - -d
+                - {{ .Values.postgresql.auth.database }}
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - {{ .Values.postgresql.auth.username }}
+                - -d
+                - {{ .Values.postgresql.auth.database }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.postgresql.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            {{- if .Values.postgresql.initdbConfigMap }}
+            # 仅用于自定义 PostgreSQL 初始化 SQL；应用迁移由服务内嵌 SQLx 执行。
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+            {{- end }}
+      volumes:
+        {{- if .Values.postgresql.initdbConfigMap }}
+        - name: initdb
+          configMap:
+            name: {{ .Values.postgresql.initdbConfigMap }}
+        {{- end }}
+  volumeClaimTemplates:
+    {{- if .Values.postgresql.persistence.enabled }}
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          {{- toYaml .Values.postgresql.persistence.accessModes | nindent 10 }}
+        resources:
+          requests:
+            storage: {{ .Values.postgresql.persistence.size }}
+        {{- if .Values.postgresql.persistence.storageClass }}
+        storageClassName: {{ .Values.postgresql.persistence.storageClass | quote }}
+        {{- end }}
+    {{- else }}
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+    {{- end }}
+{{- end }}

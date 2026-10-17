@@ -1,0 +1,20 @@
+# 奇安信 天眼 —— 命令注入告警 CEF（syslog 信封 + CEF）
+# 正样本：parsers/qianxin/samples.json 中 key = qianxin-tianyan-cef
+key: qianxin-tianyan-cef
+name: 奇安信天眼命令注入告警（CEF）
+vendor: 奇安信
+product: 天眼
+protocols: [syslog, webhook, beats]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    request: url.full
+    cs1: rule.external_id
+  category_map:
+    Web攻击: web
+    入侵检测: intrusion
+    恶意软件: malware
+required_fields: [user.name]
+sample_fixture: tests/fixtures/logs/parsers/qianxin-tianyan-cef-1.log
+description: 奇安信天眼 CEF 告警（cat=Web攻击 → web，act=block → denied，suser 由引擎改写为 user.name）。

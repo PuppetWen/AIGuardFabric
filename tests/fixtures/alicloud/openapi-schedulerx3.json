@@ -1,0 +1,160 @@
+{
+  "ListJobs": {
+    "Code": 200,
+    "Data": {
+      "PageNumber": 1,
+      "PageSize": 20,
+      "Records": [
+        {
+          "AppGroupId": 1625,
+          "AppName": "test-app",
+          "AttemptInterval": 30,
+          "Calendar": "work-day",
+          "ChildJobId": "1246",
+          "CleanMode": "{\"cleanMode\":\"NUM_ONLY\",\"totalRemain\":300}",
+          "CreateTime": 1786354281000,
+          "Creator": "1963096506470832",
+          "CurrentExecuteStatus": 3,
+          "DataOffset": 3,
+          "DependentStrategy": 1,
+          "Description": "job01单机任务",
+          "ExecutorBlockStrategy": "1",
+          "JobHandler": "jobDemoHandler",
+          "JobId": 74,
+          "JobType": "xxljob",
+          "Label": "{key:value}",
+          "LastExecuteEndTime": "2025-06-29 15:56:36\n",
+          "LastExecuteStatus": 4,
+          "MaxAttempt": 5,
+          "MaxConcurrency": 100,
+          "Name": "job01",
+          "NodeType": 1,
+          "NoticeConfig": "{\"failLimitTimes\":1,\"failEnable\":true,\"timeoutKillEnable\":false,\"missWorkerEnable\":true,\"timeoutEnable\":true,\"sendChannel\":\"\",\"timeout\":300,\"successNotice\":false}",
+          "NoticeContacts": "[{\"contactType\":1,\"name\":\"恰橙\"}]",
+          "Parameters": "name=10",
+          "Priority": 1,
+          "RouteStrategy": 1,
+          "Script": "#!/bin/bash\necho \"xxl-job: hello shell\"\necho \"Good bye!\"\nexit 0",
+          "StartTimeType": 1,
+          "Status": 1,
+          "TimeExpression": "0 0 12 * * ?",
+          "TimeType": 1,
+          "TimeZone": "Hongkong",
+          "Timezone": "HangKong",
+          "UpdateTime": 1786354281000,
+          "Updater": "1963096506470832",
+          "Weight": 1,
+          "WorkflowId": 10,
+          "Xattrs": "暂无"
+        }
+      ],
+      "Total": 65
+    },
+    "Message": "Parameter error: content is null.",
+    "RequestId": "1DF6732E-15D8-5E1F-95E3-C10077F556B5",
+    "Success": true
+  },
+  "CreateJob": {
+    "Code": 200,
+    "Message": "Parameter error: content is null.",
+    "RequestId": "3835AA29-2298-5434-BC53-9CC377CDFD2C",
+    "Success": true,
+    "Data": {
+      "JobId": 74
+    }
+  },
+  "UpdateJob": {
+    "Code": 200,
+    "Message": "Parameter error: content is null.",
+    "RequestId": "3808cf26-dde2-4286-8503-b0a2cd4065a7",
+    "Success": true
+  },
+  "DeleteJobs": {
+    "Code": 200,
+    "Message": "Parameter error: content is null.",
+    "RequestId": "91143E1D-E235-5BE0-9364-C2EE28FFB5A6",
+    "Success": true
+  },
+  "ListJobExecutions": {
+    "Code": 200,
+    "RequestId": "6BCE89B3-E882-511D-9A75-D452A56EC4B1",
+    "Message": "Parameter error: content is null.",
+    "Success": true,
+    "Data": {
+      "Records": [
+        {
+          "JobExecutionId": "1310630367761285120",
+          "JobName": "test-job",
+          "JobType": "xxljob",
+          "Parameters": "name=zhangsan",
+          "ScheduleTime": "2024-11-12 14:52:42",
+          "DataTime": "2024-11-12 14:52:42",
+          "EndTime": "2024-11-12 14:52:42",
+          "Executor": "1827811800526000",
+          "Result": "success",
+          "Status": 4,
+          "TimeType": 1,
+          "Attempt": 1,
+          "WorkAddr": "http://192.168.1.9:9999/",
+          "AppName": "test-app",
+          "RouteStrategy": 1,
+          "ServerIp": "28.0.168.46",
+          "TriggerType": 1,
+          "TotalTokens": 1000,
+          "WorkflowName": "myWorkflow",
+          "WorkflowExecutionId": "100",
+          "JobId": 74,
+          "Duration": 10,
+          "WorkflowId": 10,
+          "XAttrs": "{\"sessionId\":\"ac21f9f6-5a88-4f97-abd1-b51989166035\"}",
+          "AppGroupId": 0
+        }
+      ],
+      "Total": 20,
+      "PageNumber": 1,
+      "PageSize": 10
+    }
+  },
+  "GetJobExecution": {
+    "RequestId": "39938688-0BAB-5AD8-BF02-F4910FAC7589",
+    "Code": 200,
+    "Message": "Parameter error: content is null.\n",
+    "Success": true,
+    "Data": {
+      "JobExecutionId": "1310630367761285120",
+      "JobId": 74,
+      "JobName": "天猫-自动审单",
+      "JobType": "xxljob",
+      "Parameters": "/home/avatar/system/services/biz/payment/crontab/monitorpayment.php",
+      "ScheduleTime": "2025-03-11 00:06:10",
+      "DataTime": "2025-03-11 00:06:10",
+      "StartTime": "2025-03-11 00:06:10",
+      "EndTime": "2024-10-29 15:56:36",
+      "Duration": 1,
+      "Executor": "{'Status': 'NORMAL', 'ActiveCount': 4, 'UnavailableCount': 0, 'ExpectedCount': 4, 'RiskCount': 0}",
+      "Result": "[]",
+      "Status": 4,
+      "TimeType": 1,
+      "Attempt": 1,
+      "AppName": "test-app",
+      "RouteStrategy": 1,
+      "ServerIp": "172.3.27.76",
+      "TriggerType": 0
+    }
+  },
+  "OperateEnableJobs": {
+    "RequestId": "synthetic-OperateEnableJobs",
+    "Success": true,
+    "Code": 200
+  },
+  "OperateDisableJobs": {
+    "RequestId": "synthetic-OperateDisableJobs",
+    "Success": true,
+    "Code": 200
+  },
+  "OperateExecuteJob": {
+    "RequestId": "synthetic-OperateExecuteJob",
+    "Success": true,
+    "Code": 200
+  }
+}

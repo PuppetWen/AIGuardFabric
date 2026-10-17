@@ -1,0 +1,34 @@
+# Microsoft Azure —— NSG 流日志（NetworkSecurityGroupFlowEvent）
+# 正样本：parsers/azure/samples.json 中 key = azure-nsg-flow-json
+key: azure-nsg-flow-json
+name: Azure NSG 流日志
+vendor: Microsoft Azure
+product: Network Security Group Flow Logs
+protocols: [object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  res=$.resourceId
+  cat=$.category
+  op=$.operationName
+  mac=$.macAddress
+  rule=$.properties.flows[0].rule
+  tuple=$.properties.flows[0].flows[0].flowTuples[0]
+  version=$.properties.Version
+mapping:
+  map:
+    res: cloud.resource_id
+    cat: event.category_raw
+    op: event.type
+    mac: host.mac
+    rule: rule.name
+    tuple: event.flow_tuple
+  time_field: ts
+  category_map:
+    NetworkSecurityGroupFlowEvent: network
+  defaults:
+    event.category: network
+    event.severity: info
+required_fields: [rule, tuple]
+sample_fixture: parsers/azure/samples.json#azure-nsg-flow-json
+description: Azure NSG 流日志（flows[].rule 与 flowTuples，元组含时间/五元组/方向/动作），东西向流量基线来源。

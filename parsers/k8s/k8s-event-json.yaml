@@ -1,0 +1,41 @@
+# Kubernetes —— 核心 Event（调度失败/驱逐/OOM 等）
+# 正样本：parsers/k8s/samples.json 中 key = k8s-event-json
+key: k8s-event-json
+name: Kubernetes 集群事件
+vendor: Kubernetes
+product: Cluster Events
+protocols: [file, beats, webhook, kafka]
+engine: json-path
+pattern: |
+  ts=$.lastTimestamp
+  first=$.firstTimestamp
+  reason=$.reason
+  msg=$.message
+  kind=$.type
+  count=$.count
+  pod=$.involvedObject.name
+  ns=$.involvedObject.namespace
+  obj_kind=$.involvedObject.kind
+  component=$.source.component
+  host=$.source.host
+mapping:
+  map:
+    ts: event.time
+    first: event.start
+    reason: rule.name
+    msg: message
+    count: event.count
+    pod: host.k8s_pod
+    ns: host.k8s_namespace
+    obj_kind: kubernetes.object.kind
+    component: observer.name
+    host: host.name
+  severity_field: kind
+  severity_map:
+    Warning: medium
+    Normal: info
+  defaults:
+    event.category: configuration
+required_fields: [reason, msg]
+sample_fixture: parsers/k8s/samples.json#k8s-event-json
+description: K8s 集群事件（reason/message/type/involvedObject/source），Warning 归 medium，用于工作负载异常与配置漂移关联。

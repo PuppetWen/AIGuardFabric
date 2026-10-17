@@ -1,0 +1,161 @@
+{
+  "uid": "agf-ai-gateway",
+  "title": "AIGuardFabric · AI 网关（模型流量 / 计量 / 缓存 / 降级）",
+  "description": "指标名与 crates/agf-api/src/metrics.rs 的实际埋点一致（agf_*）。注意：逐模型 token/成本/缓存命中的细粒度指标需要 agf-aigw 的 meter 埋点（TODO(aigw-metrics)），本面板用 http 路径维度与拦截动作维度做近似，未埋点的项以 text 面板说明。",
+  "tags": ["aiguardfabric", "ai-gateway"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "数据源",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "selected": true, "text": "agf-prometheus", "value": "agf-prometheus" },
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "options": []
+      },
+      {
+        "name": "tenant",
+        "label": "租户",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": { "query": "label_values(agf_http_requests_total, tenant)", "refId": "agf-tenant" },
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "模型流量（南北向）",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "panels": []
+    },
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "网关请求速率（按路径）",
+      "description": "agf_http_requests_total 按 path 维度过滤网关路由（/api/v1/gateway*、/graphql）。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "fillOpacity": 10, "lineWidth": 1 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (path) (rate(agf_http_requests_total{path=~\"/api/v1/gateway.*|/graphql\", tenant=~\"$tenant\"}[5m]))",
+          "legendFormat": "{{path}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "网关请求 P95 时延",
+      "description": "agf_http_request_duration_seconds 直方图（agf-api 中间件埋点）。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(agf_http_request_duration_seconds_bucket{path=~\"/api/v1/gateway.*|/graphql\"}[5m])))",
+          "legendFormat": "p95 {{path}}"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(agf_http_request_duration_seconds_bucket{path=~\"/api/v1/gateway.*|/graphql\"}[5m])))",
+          "legendFormat": "p50 全局"
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "内容安全与降级动作",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "panels": []
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "网关侧拦截 / 降级动作速率",
+      "description": "agf_interceptions_total 按 action 维度：redact（双向脱敏）、throttle（限流）、degrade（降级到本地模型）、quota（配额）。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (action) (rate(agf_interceptions_total{action=~\"redact|throttle|degrade|quota|deny\"}[5m]))",
+          "legendFormat": "{{action}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "限流触发（近 1h 累计）",
+      "description": "agf_rate_limited_total：三级限流（租户 / API Key / 路由）触发的总次数。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 100 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["increase"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(agf_rate_limited_total[1h]))", "legendFormat": "限流次数" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "幂等重放（近 1h 累计）",
+      "description": "agf_idempotent_replays_total：Idempotency-Key 命中并复用首次结果的次数。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["increase"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(agf_idempotent_replays_total[1h]))", "legendFormat": "重放次数" }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "待埋点指标（TOMORROW 项，如实说明）",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "text",
+      "title": "逐模型 Token / 成本 / 缓存命中：需要 agf-aigw 埋点",
+      "description": "本面板是**说明性占位**，不是伪造数据。",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 19 },
+      "options": {
+        "mode": "markdown",
+        "content": "### 现状（如实登记）\n\n`agf-aigw` 的计量（`meter.rs`）与缓存（`cache.rs`）目前只有**内存/离线**实现，尚未导出 Prometheus 指标：\n\n| 期望指标 | 含义 | 状态 |\n|---|---|---|\n| `agf_llm_tokens_total{provider,model,kind}` | 输入/输出 token 数 | 待埋点 `TODO(aigw-metrics)` |\n| `agf_llm_cost_micro_total{provider,model}` | 成本（微元） | 待埋点 |\n| `agf_llm_cache_hits_total{cache}` | 精确/语义缓存命中 | 待埋点 |\n| `agf_llm_fallback_total{from,to}` | 多模型自动降级 | 待埋点 |\n| `agf_llm_screen_blocks_total{rule}` | 内容安全前置过滤拦截 | 待埋点 |\n\n口径与实现位置见 `docs/architecture.md` 与 `crates/agf-aigw/src/meter.rs`；在埋点落地前，本面板不展示任何数字（避免用近似值误导判断）。"
+      }
+    }
+  ]
+}

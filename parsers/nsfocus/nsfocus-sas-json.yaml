@@ -1,0 +1,41 @@
+# 绿盟 安全审计系统 SAS —— 操作审计/敏感文件访问（JSON）
+# 正样本：parsers/nsfocus/samples.json 中 key = nsfocus-sas-json
+key: nsfocus-sas-json
+name: 绿盟 SAS 安全审计
+vendor: 绿盟
+product: SAS
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  dev=$.dev_name
+  src_ip=$.src_ip
+  dst_ip=$.dst_ip
+  user=$.user
+  cmd=$.cmd
+  level=$.level
+  action=$.action
+  rule_id=$.rule_id
+  msg=$.msg
+mapping:
+  map:
+    ts: event.time
+    dev: observer.name
+    src_ip: source.ip
+    dst_ip: destination.ip
+    user: user.name
+    cmd: process.command_line
+    rule_id: rule.id
+    msg: message
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  action_field: action
+  defaults:
+    event.category: configuration
+required_fields: [rule_id, user]
+sample_fixture: parsers/nsfocus/samples.json#nsfocus-sas-json
+description: 绿盟 SAS 安全审计日志（dev_name/src_ip/user/cmd/level/action/msg），运维操作审计归 configuration。

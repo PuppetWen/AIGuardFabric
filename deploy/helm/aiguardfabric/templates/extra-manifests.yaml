@@ -1,0 +1,9 @@
+{{/*
+  逃生舱：渲染任意额外清单（默认空）。
+  用途：客户特有的 CR（Certificate、ExternalSecret、BackupSchedule 等）。
+  ⚠ 本入口绕过 Chart 的安全基线（非 root/只读根/drop ALL），使用前请自查。
+*/}}
+{{- range .Values.extraManifests }}
+---
+{{ toYaml . }}
+{{- end }}

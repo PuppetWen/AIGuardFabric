@@ -1,0 +1,34 @@
+# 腾讯云 日志服务 CLS —— 投递日志结构（JSON Lines）
+# 正样本：parsers/tencent/samples.json 中 key = tencent-cls-log-json
+# 说明：CLS 投递到 COS/CKafka 的每条日志都是 `__CONTENT__/__FILENAME__/__HOSTNAME__/__PKG_ID__/
+# __ROBOT_NAME__/__SOURCE__/__TIME__/__TOPIC__` 结构（公开文档字段），本模板把采集元数据归一化，
+# 原始 __CONTENT__ 整段落到 message（内容本体由上游应用模板二次解析）。
+key: tencent-cls-log-json
+name: 腾讯云 CLS 日志投递
+vendor: 腾讯云
+product: 日志服务 CLS
+protocols: [object-storage, kafka, http-pull, file]
+engine: json-path
+pattern: |
+  ts=$['__TIME__']
+  content=$['__CONTENT__']
+  host=$['__HOSTNAME__']
+  file=$['__FILENAME__']
+  pkg=$['__PKG_ID__']
+  topic=$['__TOPIC__']
+  source=$['__SOURCE__']
+mapping:
+  map:
+    ts: event.time
+    content: message
+    host: host.name
+    file: log.file.path
+    pkg: event.id
+    topic: event.dataset
+    source: source.ip
+  time_format: unix
+  defaults:
+    event.severity: info
+required_fields: [content, topic]
+sample_fixture: parsers/tencent/samples.json#tencent-cls-log-json
+description: 腾讯云 CLS 日志投递结构（__CONTENT__/__TIME__/__HOSTNAME__/__FILENAME__/__TOPIC__），__TIME__ 为 Unix 秒。

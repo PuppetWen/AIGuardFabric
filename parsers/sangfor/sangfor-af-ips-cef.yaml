@@ -1,0 +1,22 @@
+# 深信服 AF 下一代防火墙 —— IPS/漏洞防护 CEF 告警（syslog 信封 + CEF）
+# 正样本：parsers/sangfor/samples.json 中 key = sangfor-af-ips-cef
+# 说明：CEF 标准键（src/dst/spt/dpt/proto/cat/msg/act）由引擎直接改写为 ECS 路径，
+# 模板只需补 category_map（cat → 平台类别）与业务私有键（request/cs1）的映射。
+key: sangfor-af-ips-cef
+name: 深信服 AF IPS 告警（CEF）
+vendor: 深信服
+product: AF
+protocols: [syslog, beats, webhook]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    request: url.full
+    cs1: rule.external_id
+  category_map:
+    入侵检测: intrusion
+    Web攻击: web
+    病毒: malware
+required_fields: [source.ip]
+sample_fixture: parsers/sangfor/samples.json#sangfor-af-ips-cef
+description: 深信服 AF IPS 模块 CEF 告警（cat=入侵检测 归 intrusion，act=block → denied）。

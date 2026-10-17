@@ -1,0 +1,36 @@
+# AIGuardFabric 检测规则 —— 敏感凭据文件读取
+# 安全域: tool-abuse（工具与权限滥用）｜ 检测目标: tool-arguments ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: TA-FILE-009
+name: 敏感凭据文件读取
+description: 读取云凭证、K8s 配置、Docker 配置、SSH 私钥等凭据文件。
+domain: tool-abuse
+severity: critical
+kind: regex
+target: tool-arguments
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-522
+- credential-access
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: regex
+  pattern: '(?i)(/etc/shadow|\.aws/credentials|\.kube/config|\.docker/config\.json|/root/\.ssh/|id_rsa|/proc/self/environ|/var/run/docker\.sock)'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - '{"tool":"file.read","path":"/home/app/.aws/credentials"}'
+  - '{"tool":"file.read","path":"/root/.ssh/id_rsa"}'
+  negative:
+  - '{"tool":"file.read","path":"/home/app/.aws/config"}'
+  - 请说明 /etc/passwd 与 /etc/group 文件的用途与权限要求。
+  - 备份策略要求每天归档 /home/app/.ssh/known_hosts。
+remediation: 凭据文件不进入工具可读范围；必须读取时通过凭据代理签发短时凭证。
+author: agf-rules
+version: 1

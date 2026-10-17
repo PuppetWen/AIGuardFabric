@@ -1,0 +1,188 @@
+# =============================================================================
+# AIGuardFabric · Prometheus 抓取配置
+#
+# 用途
+#   抓取三个自研服务的 `/metrics`：agf-server / agf-ingest / agf-scheduler。
+#   告警规则在 alerts.yml（本文件 rule_files 引用）。
+#   面板见 deploy/grafana/dashboards/（01 平台总览 / 02 日志接入与解析 /
+#   03 AI 网关 / 04 运行时防护与配额）。
+#
+# -----------------------------------------------------------------------------
+# ⚠ 部署形态说明（务必先读，避免"配了却不生效"）
+# -----------------------------------------------------------------------------
+#   * 本仓库的 docker-compose*.yml 没有默认启动 prometheus / alertmanager；
+#     本文件供独立 Prometheus 使用。
+#   * 因此本文件面向**独立部署的 Prometheus**（内部或外部均可），两种落地方式：
+#       1) 容器：把本目录同时挂进容器
+#            - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#            - ./deploy/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+#          并确保 Prometheus 与三个服务同处 `agf-net` 网络（否则 DNS 名 agf-server 不可解析）。
+#       2) K8s：用 deploy/helm/aiguardfabric 的 ServiceMonitor（serviceMonitor.enabled=true，
+#          需集群先装 Prometheus Operator），或使用 Chart 的指标抓取注解。
+#   * Grafana 侧数据源由 GRAFANA_PROMETHEUS_URL 注入（deploy/grafana/provisioning/datasources）。
+#   该缺口登记在 docs/pending-verification.deploy.md → PV-DEPLOY-006。
+#
+# -----------------------------------------------------------------------------
+# 指标名现状（2026-09-23 实测）
+# -----------------------------------------------------------------------------
+#   三个服务均已实测返回 HTTP 200 的 Prometheus 文本：server:9100、
+#   ingest:8090、scheduler:9101。下面是面板和告警规则期望的指标命名清单；
+#   并非每个系列都已输出，启用相应面板前应核对实际 `/metrics` 内容。
+#     agf_build_info{version,revision,env}                 构建/版本信息（1 常量）
+#     agf_tenant_info{tenant_id}                          租户信息（用于 Grafana 变量）
+#     agf_ingest_events_total{tenant_id,source,vendor}    接入事件计数（EPS 分子）
+#     agf_events_ingested_total{tenant_id,severity}       归一化后事件计数
+#     agf_ingest_parse_total{tenant_id,vendor,result}     解析尝试（result=success|failure）
+#     agf_ingest_queue_depth{tenant_id,queue}             接入队列深度
+#     agf_ingest_queue_capacity{queue}                    队列容量上限
+#     agf_alerts_active{tenant_id,severity}               当前活跃告警
+#     agf_alerts_created_total{tenant_id,severity}        告警产生累计
+#     agf_alerts_resolved_total{tenant_id}                告警闭环累计
+#     agf_case_closed_total{tenant_id,sla_met}            案件闭环累计
+#     agf_case_close_duration_seconds_bucket{tenant_id}   案件闭环耗时直方图
+#     agf_gateway_requests_total{tenant_id,provider,model}  AI 网关请求
+#     agf_gateway_tokens_total{tenant_id,provider,model,direction} Token 用量
+#     agf_gateway_cost_usd_total{tenant_id,provider,model} 成本计量
+#     agf_gateway_cache_hits_total{tenant_id}             语义缓存命中
+#     agf_gateway_degraded_total{tenant_id,reason}        降级次数
+#     agf_gateway_circuit_open_total{tenant_id,provider}  熔断打开
+#     agf_content_blocked_total{tenant_id,stage,category} 内容安全拦截
+#     agf_policy_hits_total{tenant_id,policy,action}      策略命中
+#     agf_runtime_actions_total{tenant_id,action}         运行时动作分布
+#     agf_quota_usage{tenant_id,scope,metric}             三级配额用量（scope=tenant|agent|session）
+#     agf_quota_limit{tenant_id,scope,metric}             三级配额上限
+#     agf_heartbeat_missing_total{tenant_id,component}    心跳丢失
+#     agf_audit_chain_verify_failures_total{}             审计哈希链校验失败
+#     agf_audit_chain_length{}                            审计链当前长度
+#     agf_dependency_up{dependency}                       依赖可用性（dependency=redis|postgres|nats|clickhouse|s3）
+#     agf_tls_cert_not_after_timestamp_seconds{service}   证书到期时间戳
+#     agf_scheduler_job_failures_total{job_name}          调度任务失败
+#     agf_scheduler_last_success_timestamp_seconds{job_name} 调度任务最近成功时间
+#     agf_http_requests_total{method,path,status}         HTTP 请求（agf-server）
+#
+# =============================================================================
+
+global:
+  # 抓取间隔与 Grafana 数据源的 timeInterval(30s) 对齐，避免图表右侧留空
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: aiguardfabric
+    # env 标签参与 agf_build_info 的 Grafana 变量，这里给抓取侧兜底值
+    env: prod
+
+# -----------------------------------------------------------------------------
+# 告警规则文件
+# 容器部署注意：Prometheus 容器的配置目录是 /etc/prometheus，
+# 因此把 alerts.yml 一并挂载到 /etc/prometheus/alerts.yml（见文件头"部署形态说明"）。
+# 若以本地进程方式运行（--config.file=deploy/prometheus/prometheus.yml），
+# 相对路径按**进程工作目录**解析，需改为 - alerts.yml 并从仓库根启动。
+# -----------------------------------------------------------------------------
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+# -----------------------------------------------------------------------------
+# Alertmanager（可选）
+# compose 未内置 alertmanager；未部署时保持注释——Prometheus 仍会评估规则并在
+# /alerts 页面与 Grafana 里展示 firing 状态，只是不外发通知。
+# 部署后取消注释并改成实际地址。
+# -----------------------------------------------------------------------------
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ["alertmanager:9093"]
+
+# =============================================================================
+# 抓取配置
+# 服务名与端口以 docker-compose.yml 为准：
+#   agf-server     → 容器内 9100（独立指标监听）
+#   agf-ingest     → 8090（/metrics 与接入 HTTP 共用监听器）
+#   agf-scheduler  → 9101（/metrics 与健康检查共用监听器）
+# job 名与 compose 服务名保持一致，这样 Grafana 里的 `up{job=~"agf-.*"}` 可直接命中。
+# =============================================================================
+scrape_configs:
+  # ---------------------------------------------------------------------------
+  # agf-server：HTTP API + 控制台后端（审计链、案件、告警、配额、网关指标）
+  # ---------------------------------------------------------------------------
+  - job_name: agf-server
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ["agf-server:9100"]
+        labels:
+          service: agf-server
+          component: api
+          env: prod
+    relabel_configs:
+      # 统一实例标签，便于与 K8s 部署（ServiceMonitor）保持一致
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: job
+        replacement: agf-server
+
+  # ---------------------------------------------------------------------------
+  # agf-ingest：日志/告警统一接入（EPS、解析成功率、队列、内容拦截）
+  # ---------------------------------------------------------------------------
+  - job_name: agf-ingest
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ["agf-ingest:8090"]
+        labels:
+          service: agf-ingest
+          component: ingest
+          env: prod
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: job
+        replacement: agf-ingest
+
+  # ---------------------------------------------------------------------------
+  # agf-scheduler：定时任务（资产盘点、日志拉取、红队巡航、规则热更新、报表）
+  # ---------------------------------------------------------------------------
+  - job_name: agf-scheduler
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ["agf-scheduler:9101"]
+        labels:
+          service: agf-scheduler
+          component: scheduler
+          env: prod
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: job
+        replacement: agf-scheduler
+
+  # ---------------------------------------------------------------------------
+  # Prometheus 自抓（便于"监控系统自身存活"类告警与配置排障）
+  # ---------------------------------------------------------------------------
+  - job_name: prometheus
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ["127.0.0.1:9090"]
+        labels:
+          service: prometheus
+          component: monitoring
+
+  # ---------------------------------------------------------------------------
+  # 可选：容器/主机层指标。需要先部署 node-exporter / cAdvisor，
+  # 且其端口对 Prometheus 可达。默认注释，避免出现"永远 DOWN 的 target"噪音。
+  # ---------------------------------------------------------------------------
+  # - job_name: node-exporter
+  #   static_configs:
+  #     - targets: ["node-exporter:9100"]
+  #       labels:
+  #         service: node-exporter
+  #         component: host
+  #
+  # - job_name: cadvisor
+  #   static_configs:
+  #     - targets: ["cadvisor:8080"]
+  #       labels:
+  #         service: cadvisor
+  #         component: container

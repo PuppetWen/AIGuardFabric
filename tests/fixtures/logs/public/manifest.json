@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "samples": [
+    {
+      "key": "aws-cloudtrail-json",
+      "fixture": "public/aws-cloudtrail-json.log",
+      "vendor": "AWS",
+      "product": "CloudTrail",
+      "protocol": "object-storage",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1078.004/aws_login_sfa/cloudtrail.json",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1078.004/aws_login_sfa/cloudtrail.json",
+        "sha256": "395D8A667D12577FE83116C5FD0D850EA1B27DD21B1E303D08529869A5872B9A"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "1EEA73C1EC85B6245BA62E84F50D70D33506475ED9E37D86D9BCC7D02DB43F93",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "event.id": "630d3da9-9cdc-44a4-a617-33e2f8f21a32",
+        "event.action_raw": "ConsoleLogin",
+        "source.ip": "142.254.89.27",
+        "event.category": "authentication",
+        "event.severity": "info"
+      }
+    },
+    {
+      "key": "azure-entra-service-principal-json",
+      "fixture": "public/azure-entra-service-principal-json.log",
+      "vendor": "Microsoft Azure",
+      "product": "Microsoft Entra ID",
+      "protocol": "object-storage",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1078.004/azure_ad_service_principal_authentication/azure_ad_service_principal_authentication.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1078.004/azure_ad_service_principal_authentication/azure_ad_service_principal_authentication.log",
+        "sha256": "9134A3A6C8FA2EF745AD24BC7A6E32351C984A28450E8C50B9BE6B2523DD4D78"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "1527AFD3CA252512BC33EAB50B3638CFD9410D1A384C7A54606B21A678A8D11A",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "user.id": "60ee4f4e-9221-479c-92df-4c97cb5e2f9d",
+        "user.name": "Research",
+        "source.ip": "120.1.97.19",
+        "event.category": "authentication",
+        "event.severity": "medium"
+      }
+    },
+    {
+      "key": "crowdstrike-falcon-fdr-process-json",
+      "fixture": "public/crowdstrike-falcon-fdr-process-json.log",
+      "vendor": "CrowdStrike",
+      "product": "Falcon Data Replicator",
+      "protocol": "object-storage",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1003.003/atomic_red_team/crowdstrike_falcon.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1003.003/atomic_red_team/crowdstrike_falcon.log",
+        "sha256": "C4275AB0EF976B0D00BA7840031A06D9F47D1BEEAF4C3056D2FC7BB8FE08B38A"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "68612FC46AF3C62F4FD94DB4D869B34C6CFD6DF53614265C9EBE3DE668B05493",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "event.id": "9b9afac9-0d86-11ed-b9af-0248097df5d7",
+        "host.id": "665e9c4418234e1e92fe20df52616163",
+        "process.executable": "\\Device\\HarddiskVolume1\\Windows\\System32\\cmd.exe",
+        "process.command_line": "\"cmd.exe\" /c \"vssadmin.exe create shadow /for=C: & mklink /D C:\\Temp\\vssstore \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy1\"",
+        "event.category": "process",
+        "event.severity": "info"
+      }
+    },
+    {
+      "key": "paloalto-panos-threat-csv",
+      "fixture": "public/paloalto-panos-threat-csv.log",
+      "vendor": "Palo Alto",
+      "product": "PAN-OS",
+      "protocol": "syslog",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1190/fortigate/fortinetcve202240684.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1190/fortigate/fortinetcve202240684.log",
+        "sha256": "0859A24067009985CE89E8B721B3641931B82F6937A6FB4720D17FAF47F05F87"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "0859A24067009985CE89E8B721B3641931B82F6937A6FB4720D17FAF47F05F87",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "observer.serial_number": "016201013868",
+        "source.ip": "159.65.30.189",
+        "url.path": "2.1.22.1/api/v2/cmdb/system/admin/admin",
+        "rule.id": "(9999)",
+        "event.category": "intrusion",
+        "event.severity": "info"
+      }
+    },
+    {
+      "key": "zeek-conn-json",
+      "fixture": "public/zeek-conn-json.log",
+      "vendor": "Zeek",
+      "product": "conn.log",
+      "protocol": "file",
+      "synthetic": false,
+      "source": {
+        "repository": "https://github.com/splunk/attack_data",
+        "revision": "a92cc4e6d7e39d56a0840d206a0963eeee0e22db",
+        "path": "datasets/attack_techniques/T1021.001/remote_desktop_connection/zeek_conn.log",
+        "url": "https://media.githubusercontent.com/media/splunk/attack_data/a92cc4e6d7e39d56a0840d206a0963eeee0e22db/datasets/attack_techniques/T1021.001/remote_desktop_connection/zeek_conn.log",
+        "sha256": "57926A175CAD5CF4A5DF8AA208AD02D68FF07C8B65EB0B5138D8A8BFCC8E1590"
+      },
+      "sourceLine": 1,
+      "extraction": "Original first line, including its original line ending; no field rewriting.",
+      "fixtureSha256": "57926A175CAD5CF4A5DF8AA208AD02D68FF07C8B65EB0B5138D8A8BFCC8E1590",
+      "license": "Apache-2.0",
+      "datasetKind": "public-lab-capture",
+      "expect": {
+        "event.id": "CzeKJi1fKJy8mqFsTi",
+        "source.ip": "217.241.55.94",
+        "destination.ip": "10.0.1.14",
+        "network.transport": "tcp",
+        "event.category": "network",
+        "event.severity": "info"
+      }
+    }
+  ]
+}

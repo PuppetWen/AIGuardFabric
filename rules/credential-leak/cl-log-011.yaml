@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— 日志/回显中的口令泄露
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: event-payload ｜ 算子: regex ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-LOG-011
+name: 日志/回显中的口令泄露
+description: 连接串或登录日志里直接打印明文口令（排除已脱敏的星号形式）。
+domain: credential-leak
+severity: high
+kind: regex
+target: event-payload
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-532
+- log-leak
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: regex
+  pattern: '(?i)(password|passwd|pwd)\s*[=:]\s*[A-Za-z0-9!@#$%^&_\-]{6,}'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - 2026-02-21 10:23:45 login user=admin password=Adm1n2026 result=success
+  - jdbc:mysql://10.20.30.8:3306/orders?user=svc_order&password=Ord3rSvc!2026
+  negative:
+  - 2026-02-21 10:24:02 login user=admin password=******（日志已脱敏）
+  - 请检查这段 SQL 是否存在性能问题，并给出索引建议。
+remediation: 在日志采集侧启用凭据脱敏规则；应用侧禁止打印口令字段。
+author: agf-rules
+version: 1

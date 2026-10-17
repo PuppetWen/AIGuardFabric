@@ -1,0 +1,30 @@
+# Linux auditd —— SYSCALL 记录（正则，syslog 信封）
+# 正样本：parsers/os/samples.json 中 key = linux-auditd-syscall-regex
+key: linux-auditd-syscall-regex
+name: Linux auditd SYSCALL 记录
+vendor: Linux
+product: auditd
+protocols: [syslog, file, beats]
+engine: regex
+pattern: 'type=SYSCALL msg=audit\((?P<audit_ts>[\d.]+):(?P<serial>\d+)\): arch=\w+ syscall=(?P<syscall>\d+) success=(?P<success>\w+) exit=(?P<exit>-?\d+) .*?ppid=(?P<ppid>\d+) pid=(?P<pid>\d+) auid=(?P<auid>\d+) uid=(?P<uid>\d+) .*?comm="(?P<comm>[^"]*)" exe="(?P<exe>[^"]*)" .*?key="(?P<key>[^"]*)"'
+mapping:
+  map:
+    serial: event.sequence
+    syscall: process.syscall
+    success: event.outcome
+    exit: process.exit_code
+    ppid: process.parent.pid
+    pid: process.pid
+    auid: user.audit_id
+    uid: user.id
+    comm: process.name
+    exe: process.executable
+    key: rule.name
+  time_field: audit_ts
+  time_format: unix
+  defaults:
+    event.category: process
+    event.severity: medium
+required_fields: [comm, exe]
+sample_fixture: parsers/os/samples.json#linux-auditd-syscall-regex
+description: auditd SYSCALL 记录（syscall/exit/ppid/auid/comm/exe/审计 key），audit key 作为规则名用于命中率统计。

@@ -1,0 +1,15 @@
+[toolchain]
+# 固定到 stable 通道（本机实测解析为 rustc/cargo 1.97.1，与 §附录 A 记录一致）。
+#
+# 为什么不写死 "1.97.1"：
+#   写死具体版本会让 rustup 认为需要维护一份独立工具链副本，一旦该副本
+#   下载中断（受限网络环境常见），就会残留"缺少 rust-std / 找不到 core"的
+#   半成品状态，且 `rustup toolchain install` 会误判为 up-to-date 拒绝修复。
+#   使用 stable 通道直接复用本机已完整安装的工具链，稳定且无需额外下载。
+#
+# 为什么不声明 components / targets：
+#   声明后 rustup 会在每次进入目录时尝试同步补装，离线或受限网络下会阻塞 cargo 调用。
+#   需要时手动安装并登记到 docs/pending-verification.md（见 PV-016）：
+#       rustup component add rust-src
+#       rustup target add x86_64-unknown-linux-gnu
+channel = "stable"

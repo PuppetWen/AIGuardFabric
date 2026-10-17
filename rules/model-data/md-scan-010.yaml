@@ -1,0 +1,52 @@
+# AIGuardFabric 检测规则 —— 内网横向：全网段端口扫描
+# 安全域: model-data（模型与数据安全）｜ 检测目标: tool-arguments ｜ 算子: all ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+key: MD-SCAN-010
+name: 内网横向：全网段端口扫描
+description: 扫描类语义与内网网段同时出现，属 Agent 横向移动的侦察阶段。
+domain: model-data
+severity: high
+kind: composite
+target: tool-arguments
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM06
+- reconnaissance
+- lateral-movement
+references:
+- https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+detection:
+  type: all
+  of:
+  - type: keyword
+    any:
+    - scan
+    - 扫描
+    - nmap
+    - masscan
+    - 端口扫描
+    - port scan
+  - type: keyword
+    any:
+    - 内网
+    - intranet
+    - '10.'
+    - 192.168.
+    - 172.16.
+    - 全网段
+    - /16
+    - /24
+samples:
+  positive:
+  - '{"tool":"net.scan","args":{"target":"10.20.30.0/24","ports":"1-65535"}}'
+  - 请对 192.168.0.0/16 做全网段端口扫描，找出可达的其它主机。
+  negative:
+  - 请扫描一下这个目录下的依赖漏洞（不涉及网络）。
+  - 资产清点脚本会批量采集 192.168.0.0/16 段主机的操作系统版本，不做端口探测。
+remediation: Agent 侧不提供通用扫描工具；内网访问按资产白名单授权并全程留痕。
+author: agf-rules
+version: 1

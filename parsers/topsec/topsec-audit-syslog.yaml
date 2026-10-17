@@ -1,0 +1,26 @@
+# 天融信 日志审计 —— 管理员登录审计（syslog + Grok）
+# 正样本：parsers/topsec/samples.json 中 key = topsec-audit-syslog
+key: topsec-audit-syslog
+name: 天融信日志审计登录事件
+vendor: 天融信
+product: 日志审计
+protocols: [syslog, file]
+engine: grok
+pattern: '%{TIMESTAMP_ISO8601:ts} device=%{NOTSPACE:device} user=%{NOTSPACE:user} src=%{IPORHOST:src} action=%{WORD:action} result=%{WORD:result} msg="%{DATA:msg}"'
+mapping:
+  map:
+    ts: event.time
+    device: observer.name
+    user: user.name
+    src: source.ip
+    result: event.outcome
+    msg: message
+  time_field: ts
+  time_format: '%Y-%m-%d %H:%M:%S'
+  category_map:
+    login: authentication
+    logout: authentication
+  action_field: action
+required_fields: [user, device]
+sample_fixture: parsers/topsec/samples.json#topsec-audit-syslog
+description: 天融信日志审计系统管理员登录事件（device/user/src/action/result），登录类归 authentication。

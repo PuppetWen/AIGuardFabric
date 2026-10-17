@@ -1,0 +1,47 @@
+# OpenAI 兼容网关 —— 模型调用日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = openai-chat-gateway-json
+key: openai-chat-gateway-json
+name: OpenAI 兼容网关调用日志
+vendor: OpenAI
+product: Chat Completions 网关
+protocols: [webhook, http-push, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  request_id=$.request_id
+  provider=$.provider
+  model=$.model
+  endpoint=$.endpoint
+  status=$.status
+  latency=$.latency_ms
+  prompt_tokens=$.prompt_tokens
+  completion_tokens=$.completion_tokens
+  total_tokens=$.total_tokens
+  cost=$.cost_micro
+  user=$.user
+  key_id=$.api_key_id
+  client_ip=$.client_ip
+  prompt_hash=$.prompt_hash
+mapping:
+  map:
+    ts: event.time
+    request_id: event.id
+    provider: ai.provider
+    model: ai.model
+    endpoint: url.path
+    status: http.response.status_code
+    latency: event.duration
+    prompt_tokens: ai.prompt_tokens
+    completion_tokens: ai.completion_tokens
+    total_tokens: ai.total_tokens
+    cost: ai.cost_micro
+    user: user.name
+    key_id: ai.api_key_id
+    client_ip: source.ip
+    prompt_hash: ai.prompt_hash
+  defaults:
+    event.category: ai-model
+    event.severity: info
+required_fields: [model, request_id]
+sample_fixture: parsers/ai/samples.json#openai-chat-gateway-json
+description: OpenAI 兼容（/v1/chat/completions）网关调用日志：provider/model、Token 与成本计量（cost_micro）、prompt_hash 供内容安全审计。

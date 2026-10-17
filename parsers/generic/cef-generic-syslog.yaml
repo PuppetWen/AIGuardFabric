@@ -1,0 +1,25 @@
+# 通用 CEF —— 任意厂商的 CEF 转发（ArcSight Common Event Format）
+# 正样本：parsers/generic/samples.json 中 key = cef-generic-syslog
+# 说明：CEF 头 7 段（版本/厂商/产品/设备版本/规则ID/规则名/等级）由引擎解析并改写为 ECS；
+# 扩展段 `k=v`（值可含空格）同样由引擎改写，标准键 src/dst/spt/dpt/proto/cat/msg/suser 免映射。
+#
+# 协议声明口径（见 parsers/README.md「协议声明与放宽匹配」）：`CEF:0` 字面标记 +
+# required_fields 已足以判定"这就是一条 CEF 事件"，因此显式声明消息总线类接入协议
+# （mqtt/pulsar，与已声明的 kafka 同形：同一条载荷可经任一总线到达）——显式声明后走
+# **严格趟**，不必依赖放宽趟兜底。
+key: cef-generic-syslog
+name: 通用 CEF
+vendor: generic
+product: CEF
+protocols: [syslog, webhook, beats, kafka, mqtt, pulsar]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  category_map:
+    NetworkActivity: network
+    Authentication: authentication
+    IntrusionDetection: intrusion
+    MalwareActivity: malware
+required_fields: [observer.vendor, source.ip]
+sample_fixture: parsers/generic/samples.json#cef-generic-syslog
+description: 通用 CEF 模板：适配任何"CEF 头 + 扩展键值对"的厂商设备，cat 映射到平台类别。

@@ -1,0 +1,38 @@
+# Fortinet FortiGate —— DNS 过滤日志（syslog KV，type=utm subtype=dns）
+# 正样本：parsers/fortinet/samples.json 中 key = fortinet-fortigate-dns-kv
+key: fortinet-fortigate-dns-kv
+name: FortiGate DNS 过滤日志
+vendor: Fortinet
+product: FortiGate
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    devname: host.name
+    devid: host.id
+    logid: rule.id
+    subtype: event.category_raw
+    srcip: source.ip
+    srcport: source.port
+    dstip: destination.ip
+    dstport: destination.port
+    proto: network.iana_number
+    qname: dns.question.name
+    qtype: dns.question.type
+    catdesc: rule.category
+  severity_field: level
+  severity_map:
+    critical: critical
+    error: high
+    warning: medium
+    notification: low
+    information: info
+  category_map:
+    dns: network
+    webfilter: web
+    ips: intrusion
+  action_field: action
+required_fields: [qname, srcip]
+sample_fixture: tests/fixtures/logs/parsers/fortinet-fortigate-dns-1.log
+description: FortiGate DNS 过滤日志（qname/catdesc/action），恶意域名命中归 network 并保留 URL 分类在 rule.category。

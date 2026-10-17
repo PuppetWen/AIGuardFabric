@@ -1,0 +1,34 @@
+# Zeek —— notice.log 告警日志（TSV）
+# 正样本：parsers/zeek/samples.json 中 key = zeek-notice-tsv
+key: zeek-notice-tsv
+name: Zeek notice.log 告警
+vendor: Zeek
+product: notice.log
+protocols: [file, beats, syslog]
+engine: csv
+pattern: 'ts,uid,id.orig_h,id.orig_p,id.resp_h,id.resp_p,fuid,proto,note,msg,sub,src,dst,p,n,peer_descr,actions,suppress_for,remote_location.country_code'
+mapping:
+  map:
+    uid: event.id
+    id.orig_h: source.ip
+    id.resp_h: destination.ip
+    proto: network.transport
+    note: rule.name
+    msg: message
+    sub: rule.description
+    src: source.ip
+    dst: destination.ip
+    n: event.count
+    peer_descr: observer.name
+    actions: event.action_raw
+    suppress_for: event.suppress_for
+    remote_location.country_code: source.geo.country_iso_code
+  time_field: ts
+  time_format: unix
+  defaults:
+    event.severity: medium
+    event.category: intrusion
+    event.action: alert
+required_fields: [note, src]
+sample_fixture: parsers/zeek/samples.json#zeek-notice-tsv
+description: Zeek notice.log（note/msg/actions/n），扫描与策略命中告警归 intrusion 并保留原始动作。

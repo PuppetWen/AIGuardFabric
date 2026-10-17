@@ -1,0 +1,48 @@
+# 深信服 EDR —— 终端检测与响应告警（JSON）
+# 正样本：parsers/sangfor/samples.json 中 key = sangfor-edr-json
+key: sangfor-edr-json
+name: 深信服 EDR 终端告警
+vendor: 深信服
+product: EDR
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  kind=$.event_type
+  host=$.hostname
+  host_ip=$.host_ip
+  user=$.user
+  pname=$.process_name
+  cmdline=$.cmd_line
+  fpath=$.file_path
+  md5=$.md5
+  sev=$.severity
+  action=$.action
+  rule_id=$.rule_id
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    pname: process.name
+    cmdline: process.command_line
+    fpath: file.path
+    md5: file.hash.md5
+    rule_id: rule.id
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    malware_detect: malware
+    ransomware: malware
+    webshell: web
+    process_inject: intrusion
+  action_field: action
+required_fields: [rule_id, host]
+sample_fixture: tests/fixtures/logs/parsers/sangfor-edr-1.log
+description: 深信服 EDR 终端告警（event_type/hostname/process_name/cmd_line/file_path/md5/severity/action）。

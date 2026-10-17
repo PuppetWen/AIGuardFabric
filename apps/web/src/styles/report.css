@@ -1,0 +1,101 @@
+/* ---------------- markdown report preview ---------------- */
+
+.agf-report {
+  color: var(--agf-text);
+  font-size: 13px;
+  line-height: 1.7;
+  max-height: 560px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.agf-report h1,
+.agf-report h2,
+.agf-report h3,
+.agf-report h4 {
+  color: var(--agf-text);
+  margin: 16px 0 8px;
+  line-height: 1.35;
+}
+
+.agf-report h1 {
+  font-size: 19px;
+  border-bottom: 1px solid var(--agf-divider);
+  padding-bottom: 8px;
+}
+
+.agf-report h2 {
+  font-size: 16px;
+}
+
+.agf-report h3 {
+  font-size: 14px;
+}
+
+.agf-report p {
+  margin: 8px 0;
+  color: var(--agf-text-secondary);
+}
+
+.agf-report ul,
+.agf-report ol {
+  margin: 8px 0;
+  padding-inline-start: 22px;
+  color: var(--agf-text-secondary);
+}
+
+.agf-report li {
+  margin: 3px 0;
+}
+
+.agf-report blockquote {
+  margin: 8px 0;
+  padding: 6px 12px;
+  border-inline-start: 3px solid var(--agf-accent);
+  background: var(--agf-panel-strong);
+  border-radius: 0 6px 6px 0;
+  color: var(--agf-text-secondary);
+}
+
+.agf-report code {
+  background: var(--agf-code-bg);
+  border: 1px solid var(--agf-panel-border);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 12px;
+}
+
+.agf-report pre.agf-code {
+  margin: 8px 0;
+}
+
+.agf-report a {
+  color: var(--agf-accent);
+}
+
+.agf-report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.agf-report th,
+.agf-report td {
+  border: 1px solid var(--agf-panel-border);
+  padding: 6px 10px;
+  text-align: start;
+}
+
+.agf-report th {
+  background: var(--agf-panel-strong);
+  color: var(--agf-text);
+  font-weight: 600;
+}
+
+
+.agf-scroll-x {
+  overflow-x: auto;
+}
+

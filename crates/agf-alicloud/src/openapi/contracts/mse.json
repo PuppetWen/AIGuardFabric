@@ -1,0 +1,91 @@
+[
+{"action": "ListClusters", "version": "2019-05-31", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RequestPars", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "PageNum", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": true, "format": "int32"}},
+  {"name": "PageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": true, "format": "int32"}},
+  {"name": "ClusterAliasName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "ResourceGroupId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Tag", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Key": {"type": "string", "required": false}, "Value": {"type": "string", "required": false}}}}},
+  {"name": "KeyId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListAnsServices", "version": "2019-05-31", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "ServiceName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "GroupName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "NamespaceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ClusterName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "HasIpCount", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "ClusterId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "PageNum", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": true, "format": "int32"}},
+  {"name": "PageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": true, "format": "int32"}},
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "RequestPars", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListNacosConfigs", "version": "2019-05-31", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RequestPars", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "PageNum", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": true, "format": "int32"}},
+  {"name": "PageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": true, "format": "int32"}},
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "RegionId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "DataId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Group", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AppName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Tags", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "NamespaceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "GetNacosConfig", "version": "2019-05-31", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "DataId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Group", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "NamespaceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Beta", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "CreateNacosConfig", "version": "2019-05-31", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "DataId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Group", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "AppName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Tags", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Desc", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Type", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Content", "location": "formData", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "NamespaceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "BetaIps", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "UpdateNacosConfig", "version": "2019-05-31", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "InstanceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "DataId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "Group", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "AppName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Tags", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Desc", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Type", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Content", "location": "formData", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "NamespaceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Md5", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "BetaIps", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EncryptedDataKey", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListGateway", "version": "2019-05-31", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "PageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "PageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "OrderItem", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "DescSort", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "FilterParams", "location": "query", "style": "json", "schema": {"type": "object", "required": false, "properties": {"GatewayType": {"type": "string", "required": false}, "Name": {"type": "string", "required": false}, "Vpc": {"type": "string", "required": false}, "GatewayUniqueId": {"type": "string", "required": false}, "InstanceId": {"type": "string", "required": false}, "MseTag": {"type": "string", "required": false}, "ResourceGroupId": {"type": "string", "required": false}}}},
+  {"name": "AcceptLanguage", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]}
+]

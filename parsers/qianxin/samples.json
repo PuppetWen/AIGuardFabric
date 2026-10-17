@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "note": "奇安信模板正样本与关键字段断言。CEF 样本按 CEF 公开事件格式重建（头 7 段 + 扩展键值对），JSON/KV 样本按天眼/天擎告警导出常见字段形态重建；未联网抓取。",
+  "samples": {
+    "qianxin-tianyan-cef": {
+      "protocol": "syslog",
+      "fixture": "parsers/qianxin-tianyan-cef-1.log",
+      "line": "<134>Feb 21 10:28:00 qax-tianyan1 CEF:0|QiAnXin|TianYan|3.0.6|3001|命令注入攻击|8|src=203.0.113.60 dst=10.20.30.120 spt=51234 dpt=8080 proto=TCP act=block cat=Web攻击 suser=admin request=/api/v1/exec?cmd=id cs1=QAX-TY-3001",
+      "expect": {
+        "observer.vendor": "QiAnXin",
+        "observer.product": "TianYan",
+        "rule.id": "3001",
+        "rule.name": "命令注入攻击",
+        "source.ip": "203.0.113.60",
+        "destination.ip": "10.20.30.120",
+        "destination.port": "8080",
+        "network.transport": "TCP",
+        "user.name": "admin",
+        "event.category_raw": "Web攻击",
+        "event.action": "denied",
+        "url.full": "/api/v1/exec?cmd=id",
+        "rule.external_id": "QAX-TY-3001",
+        "event.severity": "high",
+        "event.category": "web"
+      }
+    },
+    "qianxin-tianyan-nta-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21T10:29:00+08:00\",\"alert_name\":\"Cobalt Strike 心跳通信\",\"src_ip\":\"10.20.30.130\",\"dst_ip\":\"198.51.100.10\",\"dst_port\":443,\"proto\":\"TCP\",\"severity\":\"high\",\"category\":\"木马通信\",\"action\":\"alert\",\"rule_id\":\"TY-4001\",\"threat_type\":\"c2\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:29:00.000Z",
+        "rule.name": "Cobalt Strike 心跳通信",
+        "source.ip": "10.20.30.130",
+        "destination.ip": "198.51.100.10",
+        "destination.port": "443",
+        "network.transport": "TCP",
+        "event.category_raw": "木马通信",
+        "rule.id": "TY-4001",
+        "threat.type": "c2",
+        "event.severity": "high",
+        "event.action": "alert",
+        "event.category": "malware"
+      }
+    },
+    "qianxin-tq-edr-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21T10:31:00+08:00\",\"event_type\":\"virus\",\"hostname\":\"PC-FIN-01\",\"host_ip\":\"10.20.30.140\",\"user\":\"zhangsan\",\"file_path\":\"C:\\\\Users\\\\zhangsan\\\\Downloads\\\\tool.exe\",\"md5\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"virus_name\":\"Trojan.Win32.Agent\",\"severity\":\"critical\",\"action\":\"quarantine\",\"rule_id\":\"TQ-9001\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:31:00.000Z",
+        "host.name": "PC-FIN-01",
+        "host.ip": "10.20.30.140",
+        "user.name": "zhangsan",
+        "file.path": "C:\\Users\\zhangsan\\Downloads\\tool.exe",
+        "file.hash.md5": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "threat.software.name": "Trojan.Win32.Agent",
+        "rule.id": "TQ-9001",
+        "event.severity": "critical",
+        "event.action": "denied",
+        "event.category": "malware"
+      }
+    },
+    "qianxin-tq-edr-kv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:32:00 PC-FIN-01 TQ edr_type=process_start; host_ip=10.20.30.140; user=zhangsan; process_name=cmd.exe; cmd_line=\"cmd.exe /c whoami\"; action=log; level=medium; rule_id=TQ-9101",
+      "expect": {
+        "host.name": "PC-FIN-01",
+        "host.ip": "10.20.30.140",
+        "user.name": "zhangsan",
+        "process.name": "cmd.exe",
+        "process.command_line": "cmd.exe /c whoami",
+        "rule.id": "TQ-9101",
+        "event.severity": "medium",
+        "event.action": "log",
+        "event.category": "process"
+      }
+    },
+    "qianxin-waf-cef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:33:00 qax-waf1 CEF:0|QiAnXin|WAF|4.0|5001|SQL注入|7|src=203.0.113.61 dst=10.20.30.121 dpt=443 proto=TCP act=block cat=Web攻击 msg=SQL注入拦截 cs1=QAX-WAF-5001",
+      "expect": {
+        "observer.product": "WAF",
+        "rule.id": "5001",
+        "source.ip": "203.0.113.61",
+        "destination.ip": "10.20.30.121",
+        "destination.port": "443",
+        "event.category_raw": "Web攻击",
+        "event.action": "denied",
+        "message": "SQL注入拦截",
+        "rule.external_id": "QAX-WAF-5001",
+        "event.severity": "high",
+        "event.category": "web"
+      }
+    }
+  }
+}

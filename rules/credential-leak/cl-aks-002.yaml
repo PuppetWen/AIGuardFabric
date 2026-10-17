@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— 阿里云 AccessKeyId 明文（LTAI 前缀）
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: config ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-AKS-002
+name: 阿里云 AccessKeyId 明文（LTAI 前缀）
+description: 阿里云 AK 具有稳定的 LTAI 前缀，配合长度即可高置信识别。
+domain: credential-leak
+severity: critical
+kind: regex
+target: config
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-798
+- cloud-credential
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: regex
+  pattern: '\bLTAI[A-Za-z0-9]{12,}\b'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - accessKeyId=LTAI5tAbCdEfGhIjKlMnOp secret=Gu5t9xGARNpq86cd98joQY
+  - 'spring.cloud.alicloud.access-key: LTAI5tQqWwEeRrTtYyUuIiOo'
+  negative:
+  - accessKeyId=LTAI****（已在截图中脱敏）
+  - 请说明阿里云 AccessKey 的最小权限授权实践。
+remediation: 在 RAM 中禁用该 AK，改用 STS 临时凭证；对配置仓库启用密钥扫描门禁。
+author: agf-rules
+version: 1

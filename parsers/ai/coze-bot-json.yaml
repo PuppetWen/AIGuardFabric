@@ -1,0 +1,44 @@
+# Coze —— Bot 调用与工具调用日志（JSON）
+# 正样本：parsers/ai/samples.json 中 key = coze-bot-json
+key: coze-bot-json
+name: Coze Bot 调用日志
+vendor: Coze
+product: Bot 应用
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.created_at
+  log_id=$.log_id
+  bot_id=$.bot_id
+  space_id=$.space_id
+  conversation=$.conversation_id
+  user_id=$.user_id
+  msg_type=$.msg_type
+  tool=$.tool_name
+  status=$.status
+  err=$.error_code
+  latency=$.latency_ms
+  content=$.content
+mapping:
+  map:
+    ts: event.time
+    log_id: event.id
+    bot_id: ai.bot_id
+    space_id: ai.space_id
+    conversation: ai.session_id
+    user_id: user.id
+    msg_type: event.category_raw
+    tool: ai.tool_name
+    status: event.outcome
+    err: error.code
+    latency: event.duration
+    content: message
+  category_map:
+    tool_call: ai-tool-call
+    message: ai-model
+    card: ai-model
+  defaults:
+    event.severity: info
+required_fields: [bot_id, log_id]
+sample_fixture: parsers/ai/samples.json#coze-bot-json
+description: Coze Bot 调用日志（bot_id/conversation_id/msg_type/tool_name/status/error_code），工具调用失败与越权调用排查来源。

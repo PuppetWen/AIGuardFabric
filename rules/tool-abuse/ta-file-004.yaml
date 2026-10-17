@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— 危险磁盘/文件破坏操作
+# 安全域: tool-abuse（工具与权限滥用）｜ 检测目标: tool-arguments ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/78.html
+key: TA-FILE-004
+name: 危险磁盘/文件破坏操作
+description: 针对系统目录的 rm -rf、dd 覆写块设备、mkfs、覆写 /etc 关键文件等破坏性命令。
+domain: tool-abuse
+severity: critical
+kind: regex
+target: tool-arguments
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-78
+- destructive-action
+references:
+- https://cwe.mitre.org/data/definitions/78.html
+detection:
+  type: regex
+  pattern: '(?i)(rm\s+-rf\s+/(?:etc|var|usr|boot|home|root|dev|sbin|bin|lib|opt|srv)\b|shred\s+-u|dd\s+if=\S+\s+of=/dev/(?:sd|nvme|hd)|mkfs\.\w+\s+/dev/|>\s*/etc/(?:passwd|shadow)|truncate\s+-s\s+0\s+/etc/)'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - '{"tool":"shell.exec","cmd":"dd if=/dev/zero of=/dev/sda bs=1M count=10"}'
+  - rm -rf /var/lib/postgresql && echo done
+  negative:
+  - 运维手册：清理临时文件请使用 rm -rf /tmp/app-*，不要动 /var/lib 下的数据目录。
+  - 文档说明：truncate -s 0 /var/log/app.log 可清空日志文件。
+remediation: 破坏性命令一律要求人工审批（action=approval）；对块设备与系统目录做只读挂载。
+author: agf-rules
+version: 1

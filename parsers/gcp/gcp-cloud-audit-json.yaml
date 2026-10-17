@@ -1,0 +1,51 @@
+# Google Cloud —— Cloud Audit Log（Admin Activity）
+# 正样本：parsers/gcp/samples.json 中 key = gcp-cloud-audit-json
+key: gcp-cloud-audit-json
+name: GCP Cloud Audit Log
+vendor: Google Cloud
+product: Cloud Audit Logs
+protocols: [object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  insert=$.insertId
+  principal=$.protoPayload.authenticationInfo.principalEmail
+  caller_ip=$.protoPayload.requestMetadata.callerIp
+  ua=$.protoPayload.requestMetadata.callerSuppliedUserAgent
+  service=$.protoPayload.serviceName
+  method=$.protoPayload.methodName
+  res=$.protoPayload.resourceName
+  res_type=$.resource.type
+  instance=$.resource.labels.instance_id
+  zone=$.resource.labels.zone
+  sev=$.severity
+  log=$.logName
+mapping:
+  map:
+    ts: event.time
+    insert: event.id
+    principal: user.email
+    caller_ip: source.ip
+    ua: user_agent.original
+    service: event.provider
+    method: event.action_raw
+    res: cloud.resource_id
+    res_type: cloud.resource_type
+    instance: host.id
+    zone: cloud.availability_zone
+    log: log.name
+  severity_field: sev
+  severity_map:
+    DEBUG: info
+    INFO: info
+    NOTICE: low
+    WARNING: medium
+    ERROR: high
+    CRITICAL: critical
+    ALERT: critical
+    EMERGENCY: critical
+  defaults:
+    event.category: cloud-control
+required_fields: [method, insert]
+sample_fixture: parsers/gcp/samples.json#gcp-cloud-audit-json
+description: GCP Cloud Audit Log（protoPayload.methodName/authenticationInfo/requestMetadata/resource.labels），控制面操作审计。

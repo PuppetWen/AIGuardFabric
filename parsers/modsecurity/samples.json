@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "note": "ModSecurity 模板正样本与关键字段断言。JSON 样本按 ModSecurity v3 SecAuditLogFormat JSON 公开结构（transaction/audit_data）重建；error 日志样本按 Apache error_log 中 security2 消息公开形态重建；未联网抓取。",
+  "samples": {
+    "modsecurity-audit-json": {
+      "protocol": "file",
+      "line": "{\"transaction\":{\"client_ip\":\"203.0.113.150\",\"time_stamp\":\"Sat Feb 21 10:30:00 2026\",\"request\":{\"method\":\"GET\",\"uri\":\"/login?user=admin'--\",\"http_version\":1.1,\"headers\":{\"User-Agent\":\"sqlmap/1.7.2\",\"Host\":\"www.example.com\"}},\"response\":{\"http_code\":403,\"body\":\"Access denied\"},\"is_interrupted\":true,\"producer\":{\"modsecurity\":\"ModSecurity v3.0.11\",\"connector\":\"ModSecurity-nginx v1.0.3\"},\"messages\":[{\"message\":\"SQL Injection Attack Detected via libinjection\",\"details\":{\"ruleId\":\"942100\",\"file\":\"/etc/modsecurity/crs/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf\",\"severity\":\"CRITICAL\",\"verdict\":\"blocked\"}}]},\"audit_data\":{\"messages\":[],\"action\":{\"action\":\"blocked\"}}}",
+      "expect": {
+        "event.time": "2026-02-21T10:30:00.000Z",
+        "source.ip": "203.0.113.150",
+        "http.request.method": "GET",
+        "url.path": "/login?user=admin'--",
+        "host.name": "www.example.com",
+        "http.response.status_code": "403",
+        "event.is_interrupted": "true",
+        "message": "SQL Injection Attack Detected via libinjection",
+        "rule.id": "942100",
+        "rule.verdict": "blocked",
+        "observer.product": "ModSecurity-nginx v1.0.3",
+        "event.severity": "critical",
+        "event.action": "denied",
+        "event.category": "web"
+      }
+    },
+    "modsecurity-error-regex": {
+      "protocol": "file",
+      "line": "[Sat Feb 21 10:31:00.123456 2026] [security2:error] [pid 1234:tid 140234] [client 203.0.113.151:51234] ModSecurity: Warning. Pattern match \"select.+from\" at ARGS:user. [file \"/etc/modsecurity/crs/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf\"] [line \"60\"] [id \"942100\"] [msg \"SQL Injection Attack Detected\"] [severity \"CRITICAL\"] [hostname \"www.example.com\"] [uri \"/login\"] [unique_id \"Zg1234\"]",
+      "expect": {
+        "event.time": "2026-02-21T10:31:00.123Z",
+        "source.ip": "203.0.113.151",
+        "process.pid": "1234",
+        "rule.id": "942100",
+        "message": "SQL Injection Attack Detected",
+        "host.name": "www.example.com",
+        "url.path": "/login",
+        "event.severity": "critical",
+        "event.action": "detect",
+        "event.category": "web"
+      }
+    }
+  }
+}

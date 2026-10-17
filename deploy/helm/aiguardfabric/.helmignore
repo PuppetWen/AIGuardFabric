@@ -1,0 +1,48 @@
+# =============================================================================
+# helm package 打包忽略清单
+# 目的：只把 Chart.yaml / values*.yaml / templates/ / README.md 打进 .tgz，
+#       避免把本地调试产物、编辑器备份、CI 临时文件带进发布制品。
+# 语法：每行一个模式，支持 * ? [] 通配（与 .gitignore 类似但不完全相同）
+# =============================================================================
+
+# 打包/渲染产物
+*.tgz
+*.tar.gz
+charts/*.tgz
+
+# 渲染输出（helm template 落盘留档用）
+rendered/
+out/
+
+# 编辑器与操作系统垃圾文件
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+*.bak
+*.orig
+*.tmp
+
+# IDE 配置
+.idea/
+.vscode/
+*.iml
+
+# 本地私密值文件（**绝不入库、绝不入包**）
+values-local.yaml
+values-*.local.yaml
+secrets.yaml
+*.secret.yaml
+.env
+.env.*
+
+# 版本控制元数据
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# 本地校验脚本
+validate.py

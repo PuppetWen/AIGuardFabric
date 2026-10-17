@@ -1,0 +1,35 @@
+# AIGuardFabric 检测规则 —— AWS Access Key ID 明文
+# 安全域: credential-leak（凭证泄露）｜ 检测目标: config ｜ 算子: regex ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://cwe.mitre.org/data/definitions/798.html
+key: CL-AWS-003
+name: AWS Access Key ID 明文
+description: AWS 长期凭证固定以 AKIA/ASIA 开头 + 16 位大写字母数字。
+domain: credential-leak
+severity: critical
+kind: regex
+target: config
+action: redact
+enabled: true
+rollout_percent: 100
+tags:
+- CWE-798
+- cloud-credential
+references:
+- https://cwe.mitre.org/data/definitions/798.html
+detection:
+  type: regex
+  pattern: '\b(?:AKIA|ASIA)[0-9A-Z]{16}\b'
+  case_insensitive: true
+  min_matches: 1
+samples:
+  positive:
+  - aws_access_key_id = AKIAIOSFODNN7EXAMPLE
+  - AWS_ACCESS_KEY_ID=ASIAZ5T7XQ2LM4NVWB3D
+  negative:
+  - aws_access_key_id = <YOUR_AWS_ACCESS_KEY_ID>
+  - 占位符 AKIA*** 请替换为 CI 注入的临时凭证。
+remediation: 在 IAM 中停用该 Access Key 并轮换；改用 IAM Role / OIDC 联合身份。
+author: agf-rules
+version: 1

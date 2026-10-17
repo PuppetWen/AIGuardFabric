@@ -1,0 +1,45 @@
+# Suricata —— eve.json HTTP 事件
+# 正样本：parsers/suricata/samples.json 中 key = suricata-eve-http-json
+key: suricata-eve-http-json
+name: Suricata eve.json HTTP
+vendor: Suricata
+product: eve.json
+protocols: [file, beats, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  kind=$.event_type
+  src_ip=$.src_ip
+  src_port=$.src_port
+  dest_ip=$.dest_ip
+  dest_port=$.dest_port
+  proto=$.proto
+  hostname=$.http.hostname
+  uri=$.http.url
+  method=$.http.http_method
+  ua=$.http.http_user_agent
+  http_version=$.http.protocol
+  status=$.http.status
+  length=$.http.length
+mapping:
+  map:
+    kind: event.type
+    src_ip: source.ip
+    src_port: source.port
+    dest_ip: destination.ip
+    dest_port: destination.port
+    proto: network.transport
+    hostname: url.domain
+    uri: url.path
+    method: http.request.method
+    ua: user_agent.original
+    http_version: http.version
+    status: http.response.status_code
+    length: http.response.body.bytes
+  time_field: ts
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [uri, hostname]
+sample_fixture: parsers/suricata/samples.json#suricata-eve-http-json
+description: Suricata eve.json HTTP 事件（http.hostname/url/http_method/http_user_agent/status），入网侧 Web 审计。

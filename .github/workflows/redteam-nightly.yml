@@ -1,0 +1,220 @@
+# =============================================================================
+# AIGuardFabric · 红队用例库夜间回归
+#
+# 触发条件
+#   * schedule：每日 02:17 UTC（= 北京时间 10:17），避开整点高峰
+#   * workflow_dispatch：手工触发，可指定是否只跑用例库结构校验
+#   * push 到 main/master 且改动落在 redteam/ 或 crates/agf-scan/ 时也跑一次
+#     （用例库或规则引擎改了，应当天就能发现回归）
+#
+# 为什么需要夜间回归
+#   红队用例库（redteam/**/*.yaml，RT-* 系列）与检测引擎（crates/agf-scan）是
+#   解耦的：用例库更新很频繁（新增公开 PoC），检测规则也会随规则包迭代。
+#   夜里跑一遍能最早发现"新用例打不中 / 旧用例误报"的漂移。
+#
+# -----------------------------------------------------------------------------
+# 真实命令核对结论（不凭规格假设，已逐条 grep 源码）
+# -----------------------------------------------------------------------------
+# ✅ `cargo test -p agf-scan` —— **命令真实存在**：
+#     crates/agf-scan 是 workspace 成员（见 Cargo.toml members），
+#     crate 内含 crates/agf-scan/src/redteam.rs，其中有一批 #[test] / #[tokio::test]
+#     （library_stats_and_selection / select_filters_by_capability / case_id_is_deterministic /
+#      missing_categories_reported / category_coverage_counts / domain_mapping /
+#      markdown_notes_simulation 等），因此该命令会真实执行红队编排相关用例。
+#
+# ⚠ TODO(nightly-redteam-catalog)：**没有**"把 redteam/**/*.yaml 用例库当作数据加载并
+#     回归"的独立测试目标。已核对事实：
+#       * `crates/agf-scan/tests/` 下只有一个文件 `rules_library.rs`（针对 rules/ 规则包）；
+#       * 全仓库 grep `redteam/`、`RT-CT` 在 `*.rs` 下**零命中** → 无测试读取 redteam 目录；
+#       * 因此 `cargo test -p agf-scan --test redteam_catalog` 这类命令**不存在**，
+#         本流水线**不会**调用它（写了就是假命令）。
+#     现状替代：下面 "Validate redteam catalog structure" 步骤用 PyYAML 做**结构级**校验
+#     （能解析、字段齐全、key 唯一、分类目录非空），只保证用例库"没坏"，不保证"能打中"。
+#     待 agf-scan 增加用例库加载器 + 回归入口后，把该步骤替换为真实测试命令。
+#     登记位置：docs/pending-verification.deploy.md → PV-DEPLOY-005
+#
+# -----------------------------------------------------------------------------
+# AGF_OFFLINE 开关
+# -----------------------------------------------------------------------------
+# 取值来自仓库变量 AGF_OFFLINE（未设置默认 '0'）。AGF_OFFLINE=1 时跳过：
+#   * dtolnay/rust-toolchain 与 actions/cache（离线 runner 需预装工具链）
+#   * 任何需要外网的用例拉取（本流水线默认不拉取外网；用例库随仓库分发）
+# 离线时**仍然执行**全部红队回归检查本身 —— 离线不等于豁免回归。
+# =============================================================================
+
+name: redteam-nightly
+
+on:
+  schedule:
+    # 每日 02:17 UTC
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      structure_only:
+        description: "只跑用例库结构校验（跳过 cargo 编译/测试）"
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches: [main, master]
+    paths:
+      - "redteam/**"
+      - "crates/agf-scan/**"
+      - "rules/**"
+      - ".github/workflows/redteam-nightly.yml"
+
+concurrency:
+  group: redteam-nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. 红队用例库回归（cargo test -p agf-scan）
+  # ---------------------------------------------------------------------------
+  redteam-regression:
+    name: redteam regression (cargo test -p agf-scan)
+    if: ${{ !inputs.structure_only }}
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+      CARGO_INCREMENTAL: "0"
+      RUST_BACKTRACE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust toolchain
+        if: env.AGF_OFFLINE != '1'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore cargo cache (target/)
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            .cargo/registry
+            .cargo/git
+          key: ${{ runner.os }}-redteam-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-redteam-
+
+      # 红队编排 + 用例选择 + 结果映射的单元/集成测试（真实命令，见文件头核对结论）
+      - name: cargo test -p agf-scan
+        run: cargo test -p agf-scan
+
+      # 规则库是红队检测的判据来源，一并夜间回归（与 ci.yml 的 rules job 互补：
+      # CI 是合入门禁，这里是"隔夜漂移"探测）
+      - name: cargo test -p agf-scan --test rules_library
+        run: cargo test -p agf-scan --test rules_library
+
+  # ---------------------------------------------------------------------------
+  # 2. 用例库结构校验（当前唯一的用例库级保障，见文件头 TODO）
+  # ---------------------------------------------------------------------------
+  catalog-structure:
+    name: redteam catalog structure (interim, PyYAML)
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        if: env.AGF_OFFLINE != '1'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        if: env.AGF_OFFLINE != '1'
+        run: python -m pip install --upgrade "PyYAML>=6"
+
+      # 说明：这是**结构级**校验（能解析 / 字段齐全 / key 唯一 / 分类目录非空），
+      # 不是"用例能被引擎打中"的能力验证 —— 后者需要 agf-scan 提供用例库加载器，
+      # 见 TODO(nightly-redteam-catalog)。
+      - name: Validate redteam catalog structure
+        run: |
+          python - <<'PY'
+          import glob, json, os, sys
+          try:
+              import yaml
+          except ImportError:
+              print("PyYAML 不可用（离线 runner 未预装）→ 跳过用例库结构校验")
+              sys.exit(0)
+
+          files = sorted(glob.glob("redteam/**/*.yaml", recursive=True) + glob.glob("redteam/**/*.yml", recursive=True))
+          if not files:
+              print("::error::redteam/ 下没有任何 YAML 用例文件")
+              sys.exit(1)
+
+          problems, keys, categories = [], {}, {}
+          for f in files:
+              try:
+                  doc = yaml.safe_load(open(f, encoding="utf-8"))
+              except Exception as exc:
+                  problems.append(f"{f}: YAML 解析失败: {exc}")
+                  continue
+              if not isinstance(doc, dict):
+                  problems.append(f"{f}: 顶层不是映射（mapping）")
+                  continue
+              key = doc.get("id") or doc.get("key") or os.path.splitext(os.path.basename(f))[0]
+              if key in keys:
+                  problems.append(f"{f}: 用例 key 重复（已在 {keys[key]} 出现）: {key}")
+              keys[key] = f
+              cat = os.path.basename(os.path.dirname(f)) or "root"
+              categories[cat] = categories.get(cat, 0) + 1
+              for field in ("title", "category"):
+                  if not doc.get(field):
+                      problems.append(f"{f}: 缺少字段 `{field}`")
+
+          print("用例总数：", len(files))
+          print("分类分布：", json.dumps(categories, ensure_ascii=False, sort_keys=True))
+          if problems:
+              for p in problems:
+                  print("::error::" + p)
+              sys.exit(1)
+          print("用例库结构校验通过（结构级，非能力级 —— 见 TODO(nightly-redteam-catalog)）")
+          PY
+
+      - name: Warn when regression job was skipped
+        if: ${{ inputs.structure_only }}
+        run: echo "::warning::structure_only=true —— 本次仅做用例库结构校验，未执行 cargo test -p agf-scan"
+
+  # ---------------------------------------------------------------------------
+  # 3. 汇总（红队回归红 = 夜间失败，供通知/看板消费）
+  # ---------------------------------------------------------------------------
+  summary:
+    name: nightly summary
+    needs: [redteam-regression, catalog-structure]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      AGF_OFFLINE: ${{ vars.AGF_OFFLINE || '0' }}
+    steps:
+      - name: Write job summary
+        run: |
+          {
+            echo "## 红队夜间回归"
+            echo ""
+            echo "| 检查 | 结论 |"
+            echo "|---|---|"
+            echo "| \`cargo test -p agf-scan\` | ${{ needs.redteam-regression.result }} |"
+            echo "| 用例库结构校验 | ${{ needs.catalog-structure.result }} |"
+            echo ""
+            echo "> 用例库能力级回归（redteam/**/*.yaml 被引擎真实加载并判定）尚未实现，"
+            echo "> 见 \`docs/pending-verification.deploy.md\` PV-DEPLOY-005。"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail if any check failed
+        if: needs.redteam-regression.result == 'failure' || needs.catalog-structure.result == 'failure'
+        run: |
+          echo "::error::红队夜间回归存在失败项"
+          exit 1

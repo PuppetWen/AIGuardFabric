@@ -1,0 +1,152 @@
+{{/*
+  agf-scheduler Deployment —— 资产盘点 / 日志拉取 / 红队巡航 / 规则热更新 / 报表 / 归档
+  事实来源：
+    * docker-compose.yml: agf-scheduler（无对外端口，healthcheck http://127.0.0.1:9101/healthz）
+      以及 AGF_SCHEDULER_BACKEND（local-cron | schedulerx3）
+    * deploy/docker/Dockerfile: --target scheduler → ENTRYPOINT /usr/local/bin/agf-scheduler
+      （镜像内含 agfctl，便于在同一镜像里执行迁移/备份）
+  单副本语义：replicaCount 固定为 1；多副本需改用 SchedulerX3 后端，避免定时任务重复触发。
+*/}}
+{{- if .Values.scheduler.enabled }}
+{{- $root := . -}}
+{{- $svc := .Values.scheduler -}}
+{{- $name := include "agf.componentName" (dict "root" $root "component" "scheduler") -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.componentLabels" (dict "root" $root "component" "scheduler") | nindent 4 }}
+  annotations:
+    aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+    aiguardfabric.io/singleton: "true（local-cron 后端下禁止多副本）"
+spec:
+  # local-cron 后端下必须单副本；改用 schedulerx3 后可放开（但仍建议 1~2）
+  replicas: {{ $svc.replicaCount }}
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "agf.componentSelectorLabels" (dict "root" $root "component" "scheduler") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "agf.componentLabels" (dict "root" $root "component" "scheduler") | nindent 8 }}
+        {{- with $svc.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- include "agf.prometheusAnnotations" (dict "Values" $root.Values "metricsPort" $root.Values.ports.schedulerHealth) | nindent 8 }}
+        aiguardfabric.io/config-revision: {{ toYaml $root.Values.config | sha256sum | trunc 16 }}
+        {{- with $svc.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "agf.serviceAccountName" $root }}
+      automountServiceAccountToken: {{ $root.Values.serviceAccount.automountServiceAccountToken }}
+      securityContext:
+        {{- include "agf.podSecurityContext" $root | nindent 8 }}
+      {{- include "agf.imagePullSecrets" (dict "Values" $root.Values "componentImagePullSecrets" $svc.imagePullSecrets) | nindent 6 }}
+      terminationGracePeriodSeconds: {{ $svc.terminationGracePeriodSeconds }}
+      {{- with $svc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $svc.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: agf-scheduler
+          image: {{ include "agf.image" (dict "Chart" $root.Chart "Values" $root.Values "componentImage" $svc.image) }}
+          imagePullPolicy: {{ include "agf.imagePullPolicy" (dict "Values" $root.Values "componentImage" $svc.image) }}
+          {{- with $svc.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml $root.Values.containerSecurityContext | nindent 12 }}
+          ports:
+            # 健康/指标端口（compose healthcheck 指向 9101）
+            - name: sched-health
+              containerPort: {{ $root.Values.ports.schedulerHealth }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "agf.configMapName" $root }}
+            {{- with $svc.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: AGF_SCHEDULER_HOST
+              value: "0.0.0.0"
+            - name: AGF_SCHEDULER_PORT
+              value: {{ $root.Values.ports.schedulerHealth | quote }}
+            {{- include "agf.env" (dict "root" $root "component" "scheduler") | nindent 12 }}
+          {{- if $svc.livenessProbe.enabled }}
+          livenessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.livenessProbe "defaultPort" "sched-health") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.readinessProbe.enabled }}
+          readinessProbe:
+            {{- include "agf.probe" (dict "probe" $svc.readinessProbe "defaultPort" "sched-health") | nindent 12 }}
+          {{- end }}
+          {{- if $svc.startupProbe.enabled }}
+          startupProbe:
+            {{- include "agf.probe" (dict "probe" $svc.startupProbe "defaultPort" "sched-health") | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if $root.Values.volumes.rules.configMapName }}
+            - name: rules
+              mountPath: /app/rules
+              readOnly: true
+            {{- else if $root.Values.volumes.rules.existingClaim }}
+            - name: rules
+              mountPath: /app/rules
+              readOnly: true
+            {{- end }}
+            {{- if $root.Values.volumes.evidence.enabled }}
+            # 报表/归档产物临时落盘（最终应上传对象存储）
+            - name: evidence
+              mountPath: /data
+            {{- end }}
+            {{- with $svc.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: {{ $root.Values.volumes.tmp.medium }}
+            sizeLimit: {{ $root.Values.volumes.tmp.sizeLimit }}
+        {{- if $root.Values.volumes.rules.configMapName }}
+        - name: rules
+          configMap:
+            name: {{ $root.Values.volumes.rules.configMapName }}
+        {{- else if $root.Values.volumes.rules.existingClaim }}
+        - name: rules
+          persistentVolumeClaim:
+            claimName: {{ $root.Values.volumes.rules.existingClaim }}
+        {{- end }}
+        {{- if $root.Values.volumes.evidence.enabled }}
+        - name: evidence
+          persistentVolumeClaim:
+            claimName: {{ include "agf.evidenceClaimName" $root }}
+        {{- end }}
+        {{- with $svc.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

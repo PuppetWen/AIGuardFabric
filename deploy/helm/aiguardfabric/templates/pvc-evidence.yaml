@@ -1,0 +1,31 @@
+{{/*
+  证据/暂存 PVC（/data）
+  说明：证据包最终应落对象存储（MinIO/OSS/S3），本地 PVC 仅作缓冲与离线回放。
+  生产建议：
+    * 使用支持 ReadWriteMany 的 NAS/CPFS，以便 server 与 ingest 共享同一证据目录
+    * 或把 volumes.evidence.enabled 置 false，完全走对象存储
+  keepOnUninstall：helm uninstall 后保留数据（默认 true，防止误删证据）
+*/}}
+{{- if and .Values.volumes.evidence.enabled (not .Values.volumes.evidence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "agf.evidenceClaimName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agf.labels" . | nindent 4 }}
+  {{- if .Values.volumes.evidence.keepOnUninstall }}
+  annotations:
+    # 卸载时保留 PVC：证据/审计产物不可因一次 helm uninstall 丢失
+    helm.sh/resource-policy: keep
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.volumes.evidence.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.volumes.evidence.size }}
+  {{- if .Values.volumes.evidence.storageClass }}
+  storageClassName: {{ .Values.volumes.evidence.storageClass | quote }}
+  {{- end }}
+{{- end }}

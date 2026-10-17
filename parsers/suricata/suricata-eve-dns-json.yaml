@@ -1,0 +1,41 @@
+# Suricata —— eve.json DNS 事件
+# 正样本：parsers/suricata/samples.json 中 key = suricata-eve-dns-json
+key: suricata-eve-dns-json
+name: Suricata eve.json DNS
+vendor: Suricata
+product: eve.json
+protocols: [file, beats, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  kind=$.event_type
+  src_ip=$.src_ip
+  src_port=$.src_port
+  dest_ip=$.dest_ip
+  dest_port=$.dest_port
+  proto=$.proto
+  dns_type=$.dns.type
+  rrname=$.dns.rrname
+  rrtype=$.dns.rrtype
+  rcode=$.dns.rcode
+  host=$.host
+mapping:
+  map:
+    kind: event.type
+    src_ip: source.ip
+    src_port: source.port
+    dest_ip: destination.ip
+    dest_port: destination.port
+    proto: network.transport
+    dns_type: dns.header_flags
+    rrname: dns.question.name
+    rrtype: dns.question.type
+    rcode: dns.response_code
+    host: host.name
+  time_field: ts
+  defaults:
+    event.severity: info
+    event.category: network
+required_fields: [rrname]
+sample_fixture: tests/fixtures/logs/parsers/suricata-eve-dns-1.log
+description: Suricata eve.json DNS 事件（dns.rrname/rrtype/rcode），域名可用于 C2 与 DNS 隧道检测。

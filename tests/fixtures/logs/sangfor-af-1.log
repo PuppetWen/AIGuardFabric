@@ -1,0 +1,1 @@
+<134>Feb 21 10:23:45 sangfor-af1 CEF:0|Sangfor|AF|8.0.17|1001|IPS 攻击 - SQL 注入|5|src=10.20.30.50 dst=203.0.113.10 spt=54321 dpt=80 proto=TCP act=block cat=入侵检测 msg=检测到针对 203.0.113.10 的 SQL 注入攻击 request=http://203.0.113.10/login?id=1%27%20or%20%271%27=%271

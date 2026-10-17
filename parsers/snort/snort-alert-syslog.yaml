@@ -1,0 +1,31 @@
+# Snort 2.x —— alert 输出（syslog + Grok）
+# 正样本：parsers/snort/samples.json 中 key = snort-alert-syslog
+key: snort-alert-syslog
+name: Snort 2.x 告警（syslog）
+vendor: Snort
+product: Snort 2
+protocols: [syslog, file, beats]
+engine: grok
+pattern: '\[%{INT:gid}:%{INT:sig_id}:%{INT:rev}\] %{DATA:signature} \[\*\*\] \[Classification: %{DATA:class}\] \[Priority: %{INT:priority}\] \{%{WORD:proto}\} %{IPORHOST:src_ip} -> %{IPORHOST:dst_ip}'
+mapping:
+  map:
+    gid: rule.gid
+    sig_id: rule.id
+    rev: rule.version
+    signature: rule.name
+    class: rule.category
+    src_ip: source.ip
+    dst_ip: destination.ip
+    proto: network.transport
+  severity_field: priority
+  severity_map:
+    '1': high
+    '2': medium
+    '3': low
+    '4': info
+  defaults:
+    event.category: intrusion
+    event.action: alert
+required_fields: [signature, src_ip]
+sample_fixture: parsers/snort/samples.json#snort-alert-syslog
+description: Snort 2.x syslog 告警（Priority 1-4 → high/medium/low/info），主机名与进程由 syslog 信封提供。

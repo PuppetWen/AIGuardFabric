@@ -1,0 +1,44 @@
+# Nginx —— JSON 访问日志（log_format ... escape=json）
+# 正样本：parsers/webserver/samples.json 中 key = nginx-json-access
+key: nginx-json-access
+name: Nginx JSON 访问日志
+vendor: Nginx
+product: Nginx
+protocols: [file, beats, kafka, webhook]
+engine: json-path
+pattern: |
+  ts=$.time
+  client_ip=$.remote_addr
+  user=$.remote_user
+  method=$.request_method
+  uri=$.request_uri
+  status=$.status
+  body_bytes=$.body_bytes_sent
+  rt=$.request_time
+  referer=$.http_referer
+  ua=$.http_user_agent
+  xff=$.http_x_forwarded_for
+  upstream=$.upstream_status
+  server=$.server_name
+mapping:
+  map:
+    ts: event.time
+    client_ip: source.ip
+    user: user.name
+    method: http.request.method
+    uri: url.path
+    status: http.response.status_code
+    body_bytes: http.response.body.bytes
+    rt: event.duration
+    referer: http.request.referrer
+    ua: user_agent.original
+    xff: http.request.forwarded_for
+    upstream: http.response.status_code_upstream
+    server: host.name
+  time_field: ts
+  defaults:
+    event.severity: info
+    event.category: web
+required_fields: [client_ip, uri]
+sample_fixture: parsers/webserver/samples.json#nginx-json-access
+description: Nginx JSON 访问日志（remote_addr/request_uri/request_time/http_x_forwarded_for/upstream_status），便于代理链还原。

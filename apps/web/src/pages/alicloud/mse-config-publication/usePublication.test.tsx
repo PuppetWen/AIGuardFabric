@@ -1,0 +1,48 @@
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { expect, it, vi } from 'vitest';
+import type { ApiResult } from '@/api/dataSource';
+import { useAuthStore } from '@/stores/authStore';
+import type { Tenant } from '@/types/domain';
+import { publicationApi } from './api';
+import { usePublication } from './usePublication';
+import { deferred, operation, policyId, preview, result } from './testFixtures';
+import { installHarness } from './testHarness';
+import type { Operation, Preview } from './types';
+vi.mock('@/api/sessionAccess', () => ({ useSessionAccess: vi.fn() }));
+installHarness();
+const confirmations = { confirm_apply: true, confirm_upsert: true, confirm_live: false, confirm_unknown_overlap: false };
+
+it('allows original GET during a long apply, suppresses its older late result and prevents duplicate dispatch', async () => {
+  const pending = deferred<ApiResult<Operation>>();
+  vi.spyOn(publicationApi, 'preview').mockResolvedValue(result(preview()));
+  const apply = vi.spyOn(publicationApi, 'apply').mockReturnValue(pending.promise);
+  vi.spyOn(publicationApi, 'receipt').mockImplementation(async id => result(operation({ requestId: id, status: 'uncertain', cloudWrite: { status: 'unknown' } })));
+  const view = renderHook(() => usePublication(true, true)); await waitFor(() => expect(view.result.current.data).not.toBeNull());
+  act(() => view.result.current.adopt());
+  await act(async () => { await view.result.current.prepare({ action: 'publish', policies: [{ policy_id: policyId, version: 4 }] }, false); });
+  let first!: Promise<void>;
+  act(() => { first = view.result.current.apply(confirmations); void view.result.current.apply(confirmations); });
+  await waitFor(() => expect(apply).toHaveBeenCalledTimes(1));
+  const id = apply.mock.calls[0][0].request_id;
+  expect(new URLSearchParams(window.location.search).get('publication_request_id')).toBe(id);
+  await act(async () => { await view.result.current.readReceipt(id); });
+  expect(view.result.current.operation?.cloudWrite.status).toBe('unknown');
+  await act(async () => { pending.resolve(result(operation({ requestId: id }))); await first; });
+  expect(view.result.current.operation?.cloudWrite.status).toBe('unknown'); expect(view.result.current.busy).toBe(false);
+  await act(async () => { await view.result.current.apply(confirmations); }); expect(apply).toHaveBeenCalledTimes(1);
+});
+it('rejects a late prepared preview after A to B to A session generations rather than reactivating the old draft', async () => {
+  const pending = deferred<ApiResult<Preview>>();
+  const prepare = vi.spyOn(publicationApi, 'preview').mockReturnValue(pending.promise);
+  const view = renderHook(() => usePublication(true, true)); await waitFor(() => expect(view.result.current.data).not.toBeNull());
+  act(() => view.result.current.adopt());
+  let first!: Promise<void>;
+  act(() => { first = view.result.current.prepare({ action: 'publish', policies: [{ policy_id: policyId, version: 4 }] }, false); });
+  await waitFor(() => expect(prepare).toHaveBeenCalledTimes(1));
+  act(() => useAuthStore.setState({ tenant: { id: 'tenant-two', slug: 'two' } as Tenant, sessionGeneration: 2 }));
+  act(() => useAuthStore.setState({ tenant: { id: 'tenant-one', slug: 'one' } as Tenant, sessionGeneration: 3 }));
+  await act(async () => { pending.resolve(result(preview())); await first; });
+  expect(view.result.current.preview).toBeNull();
+  const apply = vi.spyOn(publicationApi, 'apply');
+  await act(async () => { await view.result.current.apply(confirmations); }); expect(apply).not.toHaveBeenCalled();
+});

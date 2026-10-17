@@ -1,0 +1,50 @@
+# 阿里云 Web 应用防火墙 3.0 —— 攻击日志（SLS 推送 JSON）
+# 正样本文件：tests/fixtures/logs/aliyun-waf-sls-1.log（manifest.json → parser_library）
+key: aliyun-waf-sls-json
+name: 阿里云 WAF 攻击日志（SLS JSON）
+vendor: 阿里云
+product: Web应用防火墙
+protocols: [webhook, http-pull, kafka, object-storage]
+engine: json-path
+pattern: |
+  ts=$.time
+  host=$.host
+  src_ip=$.real_client_ip
+  method=$.request_method
+  uri=$.request_uri
+  ua=$.http_user_agent
+  action=$.waf_action
+  attack=$.attack_type
+  rule_id=$.rule_id
+  rule_name=$.rule_name
+  status=$.status
+  region=$.region
+  trace=$.trace_id
+mapping:
+  map:
+    ts: event.time
+    host: host.name
+    src_ip: source.ip
+    method: http.request.method
+    uri: url.path
+    ua: user_agent.original
+    attack: event.category_raw
+    rule_id: rule.id
+    rule_name: rule.name
+    status: http.response.status_code
+    region: cloud.region
+    trace: trace.id
+  category_map:
+    sqli: web
+    xss: web
+    rce: web
+    webshell: web
+    lfi: web
+    scanner: web
+  action_field: action
+  defaults:
+    event.severity: medium
+    event.category: web
+required_fields: [rule_id, src_ip]
+sample_fixture: tests/fixtures/logs/parsers/aliyun-waf-sls-1.log
+description: 阿里云 WAF 3.0 攻击日志（SLS 字段：time/host/real_client_ip/request_method/request_uri/waf_action/attack_type/rule_id/rule_name/status/region/trace_id）。

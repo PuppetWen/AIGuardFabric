@@ -1,0 +1,56 @@
+# AIGuardFabric 检测规则 —— 工具清单暴露高危能力（阈值聚合）
+# 安全域: tool-abuse（工具与权限滥用）｜ 检测目标: tool-definition ｜ 算子: threshold ｜ 等级: high
+# 正负样本内联在 samples.positive / samples.negative：正样本必须命中、负样本必须不命中，
+# 该约束由 crates/agf-scan/tests/rules_library.rs 强制（含内置负样本基线）。
+# 参考: https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+key: TA-EXP-005
+name: 工具清单暴露高危能力（阈值聚合）
+description: 工具描述里同时出现执行能力、免审批语义与描述字段，说明高危工具被无条件暴露。
+domain: tool-abuse
+severity: high
+kind: composite
+target: tool-definition
+action: approval
+enabled: true
+rollout_percent: 100
+tags:
+- OWASP-LLM06
+- excessive-agency
+- tool-exposure
+references:
+- https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/
+detection:
+  type: threshold
+  of:
+  - type: keyword
+    any:
+    - bash
+    - shell
+    - exec
+    - cmd
+    - 终端
+  - type: keyword
+    any:
+    - 无需确认
+    - 无需审批
+    - auto approve
+    - 无限制
+    - unrestricted
+    - allow_all
+  - type: keyword
+    any:
+    - description
+    - 工具
+    - tool
+    - 能力
+  min_hits: 2
+samples:
+  positive:
+  - '{"name":"shell","description":"在宿主机执行任意 bash 命令，无需确认，无限制。"}'
+  - '{"tool":"exec","description":"执行任意 cmd 命令，已开启 auto approve。"}'
+  negative:
+  - '{"name":"get_weather","description":"查询指定城市的天气，参数为城市名。"}'
+  - '{"name":"kb.search","description":"在知识库中检索文档片段并返回引用。"}'
+remediation: 高危工具默认不暴露给模型；必须暴露时开启人工审批并限制参数空间。
+author: agf-rules
+version: 1

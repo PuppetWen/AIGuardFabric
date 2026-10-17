@@ -1,0 +1,33 @@
+# AWS VPC Flow Logs —— 默认格式（syslog 转发 + Grok）
+# 正样本：parsers/aws/samples.json 中 key = aws-vpc-flow-syslog
+# 公开默认格式：`<version> <account-id> <interface-id> <srcaddr> <dstaddr> <srcport> <dstport>
+# <protocol> <packets> <bytes> <start> <end> <action> <log-status>`
+key: aws-vpc-flow-syslog
+name: AWS VPC Flow Logs
+vendor: AWS
+product: VPC Flow Logs
+protocols: [syslog, file, beats]
+engine: grok
+pattern: '%{INT:version} %{INT:account} %{NOTSPACE:interface} %{IPORHOST:src_ip} %{IPORHOST:dst_ip} %{INT:src_port} %{INT:dst_port} %{INT:protocol} %{INT:packets} %{INT:bytes} %{INT:start} %{INT:end} %{WORD:action} %{WORD:log_status}'
+mapping:
+  map:
+    account: cloud.account.id
+    interface: observer.name
+    src_ip: source.ip
+    dst_ip: destination.ip
+    src_port: source.port
+    dst_port: destination.port
+    protocol: network.iana_number
+    packets: network.packets
+    bytes: network.bytes
+    end: event.end
+    log_status: event.outcome
+  time_field: start
+  time_format: unix
+  action_field: action
+  defaults:
+    event.category: network
+    event.severity: info
+required_fields: [src_ip, dst_ip, log_status]
+sample_fixture: parsers/aws/samples.json#aws-vpc-flow-syslog
+description: AWS VPC Flow Logs 默认格式（十四列），start/end 为 Unix 秒，ACCEPT/REJECT 归一为 allowed/denied。

@@ -1,0 +1,45 @@
+# 阿里云 云安全中心 —— 漏洞公告（JSON）
+# 正样本：parsers/aliyun/samples.json 中 key = aliyun-sas-vuln-json
+key: aliyun-sas-vuln-json
+name: 阿里云云安全中心漏洞告警
+vendor: 阿里云
+product: 云安全中心
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  vul_id=$.vulId
+  vul_name=$.vulName
+  level=$.vulLevel
+  kind=$.vulType
+  cve=$.cveId
+  host=$.instanceName
+  host_id=$.instanceId
+  ts=$.firstTime
+  status=$.status
+  detail=$.detail
+mapping:
+  map:
+    vul_id: rule.id
+    vul_name: rule.name
+    kind: event.category_raw
+    cve: vulnerability.id
+    host: host.name
+    host_id: host.id
+    ts: event.time
+    status: event.action_raw
+    detail: message
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    cve: intrusion
+    sys: intrusion
+    app: intrusion
+  defaults:
+    event.category: intrusion
+required_fields: [vul_id]
+sample_fixture: parsers/aliyun/samples.json#aliyun-sas-vuln-json
+description: 阿里云云安全中心漏洞公告推送（vulId/vulName/vulLevel/cveId/instanceName 为公开 API 字段），历史漏洞利用面归 intrusion。

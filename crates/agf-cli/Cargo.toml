@@ -1,0 +1,64 @@
+[package]
+name = "agf-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "agfctl 命令行：迁移、备份恢复、健康自检、密钥生成、气隙离线包、规则与红队用例校验"
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "agfctl"
+path = "src/main.rs"
+
+[lib]
+name = "agf_cli"
+path = "src/lib.rs"
+
+[dependencies]
+# agfctl 的依赖图刻意保持最小：只保留实际复用能力的 crate。
+# 说明（脚手架阶段遗留的 agf-api/agf-asset/agf-alicloud/agf-adapters 已移除）：
+#   - agf-api 是唯一把 agf-correlate 拉进依赖图的内部依赖，而 agfctl 不需要 HTTP 层；
+#   - agfctl 的命令面（迁移/备份/健康自检/密钥/离线包/规则与用例校验）不触及资产建模、
+#     阿里云适配器与设备适配器；
+# 需要时再按 `xxx.workspace = true` 加回（工作区已声明，无需改根 Cargo.toml）。
+agf-core.workspace = true
+agf-storage.workspace = true
+agf-auth.workspace = true
+agf-scan.workspace = true
+
+tokio.workspace = true
+clap.workspace = true
+# sqlx：仅用于 `agfctl db check-schema` / `migrate`（PG 连接与运行期迁移目录）。
+# 与 agf-storage 共用工作区统一版本，保证连接参数与迁移语义一致。
+sqlx.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+dotenvy.workspace = true
+reqwest.workspace = true
+base64.workspace = true
+hex.workspace = true
+sha2.workspace = true
+flate2.workspace = true
+tar.workspace = true
+zip.workspace = true
+walkdir.workspace = true
+tempfile.workspace = true
+glob.workspace = true
+regex.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+
+[lints]
+workspace = true

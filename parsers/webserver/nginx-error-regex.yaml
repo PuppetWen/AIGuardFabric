@@ -1,0 +1,36 @@
+# Nginx —— error.log（正则）
+# 正样本：parsers/webserver/samples.json 中 key = nginx-error-regex
+key: nginx-error-regex
+name: Nginx 错误日志
+vendor: Nginx
+product: Nginx
+protocols: [file, beats, syslog]
+engine: regex
+pattern: '(?P<ts>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<pid>\d+)#(?P<tid>\d+): \*(?P<conn>\d+) (?P<msg>.*?), client: (?P<client_ip>[\d.]+), server: (?P<server>\S+), request: "(?P<method>\w+) (?P<uri>\S+) HTTP/(?P<http_version>[\d.]+)"'
+mapping:
+  map:
+    pid: process.pid
+    conn: event.sequence
+    msg: message
+    client_ip: source.ip
+    server: host.name
+    method: http.request.method
+    uri: url.path
+    http_version: http.version
+  time_field: ts
+  time_format: '%Y/%m/%d %H:%M:%S'
+  severity_field: level
+  severity_map:
+    emerg: critical
+    alert: critical
+    crit: critical
+    error: high
+    warn: medium
+    notice: low
+    info: info
+    debug: info
+  defaults:
+    event.category: web
+required_fields: [client_ip, msg]
+sample_fixture: parsers/webserver/samples.json#nginx-error-regex
+description: Nginx error.log（级别/pid/#连接号/请求行），error 级归 high，用于上传失败与后端异常排查。

@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "note": "CrowdStrike 模板正样本与关键字段断言。JSON 结构按 Falcon 公开事件模型（metadata/event 两层、eventCreationTime 为毫秒、SeverityName/Tactic/Technique 等字段名）重建；未联网抓取。 新增 public/ 样本为公开原文捕获，独立来源见 public/manifest.json；原有合成样本标注不变。",
+  "samples": {
+    "crowdstrike-falcon-detection-json": {
+      "protocol": "webhook",
+      "line": "{\"metadata\":{\"eventType\":\"DetectionSummaryEvent\",\"eventCreationTime\":1771665180000,\"customerID\":\"c0001\"},\"event\":{\"DetectId\":\"ldt:0001\",\"DetectName\":\"Suspicious PowerShell Execution\",\"SeverityName\":\"High\",\"ComputerName\":\"WIN-APP-03\",\"LocalIP\":\"10.20.30.110\",\"UserName\":\"admin\",\"ProcessId\":4321,\"ParentProcessId\":1234,\"CommandLine\":\"powershell -enc SQBFAFgA\",\"FileName\":\"powershell.exe\",\"FilePath\":\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\",\"Tactic\":\"Execution\",\"Technique\":\"PowerShell\"}}",
+      "expect": {
+        "event.time": "2026-02-21T09:13:00.000Z",
+        "event.category_raw": "DetectionSummaryEvent",
+        "rule.id": "ldt:0001",
+        "rule.name": "Suspicious PowerShell Execution",
+        "host.name": "WIN-APP-03",
+        "host.ip": "10.20.30.110",
+        "user.name": "admin",
+        "process.pid": "4321",
+        "process.parent.pid": "1234",
+        "process.command_line": "powershell -enc SQBFAFgA",
+        "file.name": "powershell.exe",
+        "file.path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "threat.tactic.name": "Execution",
+        "threat.technique.name": "PowerShell",
+        "event.severity": "high",
+        "event.category": "intrusion"
+      }
+    },
+    "crowdstrike-falcon-edr-telemetry-json": {
+      "protocol": "http-pull",
+      "line": "{\"metadata\":{\"eventType\":\"ProcessRollup2\",\"eventCreationTime\":1771665240000},\"event\":{\"aid\":\"c0001\",\"ComputerName\":\"WIN-APP-03\",\"UserName\":\"admin\",\"ProcessId\":5678,\"ImageFileName\":\"C:\\\\Windows\\\\System32\\\\cmd.exe\",\"CommandLine\":\"cmd.exe /c whoami\",\"ParentImageFileName\":\"C:\\\\Windows\\\\explorer.exe\",\"MD5HashData\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b\",\"SHA256HashData\":\"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c\"}}",
+      "expect": {
+        "event.time": "2026-02-21T09:14:00.000Z",
+        "event.category_raw": "ProcessRollup2",
+        "host.name": "WIN-APP-03",
+        "user.name": "admin",
+        "process.pid": "5678",
+        "process.executable": "C:\\Windows\\System32\\cmd.exe",
+        "process.command_line": "cmd.exe /c whoami",
+        "process.parent.executable": "C:\\Windows\\explorer.exe",
+        "process.hash.md5": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b",
+        "process.hash.sha256": "9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b0a2e4f6c8d0b2a4e6f8c0d2b4a6e8f0c",
+        "event.severity": "info",
+        "event.category": "process"
+      }
+    },
+    "crowdstrike-falcon-logon-json": {
+      "protocol": "webhook",
+      "line": "{\"metadata\":{\"eventType\":\"UserLogonFailed2\",\"eventCreationTime\":1771665300000},\"event\":{\"ComputerName\":\"DC-01\",\"UserName\":\"administrator\",\"RemoteAddressIP4\":\"203.0.113.30\",\"LogonType\":\"10\",\"Status\":\"0xC000006D\",\"SubStatus\":\"0xC000006A\"}}",
+      "expect": {
+        "event.time": "2026-02-21T09:15:00.000Z",
+        "event.category_raw": "UserLogonFailed2",
+        "host.name": "DC-01",
+        "user.name": "administrator",
+        "source.ip": "203.0.113.30",
+        "log.logon.type": "10",
+        "event.outcome": "0xC000006D",
+        "error.code": "0xC000006A",
+        "event.category": "authentication",
+        "event.severity": "high"
+      }
+    },
+    "crowdstrike-falcon-fdr-process-json": {
+      "fixture": "public/crowdstrike-falcon-fdr-process-json.log",
+      "protocol": "object-storage",
+      "expect": {
+        "event.id": "9b9afac9-0d86-11ed-b9af-0248097df5d7",
+        "host.id": "665e9c4418234e1e92fe20df52616163",
+        "process.executable": "\\Device\\HarddiskVolume1\\Windows\\System32\\cmd.exe",
+        "process.command_line": "\"cmd.exe\" /c \"vssadmin.exe create shadow /for=C: & mklink /D C:\\Temp\\vssstore \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy1\"",
+        "event.category": "process",
+        "event.severity": "info"
+      }
+    }
+  }
+}

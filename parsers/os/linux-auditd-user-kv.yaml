@@ -1,0 +1,32 @@
+# Linux auditd —— USER_LOGIN/USER_AUTH 记录（KV 正文）
+# 正样本：parsers/os/samples.json 中 key = linux-auditd-user-kv
+key: linux-auditd-user-kv
+name: Linux auditd 用户登录审计
+vendor: Linux
+product: auditd
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    type: event.category_raw
+    pid: process.pid
+    uid: user.id
+    auid: user.audit_id
+    ses: user.session_id
+    op: event.action_raw
+    acct: user.name
+    exe: process.executable
+    addr: source.ip
+    terminal: process.tty
+    res: event.outcome
+  category_map:
+    USER_LOGIN: authentication
+    USER_AUTH: authentication
+    USER_ACCT: authentication
+    USER_CMD: process
+  defaults:
+    event.severity: info
+required_fields: [acct, type]
+sample_fixture: parsers/os/samples.json#linux-auditd-user-kv
+description: auditd USER_LOGIN/USER_AUTH 记录（acct/auid/addr/terminal/res），登录审计归 authentication。

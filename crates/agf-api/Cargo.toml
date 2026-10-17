@@ -1,0 +1,103 @@
+[package]
+name = "agf-api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "AIGuardFabric HTTP/GraphQL/WebSocket API：Axum 路由、OpenAPI 3.1、RFC 9457、限流与幂等"
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = []
+test-loopback-transport = ["agf-aigw/test-loopback-transport", "agf-storage/test-loopback-transport"]
+
+[dependencies]
+agf-core.workspace = true
+agf-storage.workspace = true
+agf-auth.workspace = true
+agf-asset.workspace = true
+agf-scan.workspace = true
+agf-aigw.workspace = true
+agf-ingest.workspace = true
+agf-correlate.workspace = true
+agf-runtime.workspace = true
+agf-adapters.workspace = true
+agf-alicloud.workspace = true
+sqlx.workspace = true
+secrecy.workspace = true
+saml-rs.workspace = true
+rcgen.workspace = true
+rsa.workspace = true
+rand.workspace = true
+
+tokio.workspace = true
+tokio-stream.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+bytes.workspace = true
+# `/ws` 的 NATS 事件面（`AGF_NATS_ENABLED=1`）：与 `agf-ingest::bus::NatsEventBus` 用同一个
+# `async-nats` 版本；`NatsEventBus` 不暴露底层 client，且其主题/载荷面向 `agf_core::event::Event`，
+# 无法承载 `/ws` 的 `WsEvent`，故这里直接持有 client（连接与错误映射保持同一套）。
+async-nats.workspace = true
+
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+axum.workspace = true
+axum-extra.workspace = true
+reqwest.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+hyper.workspace = true
+http.workspace = true
+http-body-util.workspace = true
+async-graphql.workspace = true
+async-graphql-axum.workspace = true
+utoipa.workspace = true
+# TODO(api-openapi-swagger): `utoipa-swagger-ui` 的 build script 在本机（Windows + 无外网
+# 代理）会失败，因此**不声明**该依赖；Swagger UI 页面暂缺，规范由
+# `GET /api/v1/openapi.json` 返回（可直接喂给任意 Swagger UI / Postman）。
+# utoipa-swagger-ui.workspace = true
+
+tracing.workspace = true
+# OTLP 装配（`metrics::otel`）需要命名 `tracing_subscriber::Registry` 作为层类型参数。
+tracing-subscriber.workspace = true
+tracing-opentelemetry.workspace = true
+opentelemetry.workspace = true
+opentelemetry_sdk.workspace = true
+opentelemetry-otlp.workspace = true
+metrics.workspace = true
+prometheus.workspace = true
+
+uuid.workspace = true
+chrono.workspace = true
+regex.workspace = true
+url.workspace = true
+dashmap.workspace = true
+indexmap.workspace = true
+# 演示原始日志以 base64 写入 `agf-ingest` 的原始日志层（`RawLog.payload_b64`），
+# 与接入侧编码口径一致；仅此一处使用（`state.rs` 的演示灌库）。
+base64.workspace = true
+# 采集器上行（`routes/ingest/agent_mtls.rs`）的证书身份需要 X.509 风格的 SHA-256 指纹
+# （32 字节指纹的小写 hex，与 `openssl x509 -fingerprint -sha256` 同口径）。
+sha2.workspace = true
+hex.workspace = true
+# PDF embeds only the glyphs used in a report; no host font installation is required.
+subsetter = "=0.2.6"
+skrifa = "=0.42.1"
+
+[dev-dependencies]
+jsonwebtoken.workspace = true
+pretty_assertions.workspace = true
+wiremock.workspace = true
+# 采集器上行集成测试要在**进程内**造一张自签客户端证书（不依赖本机 openssl / 外部进程）。
+rcgen.workspace = true
+
+[lints]
+workspace = true

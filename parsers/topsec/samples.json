@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "note": "天融信模板正样本与关键字段断言。LEEF 1.0 样本使用制表符扩展段（\t），Grok/KV 样本按 syslog 转发常见形态重建；未联网抓取。",
+  "samples": {
+    "topsec-topsap-leef": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:44:00 topsec-soc1 LEEF:1.0|Topsec|TopSAP|3.1|1001|cat=Authentication\tdevTime=2026-02-21 10:44:00\tsrc=10.20.30.71\tdst=203.0.113.15\tsuser=admin\tsev=7\tmsg=口令暴力破解",
+      "expect": {
+        "observer.vendor": "Topsec",
+        "observer.product": "TopSAP",
+        "rule.id": "1001",
+        "event.category_raw": "Authentication",
+        "source.ip": "10.20.30.71",
+        "destination.ip": "203.0.113.15",
+        "user.name": "admin",
+        "message": "口令暴力破解",
+        "event.time": "2026-02-21T10:44:00.000Z",
+        "event.severity": "high",
+        "event.category": "authentication"
+      }
+    },
+    "topsec-ngfw-kv": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:45:00 topsec-ngfw1 NGFW src=203.0.113.16 dst=10.20.30.72 sport=51002 dport=3389 proto=TCP action=deny level=medium rule_id=TS-FW-2001 msg=会话拒绝 policy=deny-rdp app=RDP",
+      "expect": {
+        "host.name": "topsec-ngfw1",
+        "source.ip": "203.0.113.16",
+        "destination.ip": "10.20.30.72",
+        "source.port": "51002",
+        "destination.port": "3389",
+        "network.transport": "TCP",
+        "rule.id": "TS-FW-2001",
+        "rule.name": "deny-rdp",
+        "network.application": "RDP",
+        "message": "会话拒绝",
+        "event.severity": "medium",
+        "event.action": "denied",
+        "event.category": "network"
+      }
+    },
+    "topsec-audit-syslog": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:46:00 topsec-audit1 2026-02-21 10:46:00 device=FW-01 user=admin src=10.20.30.73 action=login result=success msg=\"管理员登录成功\"",
+      "expect": {
+        "host.name": "topsec-audit1",
+        "event.time": "2026-02-21T10:46:00.000Z",
+        "observer.name": "FW-01",
+        "user.name": "admin",
+        "source.ip": "10.20.30.73",
+        "event.outcome": "success",
+        "message": "管理员登录成功",
+        "event.action": "login",
+        "event.category": "authentication"
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+<189>date=2026-02-21 time=10:27:00 devname="FGT-EDGE-01" devid="FG100F0000000001" logid="1500054000" type="utm" subtype="dns" eventtype="dns-query" level="information" srcip=10.20.30.50 srcport=53122 dstip=8.8.8.8 dstport=53 proto=17 action="pass" qname="malware-c2.example.net" qtype=1 catdesc="Malicious Websites"

@@ -1,0 +1,1 @@
+{"occur_time":"2026-02-21T10:23:45+08:00","event_type":"malware","host_name":"ecs-app-02","host_ip":"10.20.30.42","severity":"critical","malware_name":"Trojan.Linux.XorDDoS","file_path":"/tmp/.x/kswapd0","action":"quarantine","user":"nginx","region":"cn-north-4"}

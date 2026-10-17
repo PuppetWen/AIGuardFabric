@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "note": "Zeek 模板正样本与关键字段断言。TSV 样本按 Zeek 官方 #fields 公开列序重建（\t 分隔，数据行不含 # 头），ts 为 Unix 秒；未联网抓取。 新增 public/ 样本为公开原文捕获，独立来源见 public/manifest.json；原有合成样本标注不变。",
+  "samples": {
+    "zeek-conn-tsv": {
+      "protocol": "file",
+      "line": "1771665000.123456\tC1zKy14m4Nq0cLf9k7\t10.20.30.130\t49786\t203.0.113.130\t3389\ttcp\t-\t1.234\t1024\t2048\tSF\t-\t-\t0\tshADadtt\t12\t1456\t14\t1876",
+      "expect": {
+        "event.time": "2026-02-21T09:10:00.123Z",
+        "event.id": "C1zKy14m4Nq0cLf9k7",
+        "source.ip": "10.20.30.130",
+        "source.port": "49786",
+        "destination.ip": "203.0.113.130",
+        "destination.port": "3389",
+        "network.transport": "tcp",
+        "network.application": "-",
+        "event.duration": "1.234",
+        "source.bytes": "1024",
+        "destination.bytes": "2048",
+        "network.connection_state": "SF",
+        "network.history": "shADadtt",
+        "source.packets": "12",
+        "destination.packets": "14",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    },
+    "zeek-dns-tsv": {
+      "protocol": "file",
+      "line": "1771665060.000000\tCd1a2b3c\t10.20.30.50\t53122\t8.8.8.8\t53\tudp\t12345\t0.012\tmalware-c2.example.net\t1\tC_INET\t1\tA\t0\tNOERROR\tF\tF\tT\tF\t0\t93.184.216.34\t300.000000\tF",
+      "expect": {
+        "event.time": "2026-02-21T09:11:00.000Z",
+        "event.id": "Cd1a2b3c",
+        "source.ip": "10.20.30.50",
+        "destination.ip": "8.8.8.8",
+        "destination.port": "53",
+        "network.transport": "udp",
+        "dns.id": "12345",
+        "event.duration": "0.012",
+        "dns.question.name": "malware-c2.example.net",
+        "dns.question.type": "A",
+        "dns.response_code": "NOERROR",
+        "dns.answers": "93.184.216.34",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    },
+    "zeek-http-tsv": {
+      "protocol": "file",
+      "line": "1771665120.000000\tCHttp01\t203.0.113.131\t51000\t10.20.30.131\t80\t1\tGET\twww.example.com\t/login.php?id=1\t-\t1.1\tsqlmap/1.7.2#stable\t0\t512\t200\tOK\t-\t-\t(empty)\t-\t-\t-\ttext/html\tFabc123",
+      "expect": {
+        "event.time": "2026-02-21T09:12:00.000Z",
+        "event.id": "CHttp01",
+        "source.ip": "203.0.113.131",
+        "destination.ip": "10.20.30.131",
+        "destination.port": "80",
+        "http.request.method": "GET",
+        "url.domain": "www.example.com",
+        "url.path": "/login.php?id=1",
+        "http.request.referrer": "-",
+        "http.version": "1.1",
+        "user_agent.original": "sqlmap/1.7.2#stable",
+        "http.response.body.bytes": "512",
+        "http.response.status_code": "200",
+        "http.response.status_message": "OK",
+        "http.response.mime_type": "text/html",
+        "event.severity": "info",
+        "event.category": "web"
+      }
+    },
+    "zeek-ssl-tsv": {
+      "protocol": "file",
+      "line": "1771665180.000000\tCSSL01\t10.20.30.132\t52000\t203.0.113.132\t443\tTLSv12\tTLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\tsecp256r1\twww.example.com\tF\t-\th2\tT\tFabc\t-\tCN=www.example.com\tCN=Example CA\t-\t-\t-",
+      "expect": {
+        "event.time": "2026-02-21T09:13:00.000Z",
+        "event.id": "CSSL01",
+        "source.ip": "10.20.30.132",
+        "destination.ip": "203.0.113.132",
+        "destination.port": "443",
+        "tls.version": "TLSv12",
+        "tls.cipher": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+        "tls.curve": "secp256r1",
+        "url.domain": "www.example.com",
+        "tls.resumed": "F",
+        "network.protocol": "h2",
+        "tls.established": "T",
+        "tls.server.subject": "CN=www.example.com",
+        "tls.server.issuer": "CN=Example CA",
+        "tls.validation_status": "-",
+        "event.severity": "info",
+        "event.category": "network"
+      }
+    },
+    "zeek-notice-tsv": {
+      "protocol": "file",
+      "line": "1771665240.000000\tCNotice1\t10.20.30.133\t0\t203.0.113.133\t0\t-\ttcp\tScan::Port_Scan\t203.0.113.133 scanned at least 15 unique ports of host 10.20.30.133\t-\t10.20.30.133\t203.0.113.133\t-\t15\teth0\tNotice::ACTION_LOG\t3600.000000\tUS",
+      "expect": {
+        "event.time": "2026-02-21T09:14:00.000Z",
+        "event.id": "CNotice1",
+        "source.ip": "10.20.30.133",
+        "destination.ip": "203.0.113.133",
+        "network.transport": "tcp",
+        "rule.name": "Scan::Port_Scan",
+        "message": "203.0.113.133 scanned at least 15 unique ports of host 10.20.30.133",
+        "event.count": "15",
+        "observer.name": "eth0",
+        "event.action_raw": "Notice::ACTION_LOG",
+        "event.suppress_for": "3600.000000",
+        "source.geo.country_iso_code": "US",
+        "event.severity": "medium",
+        "event.action": "alert",
+        "event.category": "intrusion"
+      }
+    },
+    "zeek-conn-json": {
+      "fixture": "public/zeek-conn-json.log",
+      "protocol": "file",
+      "expect": {
+        "event.id": "CzeKJi1fKJy8mqFsTi",
+        "source.ip": "217.241.55.94",
+        "destination.ip": "10.0.1.14",
+        "network.transport": "tcp",
+        "event.category": "network",
+        "event.severity": "info"
+      }
+    }
+  }
+}

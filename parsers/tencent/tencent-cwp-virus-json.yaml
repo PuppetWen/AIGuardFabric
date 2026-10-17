@@ -1,0 +1,39 @@
+# 腾讯云 主机安全 —— 病毒木马查杀（JSON）
+# 正样本：parsers/tencent/samples.json 中 key = tencent-cwp-virus-json
+key: tencent-cwp-virus-json
+name: 腾讯云主机安全病毒查杀
+vendor: 腾讯云
+product: 主机安全
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.event_time
+  host=$.hostname
+  fname=$.file_name
+  fpath=$.file_path
+  md5=$.md5
+  virus=$.virus_name
+  level=$.level
+  status=$.status
+  desc=$.description
+mapping:
+  map:
+    ts: event.time
+    host: host.name
+    fname: file.name
+    fpath: file.path
+    md5: file.hash.md5
+    virus: threat.software.name
+    status: event.action_raw
+    desc: message
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  defaults:
+    event.category: malware
+required_fields: [fpath, virus]
+sample_fixture: parsers/tencent/samples.json#tencent-cwp-virus-json
+description: 腾讯云主机安全病毒木马查杀结果（file_path/md5/virus_name/status），status 落 event.action_raw（isolated → normalize 归一为 denied）。

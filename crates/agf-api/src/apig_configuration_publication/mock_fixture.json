@@ -1,0 +1,142 @@
+{
+  "contentBinding": {
+    "model": {
+      "httpApiId": "api-owned",
+      "gatewayId": "gw-owned",
+      "environmentId": "env-owned"
+    },
+    "attachmentId": "pa-owned",
+    "pluginId": "pl-owned",
+    "classId": "cls-owned",
+    "classVersion": "1.0.0"
+  },
+  "modelBinding": {
+    "httpApiId": "api-owned",
+    "gatewayId": "gw-owned",
+    "environmentId": "env-owned"
+  },
+  "responses": {
+    "GetPluginAttachment": {
+      "code": "Ok",
+      "requestId": "fixture-read-plugin",
+      "data": {
+        "pluginAttachmentId": "pa-owned",
+        "pluginId": "pl-owned",
+        "enable": true,
+        "gatewayInfo": {
+          "gatewayId": "gw-owned",
+          "gatewayEdition": "Professional"
+        },
+        "environmentInfo": {
+          "environmentId": "env-owned",
+          "gatewayInfo": {
+            "gatewayId": "gw-owned",
+            "gatewayEdition": "Professional"
+          }
+        },
+        "pluginClassInfo": {
+          "pluginClassId": "cls-owned",
+          "name": "ai-security-guard",
+          "version": "1.0.0",
+          "type": "AI",
+          "mode": "Wasm"
+        },
+        "resourceInfos": [
+          {
+            "resourceId": "api-owned",
+            "resourceType": "HttpApi",
+            "resourceVersion": "stable"
+          }
+        ],
+        "pluginConfig": "eyJzZXJ2aWNlTmFtZSI6Im93bmVkLXNhZmVjaGVjayIsInNlcnZpY2VQb3J0Ijo0NDMsInNlcnZpY2VIb3N0IjoiZ3JlZW4uc3ludGhldGljLmludmFsaWQiLCJhY2Nlc3NLZXkiOiJzeW50aGV0aWMtY29udGVudC1rZXktbmV2ZXItY2xvdWQiLCJzZWNyZXRLZXkiOiJzeW50aGV0aWMtY29udGVudC1zZWNyZXQtbmV2ZXItY2xvdWQiLCJjaGVja1JlcXVlc3QiOnRydWUsImNoZWNrUmVzcG9uc2UiOmZhbHNlLCJkZW55Q29kZSI6NDAzLCJkZW55TWVzc2FnZSI6InByZXNlcnZlLXByaXZhdGUtYW5zd2VyIiwidW5tYW5hZ2VkIjp7ImhlYWRlciI6InN5bnRoZXRpYy1wcml2YXRlLW1hcmtlciJ9fQ=="
+      }
+    },
+    "GetHttpApi": {
+      "code": "Ok",
+      "requestId": "fixture-read-model",
+      "data": {
+        "httpApiId": "api-owned",
+        "gatewayId": "gw-owned",
+        "type": "LLM",
+        "basePath": "/v1",
+        "description": "preserved",
+        "authConfig": {
+          "authType": "ApiKey",
+          "unmanagedSecret": "synthetic-auth-marker"
+        },
+        "enableAuth": true,
+        "aiProtocols": [
+          "OpenAI/v1"
+        ],
+        "deployConfigs": [
+          {
+            "gatewayId": "gw-owned",
+            "environmentId": "env-owned",
+            "gatewayInfo": {
+              "gatewayId": "gw-owned",
+              "gatewayEdition": "Professional"
+            },
+            "backendScene": "MultiServiceByRatio",
+            "serviceConfigs": [
+              {
+                "serviceId": "svc-one",
+                "modelName": "observed-one",
+                "weight": 60,
+                "version": "r1",
+                "protocol": "HTTPS",
+                "match": {
+                  "privatePredicate": "preserve-secret-condition"
+                }
+              },
+              {
+                "serviceId": "svc-two",
+                "modelName": "observed-two",
+                "weight": 40,
+                "version": "r2",
+                "protocol": "HTTP",
+                "customBackend": {
+                  "key": "synthetic-backend-secret"
+                }
+              }
+            ],
+            "customDomainIds": [
+              "d-owned"
+            ],
+            "policyConfigs": [
+              {
+                "type": "AiTokenRateLimit",
+                "policyReference": {
+                  "policyId": "policy-unmanaged"
+                }
+              }
+            ],
+            "systemModelTiers": [],
+            "enableSystemModels": false,
+            "autoDeploy": false
+          },
+          {
+            "gatewayId": "gw-owned",
+            "environmentId": "env-other",
+            "gatewayInfo": {
+              "gatewayId": "gw-owned",
+              "gatewayEdition": "Professional"
+            },
+            "backendScene": "SingleService",
+            "serviceConfigs": [
+              {
+                "serviceId": "svc-other",
+                "modelName": "other-model",
+                "weight": 100,
+                "protocol": "HTTPS"
+              }
+            ],
+            "policyConfigs": [],
+            "futureVendorField": {
+              "secret": "leave-other-env-alone"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

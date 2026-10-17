@@ -1,0 +1,50 @@
+# 青藤云 蜂巢（Hive）—— 进程执行行为告警（JSON 推送 / API 拉取）
+# 正样本：parsers/qingteng/samples.json 中 key = qingteng-hive-process-json
+key: qingteng-hive-process-json
+name: 青藤云蜂巢进程行为告警
+vendor: 青藤云
+product: 蜂巢
+protocols: [webhook, http-pull, kafka, file]
+engine: json-path
+# JsonPath 引擎：逐行 `字段名=$.路径`；路径不存在则跳过该字段（不报错）
+pattern: |
+  ts=$.timestamp
+  kind=$.event_type
+  host=$.host.name
+  host_ip=$.host.ip
+  user=$.user.name
+  pid=$.process.pid
+  pname=$.process.name
+  cmdline=$.process.cmd_line
+  parent=$.process.parent_name
+  risk=$.risk_level
+  action=$.action
+  rule_id=$.rule_id
+  rule_name=$.rule_name
+mapping:
+  map:
+    ts: event.time
+    kind: event.category_raw
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    pid: process.pid
+    pname: process.name
+    cmdline: process.command_line
+    parent: process.parent.name
+    rule_id: rule.id
+    rule_name: rule.name
+  severity_field: risk
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    process_exec: process
+    process_start: process
+    file_write: file
+  action_field: action
+required_fields: [rule_id]
+sample_fixture: parsers/qingteng/samples.json#qingteng-hive-process-json
+description: 青藤云蜂巢进程执行告警 JSON：可疑下载执行被阻断（process.* 归一化，含父进程与命令行）。

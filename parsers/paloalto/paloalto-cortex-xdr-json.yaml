@@ -1,0 +1,46 @@
+# Palo Alto Cortex XDR —— 端点告警（JSON）
+# 正样本：parsers/paloalto/samples.json 中 key = paloalto-cortex-xdr-json
+key: paloalto-cortex-xdr-json
+name: Cortex XDR 端点告警
+vendor: Palo Alto
+product: Cortex XDR
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  ext_id=$.external_id
+  sev=$.severity
+  alert=$.alert_name
+  host=$.host_name
+  host_ip=$.host_ip
+  user=$.user_name
+  pname=$.process_name
+  cmdline=$.cmd_line
+  fpath=$.file_path
+  action=$.action
+  tactic=$.mitre_tactic
+mapping:
+  map:
+    ext_id: event.id
+    alert: rule.name
+    host: host.name
+    host_ip: host.ip
+    user: user.name
+    pname: process.name
+    cmdline: process.command_line
+    fpath: file.path
+    tactic: threat.tactic.name
+  time_field: ts
+  time_format: unix_millis
+  severity_field: sev
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  action_field: action
+  defaults:
+    event.category: intrusion
+required_fields: [alert, host]
+sample_fixture: parsers/paloalto/samples.json#paloalto-cortex-xdr-json
+description: Cortex XDR 端点告警（alert_name/host_name/process_name/mitre_tactic/action=blocked → denied，timestamp 为毫秒）。

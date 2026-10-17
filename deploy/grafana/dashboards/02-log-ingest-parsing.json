@@ -1,0 +1,778 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+        "enable": true,
+        "expr": "changes(agf_build_info[5m]) > 0",
+        "hide": false,
+        "iconColor": "purple",
+        "name": "服务重启/版本变更",
+        "step": "1m",
+        "tagKeys": "version,revision"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+        "enable": true,
+        "expr": "ALERTS{alertname=~\"AgfEpsDrop|AgfParseFailureRate.*|AgfIngestQueueBacklog\",alertstate=\"firing\"}",
+        "hide": false,
+        "iconColor": "red",
+        "name": "接入类告警",
+        "step": "1m",
+        "tagKeys": "alertname,severity"
+      }
+    ]
+  },
+  "description": "日志接入与解析：EPS、解析成功率/失败率、队列积压、按厂商与协议的来源分布。数据源为 Prometheus；指标名为约定占位名，待实现埋点后校准（见 docs/pending-verification.deploy.md PV-DEPLOY-002）。",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": ["aiguardfabric"],
+      "targetBlank": false,
+      "title": "AIGuardFabric 仪表盘",
+      "tooltip": "在四个预置仪表盘之间跳转",
+      "type": "dashboards",
+      "url": ""
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "接入健康度",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "当前全平台归一化事件吞吐（EPS）。与 1 小时前基线对比骤降会触发 AgfEpsDrop 告警。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "green", "value": 100 }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum(rate(agf_ingest_events_total{tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval]))",
+          "legendFormat": "EPS",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "接入 EPS",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "解析成功率 = success /（success + failure）。低于 99% 需排查模板与厂商日志格式变更。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 2,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 95 },
+              { "color": "green", "value": 99 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 5, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "100 * sum(rate(agf_ingest_parse_total{result=\"success\",tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval])) / clamp_min(sum(rate(agf_ingest_parse_total{tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval])), 1)",
+          "legendFormat": "解析成功率",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "解析成功率",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "解析失败率 >5% 触发 warning，>30% 触发 critical（接入大面积失效 = 监控盲区）。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 2,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 30 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 10, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "100 * sum(rate(agf_ingest_parse_total{result=\"failure\",tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval])) / clamp_min(sum(rate(agf_ingest_parse_total{tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval])), 1)",
+          "legendFormat": "解析失败率",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "解析失败率",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "当前有事件流入的接入源数量。数量骤减通常意味着某一路 Syslog/Webhook/Kafka 采集断流。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 15, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "count(count by (source) (rate(agf_ingest_events_total{tenant_id=~\"$tenant\"}[$__rate_interval]) > 0))",
+          "legendFormat": "活跃接入源",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "活跃接入源数",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "接入队列积压（占用率）。>80% 触发 AgfIngestQueueBacklog；持续积压最终会丢事件或 OOM。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 80 },
+              { "color": "red", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 19, "y": 1 },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "100 * max by (queue) (agf_ingest_queue_depth / clamp_min(agf_ingest_queue_capacity, 1))",
+          "legendFormat": "{{queue}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "队列占用率（最高队列）",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 101,
+      "panels": [],
+      "title": "吞吐与解析趋势",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "按厂商拆分的接入速率。用于快速定位「是哪一家设备/一路日志源把量打满或断流」。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "normal" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (vendor) (rate(agf_ingest_events_total{tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval]))",
+          "legendFormat": "{{vendor}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "接入吞吐（按厂商）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "解析成功/失败速率对比。失败线抬头即代表模板失配（常见于厂商改格式）。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "ops"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "failure" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (result) (rate(agf_ingest_parse_total{tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__rate_interval]))",
+          "legendFormat": "{{result}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "解析结果速率（success / failure）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "归一化后事件按严重级别拆分（AGF-ECS 的 severity）。用于判断接入量变化是「噪音变多」还是「真事件变多」。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "normal" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (severity) (rate(agf_events_ingested_total{tenant_id=~\"$tenant\"}[$__rate_interval]))",
+          "legendFormat": "{{severity}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "归一化事件吞吐（按严重级别）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "接入队列深度与容量的实际值对比。深度逼近容量即背压，需扩容 agf-ingest 或排查下游写入延迟。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "id": 9,
+      "options": {
+        "legend": { "calcs": ["max", "lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (queue) (agf_ingest_queue_depth)",
+          "legendFormat": "深度 {{queue}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (queue) (agf_ingest_queue_capacity)",
+          "legendFormat": "容量 {{queue}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "接入队列深度 vs 容量",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "id": 102,
+      "panels": [],
+      "title": "来源构成与厂商失配定位",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "事件来源构成（source = syslog / webhook / kafka / nats / mcp / otlp / filebeat …）。用于确认接入协议覆盖是否符合预期。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "id": 10,
+      "options": {
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value"] },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (source) (increase(agf_ingest_events_total{tenant_id=~\"$tenant\",vendor=~\"$vendor\"}[$__range]))",
+          "legendFormat": "{{source}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "事件来源构成（区间）",
+      "type": "piechart"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "按厂商的解析失败率排行（只看失败率最高者）。用于把「厂商改了格式」这件事直接指到具体厂商。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 2,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 30 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "id": 11,
+      "options": {
+        "displayMode": "gradient",
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "topk(10, 100 * sum by (vendor) (rate(agf_ingest_parse_total{result=\"failure\",tenant_id=~\"$tenant\"}[$__rate_interval])) / clamp_min(sum by (vendor) (rate(agf_ingest_parse_total{tenant_id=~\"$tenant\"}[$__rate_interval])), 1))",
+          "legendFormat": "{{vendor}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "厂商解析失败率 TOP10",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+      "description": "按厂商的解析尝试速率总览。与上方面板联动：量大的厂商出问题影响面最大，应优先处置。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "id": 12,
+      "options": {
+        "legend": { "calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (vendor) (rate(agf_ingest_parse_total{result=\"failure\",tenant_id=~\"$tenant\"}[$__rate_interval]))",
+          "legendFormat": "{{vendor}} 失败",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "厂商解析失败速率",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["aiguardfabric", "日志接入", "解析"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": true, "text": "agf-prometheus", "value": "agf-prometheus" },
+        "hide": 2,
+        "includeAll": false,
+        "label": "数据源",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+        "definition": "label_values(agf_tenant_info, tenant_id)",
+        "description": "租户过滤。",
+        "hide": 0,
+        "includeAll": true,
+        "label": "租户",
+        "multi": true,
+        "name": "tenant",
+        "options": [],
+        "query": {
+          "query": "label_values(agf_tenant_info, tenant_id)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+        "definition": "label_values(agf_ingest_events_total, vendor)",
+        "description": "厂商过滤（青藤云 / 阿里云 WAF / 华为云 HSS / 深信服 / 奇安信 / CrowdStrike / Fortinet …）。",
+        "hide": 0,
+        "includeAll": true,
+        "label": "厂商",
+        "multi": true,
+        "name": "vendor",
+        "options": [],
+        "query": {
+          "query": "label_values(agf_ingest_events_total, vendor)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": { "selected": true, "text": "prod", "value": "prod" },
+        "datasource": { "type": "prometheus", "uid": "agf-prometheus" },
+        "definition": "label_values(agf_build_info, env)",
+        "description": "运行环境标签（dev/test/prod）",
+        "hide": 0,
+        "includeAll": true,
+        "label": "环境",
+        "multi": false,
+        "name": "env",
+        "options": [],
+        "query": {
+          "query": "label_values(agf_build_info, env)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h", "6h", "12h", "1d"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+  },
+  "timezone": "browser",
+  "title": "AIGuardFabric · 日志接入与解析",
+  "uid": "agf-log-ingest",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,1 @@
+{"time":"2026-02-21T10:26:00+08:00","event_type":"malware_detect","hostname":"WIN-APP-03","host_ip":"10.20.30.110","user":"admin","process_name":"powershell.exe","cmd_line":"powershell -enc SQBFAFgA","file_path":"C:\\Users\\admin\\a.ps1","md5":"9f2c1d4b6a8e0f3c5d7b9a1e2f4c6d8b","severity":"high","action":"block","rule_id":"EDR-5001"}

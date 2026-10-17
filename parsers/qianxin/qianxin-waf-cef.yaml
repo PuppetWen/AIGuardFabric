@@ -1,0 +1,18 @@
+# 奇安信 网站卫士 WAF —— 攻击拦截 CEF
+# 正样本：parsers/qianxin/samples.json 中 key = qianxin-waf-cef
+key: qianxin-waf-cef
+name: 奇安信网站卫士 WAF 告警（CEF）
+vendor: 奇安信
+product: 网站卫士 WAF
+protocols: [syslog, webhook]
+engine: cef
+pattern: 'CEF:0'
+mapping:
+  map:
+    cs1: rule.external_id
+  category_map:
+    Web攻击: web
+    入侵检测: intrusion
+required_fields: [source.ip]
+sample_fixture: parsers/qianxin/samples.json#qianxin-waf-cef
+description: 奇安信网站卫士 WAF CEF 拦截日志（cat=Web攻击 → web）。

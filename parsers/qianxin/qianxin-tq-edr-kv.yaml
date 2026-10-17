@@ -1,0 +1,31 @@
+# 奇安信 天擎终端安全 —— 非 JSON 形态 syslog（key=value）
+# 正样本：parsers/qianxin/samples.json 中 key = qianxin-tq-edr-kv
+key: qianxin-tq-edr-kv
+name: 奇安信天擎 syslog（KV）
+vendor: 奇安信
+product: 天擎
+protocols: [syslog, file, beats]
+engine: kv
+pattern: '='
+mapping:
+  map:
+    edr_type: event.category_raw
+    host_ip: host.ip
+    user: user.name
+    process_name: process.name
+    cmd_line: process.command_line
+    rule_id: rule.id
+  severity_field: level
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    process_start: process
+    virus: malware
+    file_change: file
+  action_field: action
+required_fields: [edr_type, host_ip]
+sample_fixture: parsers/qianxin/samples.json#qianxin-tq-edr-kv
+description: 奇安信天擎 syslog KV 正文（edr_type/host_ip/process_name/cmd_line/action/level）。

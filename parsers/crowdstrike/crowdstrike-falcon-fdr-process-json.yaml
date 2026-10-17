@@ -1,0 +1,40 @@
+key: crowdstrike-falcon-fdr-process-json
+name: Falcon FDR 进程事件
+vendor: CrowdStrike
+product: Falcon Data Replicator
+protocols: [object-storage, http-pull, kafka, file]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  kind=$.event_simpleName
+  id=$.id
+  host=$.aid
+  cid=$.cid
+  ip=$.aip
+  pid=$.RawProcessId
+  exe=$.ImageFileName
+  cmd=$.CommandLine
+  parent=$.ParentBaseFileName
+  md5=$.MD5HashData
+  sha256=$.SHA256HashData
+mapping:
+  map:
+    kind: event.category_raw
+    id: event.id
+    host: host.id
+    cid: cloud.account.id
+    ip: source.ip
+    pid: process.pid
+    exe: process.executable
+    cmd: process.command_line
+    parent: process.parent.name
+    md5: process.hash.md5
+    sha256: process.hash.sha256
+  time_field: ts
+  time_format: unix_millis
+  defaults:
+    event.category: process
+    event.severity: info
+required_fields: [id, exe, host]
+sample_fixture: tests/fixtures/logs/public/crowdstrike-falcon-fdr-process-json.log
+description: Falcon FDR 扁平 ProcessRollup2 原始事件；与 metadata/event 包装的 Event Streams 模板分别匹配。

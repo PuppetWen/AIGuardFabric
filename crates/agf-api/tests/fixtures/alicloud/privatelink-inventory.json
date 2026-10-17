@@ -1,0 +1,40 @@
+{
+  "GetVpcEndpointAttribute": {
+    "RequestId": "agf-privatelink-endpoint-example",
+    "EndpointId": "ep-agf-demo",
+    "EndpointName": "AIGuardFabric existing endpoint example",
+    "RegionId": "cn-hangzhou",
+    "ServiceRegionId": "cn-beijing",
+    "VpcId": "vpc-agf-demo",
+    "ServiceId": "epsrv-agf-demo",
+    "EndpointDomain": "example.invalid",
+    "EndpointType": "Interface",
+    "EndpointStatus": "Active",
+    "ConnectionStatus": "Connected",
+    "EndpointBusinessStatus": "Normal",
+    "PolicyDocument": {"DO_NOT_EXPOSE": "example-policy"},
+    "Tags": [{"Key": "DO_NOT_EXPOSE", "Value": "example-tag"}]
+  },
+  "ListVpcEndpointZones": {
+    "RequestId": "agf-privatelink-zones-example",
+    "TotalCount": 1,
+    "MaxResults": 50,
+    "NextToken": "",
+    "Zones": [{
+      "ZoneId": "cn-hangzhou-a",
+      "RegionId": "cn-hangzhou",
+      "ZoneStatus": "Connected",
+      "EniId": "eni-agf-demo",
+      "VSwitchId": "vsw-agf-demo",
+      "EniIp": "192.0.2.8",
+      "ZoneIpv6Address": "2001:db8::8",
+      "ZoneDomain": "zone.example.invalid"
+    }]
+  },
+  "ListVpcEndpointSecurityGroups": {
+    "RequestId": "agf-privatelink-security-groups-example",
+    "TotalCount": 1,
+    "MaxResults": 50,
+    "SecurityGroups": [{"SecurityGroupId": "sg-agf-demo", "SecurityGroupStatus": "Attached"}]
+  }
+}

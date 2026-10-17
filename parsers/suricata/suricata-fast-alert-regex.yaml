@@ -1,0 +1,36 @@
+# Suricata —— fast.log 告警行（正则）
+# 正样本：parsers/suricata/samples.json 中 key = suricata-fast-alert-regex
+# fast.log 公开格式：`MM/DD/YYYY-HH:MM:SS.ffffff  [**] [gid:sid:rev] 签名 [**] [Classification: ...] [Priority: n] {PROTO} src:port -> dst:port`
+key: suricata-fast-alert-regex
+name: Suricata fast.log 告警
+vendor: Suricata
+product: fast.log
+protocols: [file, syslog, beats]
+engine: regex
+pattern: '(?P<ts>\d{2}/\d{2}/\d{4}-\d{2}:\d{2}:\d{2}\.\d{6})  \[\*\*\] \[(?P<gid>\d+):(?P<sig_id>\d+):(?P<rev>\d+)\] (?P<signature>.+?) \[\*\*\] \[Classification: (?P<class>[^\]]*)\] \[Priority: (?P<priority>\d+)\] \{(?P<proto>[A-Z]+)\} (?P<src_ip>[\d.]+):(?P<src_port>\d+) -> (?P<dst_ip>[\d.]+):(?P<dst_port>\d+)'
+mapping:
+  map:
+    gid: rule.gid
+    sig_id: rule.id
+    rev: rule.version
+    signature: rule.name
+    class: rule.category
+    src_ip: source.ip
+    src_port: source.port
+    dst_ip: destination.ip
+    dst_port: destination.port
+    proto: network.transport
+  time_field: ts
+  time_format: '%m/%d/%Y-%H:%M:%S%.f'
+  severity_field: priority
+  severity_map:
+    '1': high
+    '2': medium
+    '3': low
+    '4': info
+  defaults:
+    event.category: intrusion
+    event.action: alert
+required_fields: [signature, src_ip]
+sample_fixture: parsers/suricata/samples.json#suricata-fast-alert-regex
+description: Suricata fast.log 告警（Priority 1-4 → high/medium/low/info），无 JSON 解析器时的兜底通道。

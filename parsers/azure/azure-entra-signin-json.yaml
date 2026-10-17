@@ -1,0 +1,46 @@
+# Microsoft Entra ID —— 登录日志（SignInLogs）
+# 正样本：parsers/azure/samples.json 中 key = azure-entra-signin-json
+key: azure-entra-signin-json
+name: Entra ID 登录日志
+vendor: Microsoft Azure
+product: Microsoft Entra ID
+protocols: [object-storage, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.time
+  op=$.operationName
+  cat=$.category
+  result=$.resultType
+  desc=$.resultDescription
+  src_ip=$.callerIpAddress
+  upn=$.properties.userPrincipalName
+  app=$.properties.appDisplayName
+  err=$.properties.status.errorCode
+  reason=$.properties.status.failureReason
+  os=$.properties.deviceDetail.operatingSystem
+  browser=$.properties.deviceDetail.browser
+  corr=$.correlationId
+mapping:
+  map:
+    ts: event.time
+    op: event.action_raw
+    cat: event.category_raw
+    result: event.outcome
+    desc: message
+    src_ip: source.ip
+    upn: user.email
+    app: service.name
+    err: error.code
+    reason: error.message
+    os: host.os
+    browser: user_agent.name
+    corr: trace.id
+  category_map:
+    SignInLogs: authentication
+    NonInteractiveUserSignInLogs: authentication
+  defaults:
+    event.category: authentication
+    event.severity: medium
+required_fields: [upn, src_ip]
+sample_fixture: parsers/azure/samples.json#azure-entra-signin-json
+description: Entra ID（Azure AD）登录日志（resultType 50126 等错误码、failureReason、设备信息），失败登录与异地登录检测来源。

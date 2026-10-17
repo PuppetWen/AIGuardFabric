@@ -1,0 +1,232 @@
+[
+{"action": "ListGateways", "version": "2024-03-27", "method": "GET", "path": "/v1/gateways", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "keyword", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "gatewayType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "resourceGroupId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "vpcId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "tag", "location": "query", "style": "json", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"key": {"type": "string", "required": false}, "value": {"type": "string", "required": false}}}}}
+ ]},
+{"action": "ListHttpApis", "version": "2024-03-27", "method": "GET", "path": "/v1/http-apis", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "keyword", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "types", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withAuthPolicyInEnvironmentId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withConsumerInfoById", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withEnvironmentInfo", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "withPluginAttachmentByPluginId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "resourceGroupId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withEnvironmentInfoById", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withAuthPolicyList", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "withIngressInfo", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "withPolicyConfigs", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "withAPIsPublishedToEnvironment", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "gatewayType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListHttpApiRoutes", "version": "2024-03-27", "method": "GET", "path": "/v1/http-apis/{httpApiId}/routes", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "httpApiId", "location": "path", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "environmentId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "deployStatuses", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "name", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "nameLike", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pathLike", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withConsumerInfoById", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "consumerAuthorizationRuleId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withAuthPolicyInfo", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "withPluginAttachmentByPluginId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "domainId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "forDeploy", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "backendServiceName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "ListPlugins", "version": "2024-03-27", "method": "GET", "path": "/v1/plugins", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pluginClassId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pluginClassName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withAttachmentInfo", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "attachResourceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "attachResourceType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "gatewayType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "includeBuiltinAiGateway", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}}
+ ]},
+{"action": "ListPluginClasses", "version": "2024-03-27", "method": "GET", "path": "/v1/plugin-classes", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "nameLike", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "aliasLike", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "type", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "source", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "installed", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "direction", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "excludeBuiltinAiProxy", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "gatewayType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{"action": "InstallPlugin", "version": "2024-03-27", "method": "POST", "path": "/v1/plugins/", "style": "ROA", "read_only": false,
+ "parameters": [
+  {"name": "body", "location": "body", "style": "json", "schema": {"type": "object", "required": false, "properties": {"pluginClassId": {"type": "string", "required": false}, "gatewayIds": {"type": "array", "required": false, "items": {"type": "string", "required": false}}}}}
+ ]},
+{"action": "CreatePluginAttachment", "version": "2024-03-27", "method": "POST", "path": "/v1/plugin-attachments", "style": "ROA", "read_only": false,
+ "parameters": [
+  {"name": "body", "location": "body", "style": "json", "schema": {"type": "object", "required": false, "properties": {"attachResourceIds": {"type": "array", "required": false, "items": {"type": "string", "required": false}}, "attachResourceType": {"type": "string", "required": false}, "enable": {"type": "boolean", "required": false}, "environmentId": {"type": "string", "required": false}, "gatewayId": {"type": "string", "required": false}, "pluginConfig": {"type": "string", "required": false}, "pluginId": {"type": "string", "required": false}}}}
+ ]},
+{"action": "UpdatePluginAttachment", "version": "2024-03-27", "method": "PUT", "path": "/v1/plugin-attachments/{pluginAttachmentId}", "style": "ROA", "read_only": false,
+ "parameters": [
+  {"name": "pluginAttachmentId", "location": "path", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "body", "location": "body", "style": "json", "schema": {"type": "object", "required": false, "properties": {"attachResourceIds": {"type": "array", "required": false, "items": {"type": "string", "required": false}}, "enable": {"type": "boolean", "required": false}, "pluginConfig": {"type": "string", "required": false}}}}
+ ]},
+{"action": "ListPluginAttachments", "version": "2024-03-27", "method": "GET", "path": "/v1/plugin-attachments", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "attachResourceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "attachResourceType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "environmentId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pluginId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "attachResourceTypes", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "withParentResource", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}}
+ ]},
+{"action": "CreateAndAttachPolicy", "version": "2024-03-27", "method": "POST", "path": "/v1/policies", "style": "ROA", "read_only": false,
+ "parameters": [
+  {"name": "body", "location": "body", "style": "json", "schema": {"type": "object", "required": false, "properties": {"name": {"type": "string", "required": false}, "className": {"type": "string", "required": true}, "config": {"type": "string", "required": true}, "description": {"type": "string", "required": false}, "attachResourceIds": {"type": "array", "required": true, "items": {"type": "string", "required": false}}, "attachResourceType": {"type": "string", "required": true}, "environmentId": {"type": "string", "required": false}, "gatewayId": {"type": "string", "required": false}}}}
+ ]},
+{"action": "UpdateAndAttachPolicy", "version": "2024-03-27", "method": "PUT", "path": "/v1/policies/{policyId}", "style": "ROA", "read_only": false,
+ "parameters": [
+  {"name": "policyId", "location": "path", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "body", "location": "body", "style": "json", "schema": {"type": "object", "required": false, "properties": {"name": {"type": "string", "required": false}, "description": {"type": "string", "required": false}, "config": {"type": "string", "required": true}, "attachResourceIds": {"type": "array", "required": true, "items": {"type": "string", "required": false}}, "attachResourceType": {"type": "string", "required": true}, "environmentId": {"type": "string", "required": false}, "gatewayId": {"type": "string", "required": false}}}}
+ ]},
+{"action": "ListPolicyClasses", "version": "2024-03-27", "method": "GET", "path": "/v1/policy-classes", "style": "ROA", "read_only": true,
+ "parameters": [
+  {"name": "type", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "direction", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "attachResourceType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "pageNumber", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "pageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "attachResourceId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "gatewayId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}}
+ ]},
+{
+    "action": "GetHttpApi",
+    "version": "2024-03-27",
+    "method": "GET",
+    "path": "/v1/http-apis/{httpApiId}",
+    "style": "ROA",
+    "read_only": true,
+    "parameters": [
+      {
+        "name": "httpApiId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      },
+      {
+        "name": "expandPolicyConfigs",
+        "location": "query",
+        "style": "",
+        "schema": {
+          "type": "boolean",
+          "required": false
+        }
+      }
+    ]
+  },
+  {
+    "action": "GetPolicy",
+    "version": "2024-03-27",
+    "method": "GET",
+    "path": "/v2/policies/{policyId}",
+    "style": "ROA",
+    "read_only": true,
+    "parameters": [
+      {
+        "name": "policyId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      }
+    ]
+  },
+  {
+    "action": "GetPolicyAttachment",
+    "version": "2024-03-27",
+    "method": "GET",
+    "path": "/v1/policy-attachments/{policyAttachmentId}",
+    "style": "ROA",
+    "read_only": true,
+    "parameters": [
+      {
+        "name": "policyAttachmentId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      }
+    ]
+  },
+  {
+    "action": "UpdatePolicy",
+    "version": "2024-03-27",
+    "method": "PUT",
+    "path": "/v2/policies/{policyId}",
+    "style": "ROA",
+    "read_only": false,
+    "parameters": [
+      {
+        "name": "policyId",
+        "location": "path",
+        "style": "",
+        "schema": {
+          "type": "string",
+          "required": true
+        }
+      },
+      {
+        "name": "body",
+        "location": "body",
+        "style": "json",
+        "schema": {
+          "type": "object",
+          "required": true,
+          "properties": {
+            "name": {
+              "type": "string",
+              "required": true
+            },
+            "config": {
+              "type": "string",
+              "required": true
+            },
+            "description": {
+              "type": "string",
+              "required": false
+            }
+          }
+        }
+      }
+    ]
+  }
+]

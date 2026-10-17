@@ -1,0 +1,33 @@
+# 青藤云 蜂巢（Hive）主机入侵检测 —— WebShell 文件写入告警（syslog 信封 + KV 正文）
+# 正样本：parsers/qingteng/samples.json 中 key = qingteng-hive-webshell-syslog
+key: qingteng-hive-webshell-syslog
+name: 青藤云蜂巢 WebShell 告警
+vendor: 青藤云
+product: 蜂巢
+protocols: [syslog, beats, file]
+engine: grok
+# 引擎会先剥离 syslog 信封（<PRI>Mmm dd HH:MM:SS host app[pid]:），再对正文做 Grok 匹配
+pattern: '%{TIMESTAMP_ISO8601:ts} \[%{WORD:level}\] host=%{NOTSPACE:host_ip} hostname=%{NOTSPACE:hostname} user=%{NOTSPACE:user} rule_id=%{NOTSPACE:rule_id} risk=%{WORD:risk} action=%{WORD:action} msg="%{DATA:msg}" path=%{NOTSPACE:path}'
+mapping:
+  map:
+    ts: event.time
+    level: log.level
+    host_ip: source.ip
+    hostname: host.name
+    user: user.name
+    rule_id: rule.id
+    msg: message
+    path: file.path
+  severity_field: risk
+  severity_map:
+    critical: critical
+    high: high
+    medium: medium
+    low: low
+  category_map:
+    block: intrusion
+    alert: intrusion
+  action_field: action
+required_fields: [rule_id]
+sample_fixture: parsers/qingteng/samples.json#qingteng-hive-webshell-syslog
+description: 青藤云蜂巢主机入侵检测 syslog：WebShell 文件写入被阻断（Grok 解析 KV 正文，level/host/rule_id 为公开日志字段）。

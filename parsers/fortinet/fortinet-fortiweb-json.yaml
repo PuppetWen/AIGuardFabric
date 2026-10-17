@@ -1,0 +1,47 @@
+# Fortinet FortiWeb —— WAF 攻击日志（JSON）
+# 正样本：parsers/fortinet/samples.json 中 key = fortinet-fortiweb-json
+key: fortinet-fortiweb-json
+name: FortiWeb WAF 告警
+vendor: Fortinet
+product: FortiWeb
+protocols: [webhook, http-pull, kafka]
+engine: json-path
+pattern: |
+  ts=$.timestamp
+  dev=$.devname
+  src_ip=$.src_ip
+  dst_ip=$.dst_ip
+  method=$.method
+  uri=$.url
+  status=$.http_status
+  attack=$.attack_type
+  action=$.action
+  sev=$.severity
+  policy=$.policy
+  rule_id=$.rule_id
+  ua=$.user_agent
+mapping:
+  map:
+    ts: event.time
+    dev: host.name
+    src_ip: source.ip
+    dst_ip: destination.ip
+    method: http.request.method
+    uri: url.path
+    status: http.response.status_code
+    attack: rule.name
+    policy: rule.category
+    rule_id: rule.id
+    ua: user_agent.original
+  severity_field: sev
+  severity_map:
+    Critical: critical
+    High: high
+    Medium: medium
+    Low: low
+  action_field: action
+  defaults:
+    event.category: web
+required_fields: [rule_id, src_ip]
+sample_fixture: parsers/fortinet/samples.json#fortinet-fortiweb-json
+description: FortiWeb WAF 攻击日志（attack_type/action=Alert_Deny/policy/http_status），Web 攻击归 web。

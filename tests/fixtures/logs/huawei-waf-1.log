@@ -1,0 +1,1 @@
+{"time":"2026-02-21T10:23:45+08:00","host":"api.example.cn","client_ip":"203.0.113.88","request_uri":"/api/v1/orders?id=1%20or%201=1","request_method":"GET","attack_type":"SQL Injection","action":"block","rule_id":"HW-WAF-2041","status":"403","severity":"high"}

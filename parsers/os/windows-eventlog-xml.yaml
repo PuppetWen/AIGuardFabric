@@ -1,0 +1,26 @@
+# Microsoft Windows —— 安全事件日志（XML 压平单行，正则）
+# 正样本：parsers/os/samples.json 中 key = windows-eventlog-xml
+# 说明：原始 Event XML 是多行；经 syslog/文件转发时通常被压成单行。本模板按**单行 XML** 解析
+# （正则的 `.` 默认不跨行），多行原文请先压平或改用 JSON 转发模板。
+key: windows-eventlog-xml
+name: Windows 事件日志（XML）
+vendor: Microsoft Windows
+product: Event Log
+protocols: [syslog, file, webhook]
+engine: regex
+pattern: '<EventID>(?P<event_id>\d+)</EventID>.*?<TimeCreated SystemTime="(?P<ts>[^"]+)".*?<Computer>(?P<computer>[^<]*)</Computer>.*?<Channel>(?P<channel>[^<]*)</Channel>.*?<EventRecordID>(?P<record_id>\d+)</EventRecordID>.*?<Data Name="TargetUserName">(?P<user>[^<]*)</Data>.*?<Data Name="IpAddress">(?P<src_ip>[^<]*)</Data>'
+mapping:
+  map:
+    event_id: event.code
+    computer: host.name
+    channel: log.channel
+    record_id: event.sequence
+    user: user.name
+    src_ip: source.ip
+  time_field: ts
+  defaults:
+    event.category: authentication
+    event.severity: medium
+required_fields: [event_id, computer]
+sample_fixture: parsers/os/samples.json#windows-eventlog-xml
+description: Windows 事件 XML（EventID/TimeCreated/Computer/Channel/EventRecordID/EventData），无 JSON 转发能力的兜底通道。

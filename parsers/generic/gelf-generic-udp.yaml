@@ -1,0 +1,29 @@
+# 通用 GELF —— Graylog Extended Log Format（UDP/TCP 单条 JSON）
+# 正样本：parsers/generic/samples.json 中 key = gelf-generic-udp
+# 说明：host/short_message/level/timestamp 为 GELF 规范保留字段，`_` 前缀为自定义字段（引擎加 gelf. 前缀）。
+key: gelf-generic-udp
+name: 通用 GELF
+vendor: generic
+product: GELF
+protocols: [syslog, file, beats, http-push]
+engine: gelf
+pattern: 'gelf'
+mapping:
+  map:
+    gelf._app: service.name
+    gelf._facility: log.facility
+  severity_field: gelf.level
+  severity_map:
+    '0': critical
+    '1': critical
+    '2': critical
+    '3': high
+    '4': medium
+    '5': low
+    '6': info
+    '7': info
+  defaults:
+    event.category: other
+required_fields: [message, host.name]
+sample_fixture: parsers/generic/samples.json#gelf-generic-udp
+description: 通用 GELF 模板（syslog 八级 level 映射：0-2 critical、3 high、4 medium、5 low、6-7 info）。

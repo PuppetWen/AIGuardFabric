@@ -1,0 +1,45 @@
+[
+{"action": "PutCustomEvent", "version": "2019-01-01", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "EventInfo", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": true, "items": {"type": "object", "required": false, "properties": {"EventName": {"type": "string", "required": true}, "Time": {"type": "string", "required": false}, "GroupId": {"type": "string", "required": false}, "Content": {"type": "string", "required": true}}}}}
+ ]},
+{"action": "PutCustomMetric", "version": "2019-01-01", "method": "POST", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "MetricList", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": true, "items": {"type": "object", "required": false, "properties": {"Type": {"type": "string", "required": true}, "MetricName": {"type": "string", "required": true}, "Time": {"type": "string", "required": false}, "GroupId": {"type": "string", "required": true}, "Values": {"type": "string", "required": true}, "Dimensions": {"type": "string", "required": true}, "Period": {"type": "string", "required": false}}}}}
+ ]},
+{"action": "DescribeAlertHistoryList", "version": "2019-01-01", "method": "GET", "path": "/", "style": "RPC", "read_only": true,
+ "parameters": [
+  {"name": "RuleId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "RuleName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Namespace", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "MetricName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "GroupId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Status", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "State", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "Ascending", "location": "query", "style": "repeatList", "schema": {"type": "boolean", "required": false}},
+  {"name": "StartTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EndTime", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "PageSize", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}},
+  {"name": "Page", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int32"}}
+ ]},
+{"action": "PutEventRule", "version": "2019-01-01", "method": "PUT", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "RuleName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "GroupId", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "EventType", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false, "enum": ["SYSTEM", "CUSTOM"]}},
+  {"name": "Description", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false}},
+  {"name": "State", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": false, "enum": ["ENABLED", "DISABLED"]}},
+  {"name": "EventPattern", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": true, "items": {"type": "object", "required": false, "properties": {"EventTypeList": {"type": "array", "required": false, "items": {"type": "string", "required": false}}, "StatusList": {"type": "array", "required": false, "items": {"type": "string", "required": false}}, "Product": {"type": "string", "required": true}, "LevelList": {"type": "array", "required": false, "items": {"type": "string", "required": false}}, "NameList": {"type": "array", "required": false, "items": {"type": "string", "required": false}}, "CustomFilters": {"type": "string", "required": false}, "SQLFilter": {"type": "string", "required": false}}}}},
+  {"name": "SilenceTime", "location": "query", "style": "repeatList", "schema": {"type": "integer", "required": false, "format": "int64"}}
+ ]},
+{"action": "PutEventRuleTargets", "version": "2019-01-01", "method": "PUT", "path": "/", "style": "RPC", "read_only": false,
+ "parameters": [
+  {"name": "RuleName", "location": "query", "style": "repeatList", "schema": {"type": "string", "required": true}},
+  {"name": "FcParameters", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"FunctionName": {"type": "string", "required": false}, "Region": {"type": "string", "required": false}, "ServiceName": {"type": "string", "required": false}, "Id": {"type": "string", "required": false}}}}},
+  {"name": "ContactParameters", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"ContactGroupName": {"type": "string", "required": false}, "Id": {"type": "string", "required": false}, "Level": {"type": "string", "required": false}}}}},
+  {"name": "MnsParameters", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Region": {"type": "string", "required": false}, "Queue": {"type": "string", "required": false}, "Id": {"type": "string", "required": false}, "Topic": {"type": "string", "required": false}}}}},
+  {"name": "WebhookParameters", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Protocol": {"type": "string", "required": false}, "Url": {"type": "string", "required": false}, "Method": {"type": "string", "required": false}, "Id": {"type": "string", "required": false}}}}},
+  {"name": "SlsParameters", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"LogStore": {"type": "string", "required": false}, "Region": {"type": "string", "required": false}, "Project": {"type": "string", "required": false}, "Id": {"type": "string", "required": false}}}}},
+  {"name": "OpenApiParameters", "location": "query", "style": "repeatList", "schema": {"type": "array", "required": false, "items": {"type": "object", "required": false, "properties": {"Action": {"type": "string", "required": false}, "Arn": {"type": "string", "required": false}, "Id": {"type": "string", "required": false}, "Product": {"type": "string", "required": false}, "Region": {"type": "string", "required": false}, "Role": {"type": "string", "required": false}, "Version": {"type": "string", "required": false}, "JsonParams": {"type": "string", "required": false}}}}}
+ ]}
+]
